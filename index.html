@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<!--
+  제주 운동 지도 | JEJUGRAPHER
+  버전: v6
+  작성일: 2026.05.24
+  변경: 전체 밝은 테마 통일. 랜딩·일반인용 지도를 어두운 톤 → 밝은 톤으로 전환.
+        지도 타일 둘 다 CARTO light_all(밝은 지도)로 통일. 운동하기 좋은 밝은 페이지.
+  이력: v3 권역1 27곳 → v4 권역2~5 1차 통합 → v5 밝은 테마 전환 → v6 권역2~5 보충 63곳 추가(ME 72/ALL 158, 총 230)
+  데이터: ME 47곳 / ALL 95곳 (변동 없음)
+  베이스: index.html v2 (건강정보 제거 완료본)
+  좌표계: EPSG:4326 / 좌표: Google Places 실측 (머체왓 원본 위도 오기 교정)
+-->
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>제주 운동 지도 | JEJUGRAPHER</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Black+Han+Sans&display=swap');
+  :root{--sea:#1a6b6b;--sea-l:#2bb3b3;--coral:#ff6b4a;--paper:#f4f1e8;
+    --lv1:#2e8b57;--lv2:#e0a127;--lv3:#c0392b;
+    --run:#ff6b4a;--bike:#f2c14e;--dive:#2b8fd6;--hike:#5ec46a;--walk:#a98bd6;--line:#c9c2ac;}
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{font-family:'Gowun Batang',serif;overflow:hidden;}
+  .hidden{display:none!important;}
+
+  /* ===== 랜딩 ===== */
+  #landing{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    background:#f4f1e8;background-image:radial-gradient(circle at 78% 12%,rgba(43,179,179,.20),transparent 50%),radial-gradient(circle at 12% 88%,rgba(255,107,74,.16),transparent 50%);padding:24px;transition:opacity .4s;}
+  .brand{font-family:'Black Han Sans',sans-serif;font-size:13px;letter-spacing:3px;color:var(--sea);margin-bottom:6px;}
+  #landing h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(26px,5.5vw,50px);color:#1a2e2a;text-align:center;line-height:1.1;}
+  #landing .tag{color:#5a6b6b;font-size:14px;margin-top:10px;text-align:center;max-width:560px;line-height:1.5;}
+  .choose{display:flex;gap:22px;margin-top:38px;flex-wrap:wrap;justify-content:center;}
+  .choice{width:300px;background:#fff;border:1.5px solid #d9d2c2;border-radius:14px;padding:26px 24px;cursor:pointer;transition:.2s;text-align:left;box-shadow:0 4px 16px rgba(26,107,107,.08);}
+  .choice:hover{transform:translateY(-5px);border-color:var(--sea-l);background:#fbfaf6;box-shadow:0 8px 24px rgba(26,107,107,.15);}
+  .choice .ico{font-size:34px;}
+  .choice h2{font-family:'Black Han Sans',sans-serif;font-size:21px;margin-top:12px;color:#1a2e2a;}
+  .choice .who{display:inline-block;font-size:11px;font-weight:700;font-family:sans-serif;padding:3px 10px;border-radius:12px;margin-top:9px;}
+  .who.me{background:#d8f0e8;color:#1a6b6b;border:1px solid var(--sea);}
+  .who.all{background:#ffe3d6;color:#c4502a;border:1px solid var(--coral);}
+  .choice p{color:#5a6b6b;font-size:13px;margin-top:12px;line-height:1.55;}
+  .choice .go{margin-top:16px;font-family:sans-serif;font-weight:700;font-size:13px;color:var(--sea);}
+  #landing .foot{margin-top:34px;font-size:11px;color:#8a8270;text-align:center;line-height:1.6;max-width:620px;}
+
+  /* ===== 지도 뷰 공통 ===== */
+  #app{height:100%;display:flex;flex-direction:column;}
+  .topbar{display:flex;align-items:center;gap:14px;padding:11px 22px;border-bottom:2px solid var(--sea);flex-wrap:wrap;}
+  .topbar .home{cursor:pointer;font-family:'Black Han Sans',sans-serif;color:var(--sea);font-size:15px;border:none;background:none;}
+  .switch{display:flex;border:2px solid var(--sea);border-radius:3px;overflow:hidden;}
+  .switch button{font-family:'Gowun Batang',serif;font-weight:700;font-size:13px;padding:7px 14px;border:none;background:transparent;color:var(--sea);cursor:pointer;}
+  .switch button.active{background:var(--sea);color:#fff;}
+  .vtitle{font-size:13px;color:#6a6354;}
+
+  .filters{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:10px 22px;border-bottom:1px solid var(--line);}
+  .flabel{font-size:11px;color:#7f969d;font-family:sans-serif;font-weight:700;}
+  .chip{font-size:12.5px;font-weight:700;padding:6px 12px;border:2px solid var(--line);border-radius:18px;background:#fff;cursor:pointer;transition:.15s;display:flex;align-items:center;gap:5px;font-family:'Gowun Batang',serif;}
+  .chip .dot{width:10px;height:10px;border-radius:50%;}
+  .chip.off{opacity:.32;}
+
+  .wrap{flex:1;display:flex;min-height:0;}
+  .mapbox{flex:1;}
+  .panel{width:392px;max-width:44vw;overflow-y:auto;border-left:2px solid var(--sea);}
+  .panel-head{padding:14px 18px 9px;border-bottom:1px dashed var(--line);position:sticky;top:0;z-index:2;}
+  .panel-head h2{font-family:'Black Han Sans',sans-serif;font-size:15px;}
+  .panel-head p{font-size:12px;margin-top:3px;}
+  .card{padding:13px 18px;border-bottom:1px solid var(--line);cursor:pointer;transition:.15s;}
+  .card .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
+  .badge{font-size:10.5px;font-weight:700;color:#fff;padding:2px 8px;border-radius:10px;font-family:sans-serif;}
+  .lvb{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:10px;font-family:sans-serif;}
+  .has3d{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--coral);color:#fff;font-family:sans-serif;}
+  .card .meta{font-size:12px;margin-top:5px;line-height:1.5;}
+  .detail{padding:2px 0 6px;}
+  .detail dt{font-size:10.5px;font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-top:10px;font-family:sans-serif;}
+  .detail dd{font-size:12.5px;line-height:1.5;margin-top:2px;}
+  .infobox{padding:9px 11px;font-size:12px;line-height:1.55;margin-top:10px;border-radius:0 3px 3px 0;}
+  .splat-btn{display:inline-block;margin-top:12px;background:var(--coral);color:#fff;font-weight:700;font-family:sans-serif;font-size:13px;padding:9px 16px;border-radius:4px;text-decoration:none;cursor:pointer;}
+  .src{font-size:11px;margin-top:11px;word-break:break-all;}
+  .leaflet-popup-content{font-family:'Gowun Batang',serif;}.pop-nm{font-weight:700;font-size:14px;}.pop-meta{font-size:12px;color:#555;margin-top:3px;line-height:1.45;}
+  .vfoot{padding:10px 22px;font-size:10.5px;border-top:1px solid var(--line);line-height:1.6;}
+
+  /* 테마: 건강(밝은) / 일반(어두운) */
+  .theme-me{background:var(--paper);color:#1a2e2a;}
+  .theme-me .topbar,.theme-me .filters{background:#efeadd;}
+  .theme-me .chip{background:var(--paper);}
+  .theme-me .panel{background:var(--paper);}
+  .theme-me .panel-head{background:var(--paper);} .theme-me .panel-head h2{color:var(--sea);} .theme-me .panel-head p{color:#6a6354;}
+  .theme-me .card:hover{background:#efeadd;} .theme-me .card.sel{background:#eaf5ef;border-left:5px solid var(--sea);}
+  .theme-me .card .meta{color:#6a6354;} .theme-me .detail dt{color:var(--sea);} .theme-me .detail dd{color:#1a2e2a;}
+  .theme-me .vfoot{background:#efeadd;color:#8a8270;} .theme-me .src{color:#8a8270;}
+  .theme-me .mapbox{background:#dfe6e6;}
+
+  .theme-all{background:#eef3f2;color:#1a2e2a;}
+  .theme-all .topbar,.theme-all .filters{background:#e3ece9;}
+  .theme-all .home,.theme-all .switch{color:var(--sea);border-color:var(--sea);}
+  .theme-all .switch button{color:var(--sea);} .theme-all .switch button.active{background:var(--sea);color:#fff;}
+  .theme-all .vtitle{color:#5a6b6b;} .theme-all .chip{background:#fff;color:#1a2e2a;border-color:#cfd9d6;}
+  .theme-all .panel{background:#f6faf9;border-color:var(--sea);} .theme-all .panel-head{background:#f6faf9;border-color:#d3ddda;}
+  .theme-all .panel-head h2{color:var(--sea);} .theme-all .panel-head p{color:#6a7b7b;}
+  .theme-all .card{border-color:#d3ddda;} .theme-all .card:hover{background:#e8f1ee;} .theme-all .card.sel{background:#e0f0ea;border-left:5px solid var(--sea);}
+  .theme-all .card .nm{color:#1a2e2a;} .theme-all .card .meta{color:#6a7b7b;} .theme-all .detail dt{color:var(--sea);} .theme-all .detail dd{color:#243a36;}
+  .theme-all .vfoot{color:#8a8270;border-color:#d3ddda;} .theme-all .src{color:#8a8270;} .theme-all .mapbox{background:#dfe6e6;}
+  .theme-all .topbar,.theme-all .filters{border-color:#d3ddda;}
+
+  @media(max-width:760px){.wrap{flex-direction:column;}.panel{width:100%;max-width:100%;border-left:none;border-top:2px solid var(--sea);}.choice{width:100%;max-width:340px;}}
+</style>
+</head>
+<body>
+
+<!-- ===== 랜딩 ===== -->
+<div id="landing">
+  <div class="brand">JEJUGRAPHER</div>
+  <h1>제주 운동 지도</h1>
+  <p class="tag">제주 전역의 운동·여행 장소를 강도·종목별로. 두 가지 지도 중 선택하세요.</p>
+  <div class="choose">
+    <div class="choice" onclick="enter('me')">
+      <div class="ico">🌿</div>
+      <h2>건강관리용 지도</h2>
+      <span class="who me">회복기·저강도 맞춤</span>
+      <p>회복기 저강도 운동 맞춤. 무장애·노면 안전·인프라·우천 위험·접근성 중심으로 안전한 산책 장소를 안내합니다.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
+    <div class="choice" onclick="enter('all')">
+      <div class="ico">🏃</div>
+      <h2>일반인용 운동 지도</h2>
+      <span class="who all">운동 즐기는 모두</span>
+      <p>러닝·자전거·스쿠버/프리다이빙·등산·트레킹. 종목별 + 난이도별 코스. 거리·소요시간·자격요건 표시.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
+  </div>
+  <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
+</div>
+
+<!-- ===== 지도 앱 ===== -->
+<div id="app" class="hidden">
+  <div class="topbar">
+    <button class="home" onclick="goHome()">◂ JEJUGRAPHER</button>
+    <div class="switch">
+      <button id="swMe" onclick="enter('me')">건강관리용</button>
+      <button id="swAll" onclick="enter('all')">일반인용</button>
+    </div>
+    <span class="vtitle" id="vtitle"></span>
+  </div>
+  <div class="filters" id="filters"></div>
+  <div class="wrap">
+    <div class="mapbox" id="map"></div>
+    <aside class="panel">
+      <div class="panel-head"><h2 id="panelTitle"></h2><p id="panelSub"></p></div>
+      <div id="list"></div>
+    </aside>
+  </div>
+  <div class="vfoot" id="vfoot"></div>
+</div>
+
+<script>
+// ================= 데이터 =================
+// splatUrl은 3D 가우시안 스플래팅 뷰가 제작된 지점에만 추가. 없으면 3D 버튼 미표시.
+const ARA=[33.4566,126.5619];
+
+const ME=[
+ {name:"사려니숲 무장애나눔길",lat:33.3949678,lng:126.6839679,region:"중산간(동부)",lv:1,safe:"ok",araTime:"차량 약 30분",length:"약 1.3km(무장애 구간)",slope:"입구 약 6도, 완만",surface:"목재 데크",bf:"무장애(노폭 1.7m, 휠체어 교행)",infra:"장애인주차 5면·남녀분리 장애인화장실·쉼터 다수",shade:"삼나무 수관 깊은 그늘",rain:"중 — 우천·폭설 시 데크 수막, 통행제한 가능",time:"무장애 구간 약 31분",health:"평탄 데크라 저강도 산책에 안전. 약 31분 스케일로 가볍게 다녀오기 좋음. ★우천 시 데크 미끄럼 주의.",src:"공간정보 조사 / tour.jejudsi.kr"},
+ {name:"서귀포 치유의숲 노고록길",lat:33.2988369,lng:126.5222283,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"남부(원거리)",length:"무장애 3.8km(특화 0.87km)",slope:"5~8% 이내, 유니버설 디자인",surface:"목재 데크 + 일부 흙길",bf:"무장애(전구간 휠체어·유모차)",infra:"장애인전용주차·장애인화장실·야외족욕장·산림욕베드",shade:"수령 60년+ 편백·삼나무",rain:"중 — 삼나무 방부목 우천 시 마찰 급감",time:"2~3시간(치유 프로그램)",health:"평균경사 5% 전후의 완만한 코스. 단차·턱 완전제거. ★데크 800m 후 흙길 전환→휠체어는 입구로 회귀. 흙길 단차 32cm 주의. 사전예약제.",src:"공간정보 조사 / headlinejeju"},
+ {name:"절물자연휴양림 너나들이길",lat:33.4393622,lng:126.6299100,region:"제주시 도심/중산간",lv:1,safe:"care",araTime:"제주시 도심권(근거리)",length:"약 3.0km",slope:"계단 없음 / ★일부 자료 경사 5도=8.75% 보고",surface:"목재 데크",bf:"무장애(임산부·노약자 특화)",infra:"휴양림 인프라(상세 데이터 없음)",shade:"빽빽한 삼나무 숲 그늘",rain:"중 — 데크 낙엽·수막",time:"데이터 없음(오름 연계 시 3시간+)",health:"계단 없어 부담 적은 코스. ★단 일부 무장애 구간 경사 8.75% 보고 = 저강도 기준 초과 가능 → 경사 구간 확인. 근거리라 접근성 최상.",src:"공간정보 조사 / mediajeju"},
+ {name:"한라수목원 광이오름",lat:33.468104,lng:126.4952574,region:"제주시 도심",lv:2,safe:"care",araTime:"차량/도보 약 20분(연동)",length:"탐방로 1.2km(전체 1.7km)",slope:"표고 266.8m·비고 77m, 분화구 경사 다소 높음",surface:"나무 데크 + 흙길 혼재",bf:"무장애 아님",infra:"주차장(유료)·생태체험관·쉼터·매점·화장실",shade:"수목원 수관 그늘",rain:"하",time:"약 45분(분화구 30+정상 15)",health:"분화구 경사 구간은 호흡이 가빠지는 편 → 저강도 위주면 평탄 둘레길만 권장. 근거리 접근성 좋음.",src:"공간정보 조사 / ihalla"},
+ {name:"수월봉 엉알해안산책로",lat:33.2944141,lng:126.1628076,region:"서부",lv:2,safe:"care",araTime:"서부(원거리)",length:"엉알길 일부(올레12 전체 13.8km)",slope:"정상 해발 77m, 초반 평탄",surface:"흙·바위·화산재 지층 혼재",bf:"데이터 없음(일부 평탄 보행 가능)",infra:"데이터 없음",shade:"해안가라 그늘 미흡",rain:"중 — 절벽 낙석으로 통제 빈번",time:"엉알길만 약 1시간",health:"평지 구간은 가볍게 가능하나 ★절벽 인접·낙석 통제 잦음. 그늘 없어 더운 시간대 회피, 동반 권장.",src:"공간정보 조사 / visitkorea"},
+ {name:"제주올레 7코스",lat:33.2413514,lng:126.5479980,region:"남부(서귀포)",lv:2,safe:"no",araTime:"데이터 없음",length:"약 17.7km",slope:"올레 난이도 '중'(바위·구릉)",surface:"자갈·험한 현무암 바위",bf:"무장애 아님",infra:"칠십리공원(화장실/전망대)·주차",shade:"일부만",rain:"중 — 현무암 수막 미끄럼",time:"약 5~6시간",health:"★불규칙·험한 현무암 바윗길 + 17km 장거리 → 저강도 목적엔 부적합. 충분한 체력 전제.",src:"공간정보 조사 / visitjeju"},
+ {name:"거문오름",lat:33.4546419,lng:126.7179249,region:"동부/중산간",lv:3,safe:"no",araTime:"데이터 없음",length:"분화구 5.0km / 전체 6.7km",slope:"해발 456m, 9개 봉우리 오르내림",surface:"자연 산림 지형",bf:"무장애 아님(예약 필수, 유료)",infra:"탐방지원센터(진입 후 화장실 이용 불가)",shade:"곶자왈 숲 수관",rain:"데이터 없음",time:"2시간30분~3시간30분",health:"★수시간 산악 보행 + 도중 화장실 없음 + 고강도. 저강도 목적엔 부적합. 충분한 체력·예약 전제.",src:"공간정보 조사 / visitjeju"},
+ {name:"다랑쉬오름",lat:33.4762433,lng:126.8229497,region:"동부",lv:3,safe:"no",araTime:"데이터 없음",length:"약 4.0km",slope:"해발 382m, 화구 깊이 115m, 급경사",surface:"비탈진 급경사",bf:"무장애 아님",infra:"탐방안내소·초소·쉼터",shade:"그늘 미흡",rain:"상 — 빗길 하산 낙상 매우 치명적",time:"약 1시간 20분",health:"★가파른 사면 급경사 → 저강도 목적엔 부적합. 빗길 하산 낙상 위험 큼.",src:"공간정보 조사 / visitjeju"},
+ {name:"새별오름",lat:33.3659432,lng:126.3564400,region:"서부",lv:3,safe:"no",araTime:"데이터 없음",length:"편도(데이터 없음)",slope:"해발 519m, 공식난이도 '상'",surface:"억새 사면",bf:"무장애 아님",infra:"대형 주차장·푸드트럭",shade:"억새뿐, 해가림 부재",rain:"데이터 없음",time:"편도 약 20분",health:"★짧지만 가팔라 단시간에 강도가 급격히 올라감 → 저강도 목적엔 부적합.",src:"공간정보 조사 / visitjeju"},
+ {name:"이호테우 해변 산책길",lat:33.4979571,lng:126.4531502,region:"제주시 도심(이호동)",lv:1,safe:"care",araTime:"공항 서북측, 도심서 근거리",length:"해안도로 연계 시 수 km 연장 가능",slope:"0m / 완전 평지",surface:"보도블록·해변 모래·피아노건반길",bf:"가능(해변 모래사장 제외)",infra:"조명·말등대·어린이 풀장(여름)",shade:"거의 없음(꽃밭길 일부 제외)",rain:"중 — 해풍·월파 주의",time:"데이터 없음(연장 가변)",health:"표고 0m 완전 평지라 부담이 적은 코스. ★그늘이 거의 없어 더운 시간대 회피, 해풍·월파 시 주의. 야간 조명 확보됨.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"도두 무지개 해안도로",lat:33.509258,lng:126.4719749,region:"제주시 도심(도두동)",lv:1,safe:"ok",araTime:"공항 북측 해안",length:"약 1~2km 내외",slope:"0m / 완만한 포장도로",surface:"아스팔트·인도 포장",bf:"가능",infra:"벤치·카페거리·무지개 방호벽",shade:"없음",rain:"중 — 차량 통행 인접 주의",time:"데이터 없음",health:"완만한 포장 평지로 가볍게 걷기 좋음. ★그늘 없음, 도로 인접이라 교통 안전 유의. 무지개 방호벽 경관.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"도두봉 둘레길",lat:33.508095,lng:126.468593,region:"제주시 도심(도두동)",lv:2,safe:"care",araTime:"공항 바로 북쪽 해안",length:"2.25km / 약 1시간 7분~2시간",slope:"표고 61.8m / 완만한 오름",surface:"나무 데크·포장로·흙길",bf:"일부 가능(둘레길 하단부)",infra:"사찰(장안사)·전망대·벤치",shade:"숲길 구간 그늘 형성",rain:"낮음(정비 우수)",time:"약 1시간 7분~2시간",health:"표고 61.8m의 낮은 오름. 둘레길 하단부는 평탄해 일부 가능하나 정상부는 완만한 오르막. 저강도 위주면 하단부 위주 권장. 공항 인접 소음 큼.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"용두암 해안 산책로",lat:33.5157583,lng:126.5116346,region:"제주시 도심(용담동)",lv:1,safe:"care",araTime:"용담동 해안도로 연결부",length:"도두봉에서 도보 약 1시간 거리",slope:"0m / 해안 암반지대 평탄화",surface:"보도블록·현무암 판석 포장",bf:"대부분 가능",infra:"공영주차장·야간 조명·화장실",shade:"없음",rain:"높음 — 현무암 젖을 시 미끄러움",time:"데이터 없음",health:"해안 암반지대를 평탄화한 산책로로 대부분 무장애 가능. ★현무암이 젖으면 미끄럽고, 강풍 시 물보라(염무) 노출. 야간 조명·화장실 있음.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"탑동광장 해안 산책로",lat:33.5180392,lng:126.5265318,region:"제주시 도심(삼도동)",lv:1,safe:"care",araTime:"구제주 앞바다, 도심 중심",length:"광장 중심 왕복 수 km",slope:"0m / 평지",surface:"우레탄·콘크리트·보도블록",bf:"최적(모든 구역 단차 최소화)",infra:"해변공연장·농구장·야자수·방파제",shade:"없음",rain:"매우 높음 — 풍랑 시 파도 월파",time:"데이터 없음",health:"단차 최소화로 무장애 최적. 도심 중심이라 접근성 좋음. ★악천후 시 월파 위험으로 출입 통제. 인라인·자전거·보행자 동선 겹침 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"삼양 검은모래 해안도로",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",lv:1,safe:"care",araTime:"삼양동 북측 해안",length:"연계 코스 1~3km 내외",slope:"0m / 평지",surface:"아스팔트·콘크리트",bf:"가능",infra:"정자 구조물·주차장",shade:"정자 제외 시 없음",rain:"중 — 월파 주의",time:"데이터 없음",health:"평지 해안도로로 가볍게 걷기 좋음. ★그늘은 정자뿐, 차량 통행로 인접. 동부 해안 일몰 경관.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"삼양 해수욕장 어싱 산책로",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",lv:2,safe:"care",araTime:"삼양동 해변",length:"백사장 왕복",slope:"0m / 평탄한 모래 지형",surface:"검은 모래(현무암 풍화토)",bf:"불가(휠체어 진입 어려움)",infra:"공영 화장실·세족 시설",shade:"없음",rain:"중 — 파도 주의",time:"데이터 없음",health:"맨발 걷기(어싱)에 적합한 검은 모래 노면. 평지지만 모래 저항으로 하체 부하가 있어 강도는 중(中). ★휠체어 진입 불가, 모래찜질 객과 동선 충돌 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"삼무공원(배두리오름)",lat:33.4918224,lng:126.4917277,region:"제주시 도심(연동)",lv:1,safe:"care",araTime:"신제주 연동 도심 한가운데",length:"둘레 617m / 1회전 약 10분",slope:"표고 85m, 비고 10m",surface:"우레탄 포설·야자매트·돌계단",bf:"부분 가능(계단 제외 우레탄 길)",infra:"팔각정·체육시설·벤치·화장실·상권",shade:"벚나무·소나무 숲 우거짐",rain:"낮음(야자매트 배수 우수)",time:"약 10분(1회전)",health:"비고 10m의 나지막한 언덕으로 둘레 617m 콤팩트 코스. 우레탄·야자매트로 무릎 관절 약한 분께 적합. 계단 구간만 제외하면 부담 적음. 도심 한가운데라 접근성 최상.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"신산근린공원 산책로",lat:33.5059296,lng:126.532976,region:"제주시 도심(일도동)",lv:1,safe:"ok",araTime:"구제주 일도동 주거지 인근",length:"총 코스 약 1.2km",slope:"완전 평지",surface:"포장도로·흙길 혼재",bf:"최적(휠체어 가능)",infra:"벤치·화장실·증기기관차 전시",shade:"20~100년 왕벚나무 터널",rain:"낮음",time:"데이터 없음",health:"완전 평지에 왕벚나무 그늘 터널이 덮인 1.2km 코스. 휠체어 가능한 무장애 최적 환경. 도심 주거지 인근이라 접근성 좋음. 봄철 벚꽃 축제 시 인파.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"전농로 왕벚나무 거리",lat:33.5043987,lng:126.5193278,region:"제주시 도심(삼도동)",lv:1,safe:"care",araTime:"삼도동 원도심 상권",length:"연계 코스에 따라 가변",slope:"평지",surface:"아스팔트·인도 포장",bf:"가능(인도 연석 단차 주의)",infra:"50년 전통 노포 상점·벚꽃길",shade:"왕벚나무 터널이 덮음",rain:"낮음",time:"데이터 없음",health:"평지 가로수길로 벚나무 터널 그늘이 좋음. 원도심 상권과 결합된 도시 보행로. ★인도 연석 단차 주의, 벚꽃 시즌 차량 통행 혼잡.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"제주향교 산책길",lat:33.5111112,lng:126.5156105,region:"제주시 도심(용담동)",lv:1,safe:"ok",araTime:"용담1동 향교 일대",length:"경내 관람 포함 수십 분",slope:"평지",surface:"보도블록·흙길·포장 혼재",bf:"일부 진입 제한",infra:"유형문화재 건축물·야간 경관 조명",shade:"나무 및 처마 그늘",rain:"낮음",time:"수십 분",health:"평지 역사 탐방 산책로. 조선 건축(대성전 등) 관람과 결합. ★교육·종교시설이라 정숙 요망, 일부 구역 진입 제한.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"노형근린공원",lat:33.4802652,lng:126.4826757,region:"제주시 도심(노형동)",lv:1,safe:"ok",araTime:"신제주 노형동 주거지",length:"단거리 순환",slope:"평지",surface:"우레탄·블록 포장",bf:"가능",infra:"운동기구·농구장·축구장·테니스장·화장실·야간 조명",shade:"조경수 그늘",rain:"낮음",time:"데이터 없음",health:"평지 도심 근린공원으로 산책·가벼운 운동에 적합. 야간 조명·CCTV로 야간 산책 비교적 안전. 운동기구·체육시설 잘 갖춰짐.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"사라봉 공원 산책로",lat:33.5177405,lng:126.5449135,region:"제주시 도심(사라봉동)",lv:2,safe:"care",araTime:"구제주 동문로터리 동쪽 2km",length:"개별 산책로 30분~",slope:"해발 143m / 지속적 경사로",surface:"포장 흙길·야자매트·우레탄",bf:"제한적(일부 평탄 구간만)",infra:"팔각정·운동기구 다수·사찰·등대",shade:"숲 지대 많아 충분한 그늘",rain:"보통",time:"30분~",health:"해발 143m 오름으로 경사가 있으나 체력단련기구가 있는 평탄부만 순환하면 저강도로 가능. 숲 그늘 충분. 영주십경 '사봉낙조' 일몰 경관. 도민 핵심 체력단련장이라 혼잡.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"한라수목원 수생식물원 둘레길",lat:33.4699272,lng:126.4932445,region:"제주시 도심(노형동)",lv:1,safe:"care",araTime:"신제주 노형동, 도심 근거리",length:"전체 관람 시 1.5~2시간",slope:"완만한 구릉, 비고 48m",surface:"목재 데크·블록 포장",bf:"다수 구간 가능",infra:"생태학습관·매표소·주차장",shade:"등나무 쉼터 등 다수",rain:"비교적 안전(단차 주의)",time:"1.5~2시간",health:"수생식물원 데크길은 수평적 산책로로 다수 구간 무장애 가능. 식물 군락·연못 수련 경관. ★자전거 출입 등 제한 규정, 데크 단차 주의. 입장 무료.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"비자림 숲길",lat:33.484272,lng:126.8064793,region:"동부(구좌읍)",lv:1,safe:"care",araTime:"구좌읍 비자숲길, 도심서 차량 30분+",length:"약 3.2km / 1~2시간",slope:"평탄함",surface:"화산송이·흙길",bf:"가능(유모차 진입 가능 구간)",infra:"화장실·주차장",shade:"울창한 숲 그늘 형성",rain:"배수 양호",time:"1~2시간",health:"화산송이가 두껍게 깔려 충격 흡수가 좋고 누적 표고차가 거의 없는 평탄 노면. 천년 비자나무 숲 그늘이 짙음. 일부 자갈 구간 있어 편한 신발 권장. 입장료 있음.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"김녕 지질트레일 A코스",lat:33.5582327,lng:126.759787,region:"동부(구좌읍)",lv:1,safe:"ok",araTime:"구좌읍 김녕",length:"2.2km / 약 40분~1시간",slope:"거의 없음",surface:"화산송이 깔린 평지",bf:"가능(유모차·평탄 보행)",infra:"안내판 등",shade:"숲 안쪽 그늘 분포",rain:"데이터 없음",time:"약 40분~1시간",health:"화산송이 평지로 유모차·평탄 보행 가능한 무장애형 코스. 비자나무 숲과 독특한 지질 특성. 표고차 거의 없어 부담 적음.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"월정리해변 해안산책로",lat:33.5559739,lng:126.7961709,region:"동부(구좌읍)",lv:1,safe:"care",araTime:"구좌읍 월정리",length:"데이터 없음",slope:"해수면 기준(0m)",surface:"포장(보도블럭 구간 한정)",bf:"가능(보도블럭 구간 한정)",infra:"인근 카페거리 다수",shade:"없음",rain:"중 — 해풍·파도 노출",time:"데이터 없음",health:"해수면 평지 해안 산책로. 보도블럭 구간은 보행 가능. ★보행자와 차량 혼재 동선 주의, 그늘 없음. 한적한 바다 조망과 카페뷰.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"동백동산(곶자왈)",lat:33.4776624,lng:126.7135079,region:"동부(조천읍)",lv:2,safe:"care",araTime:"조천읍 선흘리",length:"데이터 없음",slope:"완만한 구릉",surface:"자연 흙길·돌길 일부",bf:"불가",infra:"데이터 없음",shade:"숲 그늘 매우 우수",rain:"습지 환경상 이끼 미끄럼 주의",time:"데이터 없음",health:"완만한 구릉의 곶자왈 원시 생태·습지 숲길. 그늘이 매우 우수하나 ★이끼·습지로 미끄러워 발목 안정성 확보 필요. 러닝 코스로도 제안되나 노면 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"함덕 카페거리 산책로",lat:33.5437787,lng:126.6688353,region:"동부(조천읍)",lv:1,safe:"care",araTime:"조천읍 신북로 인근",length:"단거리",slope:"해수면 인근",surface:"보도 포장",bf:"가능",infra:"카페·상업 인프라 밀집",shade:"건축물 그늘 일부",rain:"데이터 없음",time:"단거리",health:"해수면 인근 보도 포장 단거리 산책로. 카페·상업 인프라 밀집해 접근성 좋음. ★차량 통행로 인접 주의. 레트로 감성·오션뷰.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"수월봉 지질트레일",lat:33.2944141,lng:126.1628076,region:"서부(한경면)",lv:1,safe:"care",araTime:"한경면 고산리",length:"데이터 없음",slope:"정상까지 차량 진입 가능한 완만한 경사",surface:"아스팔트 포장",bf:"가능(차량·휠체어 이용 가능)",infra:"주차장 완비",shade:"없음(탁 트임)",rain:"강풍 노출 위험",time:"데이터 없음",health:"정상까지 완만해 차량·휠체어 접근 가능한 무장애형. 지질트레일 단면층과 차귀도 해상 조망. ★그늘 없고 강풍 노출, 자전거·차량 통행 혼재 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"신창 풍차해안도로",lat:33.3412384,lng:126.1668087,region:"서부(한경면)",lv:1,safe:"care",araTime:"한경면 신창",length:"도보·자전거용 단거리",slope:"해안 인접 평지 수준",surface:"콘크리트 포장",bf:"가능",infra:"상업시설 드묾",shade:"없음",rain:"높음 — 해풍·높은 파도 덮침 주의",time:"데이터 없음",health:"해안 평지 콘크리트 포장로. 거대한 풍력발전기와 이국적 해안선. ★해풍·파도 덮침 주의, 피난처 적어 한적함.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"금능으뜸원해수욕장",lat:33.3899107,lng:126.2353674,region:"서부(한림읍)",lv:1,safe:"care",araTime:"한림읍 금능",length:"단거리 산책",slope:"평지(해발 0m 수렴)",surface:"젖은 모래·데크",bf:"접근 용이",infra:"야영장·화장실",shade:"없음",rain:"중 — 풍랑 조심",time:"단거리",health:"평지 해변으로 수심이 얕고 투명한 바닷물. 협재와 인접. 단단히 젖은 모래 지형은 관절 부하가 적음. ★밀물 시 백사장 축소, 그늘 없음.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"협재해수욕장",lat:33.394261,lng:126.2399011,region:"서부(한림읍)",lv:1,safe:"care",araTime:"한림읍 협재리",length:"단거리 산책",slope:"평지",surface:"모래·블럭 포장",bf:"인접로 가능",infra:"대형 주차장·편의점·상가 밀집",shade:"없음",rain:"데이터 없음",time:"단거리",health:"평지 모래·블럭 포장 해변. 고운 모래와 비양도 조망. 누적 표고차 0에 수렴해 저강도 보행에 적합. ★성수기 유동인구 과도해 러닝 시 충돌 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"곽지해수욕장",lat:33.450902,lng:126.3057298,region:"서부(애월읍)",lv:1,safe:"care",araTime:"애월읍 곽지리",length:"야영장 순환 보행",slope:"평지",surface:"모래·야영지 포장",bf:"포장 구역 내 가능",infra:"공영주차장·글램핑/카라반",shade:"없음",rain:"중 — 텐트 등 야영장비 침수 주의",time:"데이터 없음",health:"평지 해변·야영장 순환 보행. 넓은 해변과 용천수 노천탕. 포장 구역은 무장애 가능. ★그늘 없음.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"금산공원(납읍 난대림)",lat:33.4337682,lng:126.3309964,region:"서부(애월읍)",lv:2,safe:"care",araTime:"애월읍 납읍리",length:"순환 소요",slope:"국지적 단차 존재",surface:"흙길·목재 데크 혼합",bf:"진입로 외 일부 구간 제약",infra:"인접 납읍리 마을 인프라",shade:"난대림 상록수 짙은 그늘",rain:"숲 내부 습도로 목재 데크 미끄러움",time:"데이터 없음",health:"상록수 난대림의 짙은 그늘. 천연기념물 원시 희귀 난대식생 군락지. 국지적 단차 있어 일부 구간 제약. ★목재 데크 미끄럼, 법적 보호구역이라 식물 채취·산림 훼손 금지.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"한림복지문화체육시설",lat:33.4055445,lng:126.2664193,region:"서부(한림읍)",lv:1,safe:"ok",araTime:"한림읍 대림리",length:"시설 내 트랙 활용(반복 러닝)",slope:"평탄(단차 없는 체육시설 규격)",surface:"우레탄 트랙·실내 마루",bf:"가능(공공시설 규정 무장애 설계)",infra:"100명 수용·전용 주차장·실내외 체육",shade:"실내 구역·실외 관중석 차광막",rain:"우천 시 야외 우레탄 마찰계수 하락 주의",time:"데이터 없음",health:"단차 없는 규격화된 공공 체육시설. 우레탄 트랙으로 반복 러닝에 적합하고 무장애 설계. 실내 구역은 전천후. ★행사 대관 시 개인 이용 제한 가능.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"표선 성읍리 소형 오름",lat:33.3820000,lng:126.7990000,region:"남부(표선면 성읍리)",lv:1,safe:"care",araTime:"표선면 성읍리 산1",length:"정상까지 약 15~20분",slope:"표고차 매우 낮고 경사 극히 완만",surface:"포장·흙길",bf:"일부",infra:"정비된 전용 주차장 완비",shade:"수목 그늘",rain:"데이터 없음",time:"약 15~20분",health:"표고차 매우 낮고 경사가 극히 완만해 노약자도 동행 가능. 정상서 한라산 백록담·성산일출봉·풍차까지 파노라마 조망. 체력 소모 대비 경관 보상이 큼. (PDF상 명칭 미상)",src:"공간정보 조사 / Google Places 실측(개오름 인근 추정)"},
+ {name:"남원 큰엉 해안산책로",lat:33.2733146,lng:126.7048177,region:"남부(남원읍)",lv:1,safe:"care",araTime:"남원읍 남원관광지구 내",length:"1~2시간 소요 수준",slope:"평탄한 해안 절벽 윗면 보행",surface:"포장도로·흙길 혼합",bf:"가능(무장애 33%~100% 구간 혼재)",infra:"주차장·화장실 완비",shade:"식생 덮인 수림 터널 그늘 우수",rain:"높음 — 태풍·고파랑 시 절벽 파도 덮침",time:"1~2시간",health:"평탄한 해안 절벽 윗면 보행로로 수림 터널 그늘이 우수. 무장애 적용 구간이 넓음. 한반도 지형 빼닮은 수림 터널 포토존. ★무장애 33% 구간과 100% 구간 경계 사전 확인, 태풍·고파랑 시 위험.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"혼인지",lat:33.4160056,lng:126.8938445,region:"남부(성산읍)",lv:1,safe:"ok",araTime:"성산읍 온평리",length:"단거리 산책",slope:"완전한 평지",surface:"정비된 평탄 보행블록·잔디",bf:"가능(무장애 40%~100% 혼재)",infra:"공공화장실·관리소",shade:"전통 수목 산발적 그늘",rain:"평탄지형 국지적 물고임",time:"단거리",health:"완전 평지의 정비된 보행블록·잔디 산책로. 무장애 적용률 높음. 탐라국 개국신화(삼성혈 설화) 연못과 정통 조경. ★유적지 보호 위해 정해진 관람로 이탈 금지.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"성산국민체육센터 운동장",lat:33.4669124,lng:126.90497,region:"남부(성산읍)",lv:1,safe:"ok",araTime:"성산읍 오조리",length:"400m 규격×5레인 트랙 루프",slope:"인공 평지(트랙 내 표고차 완전 제로)",surface:"탄성 우레탄 트랙(표준 규격)",bf:"완벽히 가능(경계턱 없음)",infra:"관중석 488석·화장실·주차장",shade:"야외 노출로 그늘 없음",rain:"집중호우 시 우레탄 수막현상 미끄럼",time:"데이터 없음",health:"표고차 완전 제로의 400m 규격 우레탄 트랙. 경계턱 없어 완벽한 무장애. 탄성 포장으로 관절 부담 적고 야간·기상 무관하게 일정 심박 러닝 가능. ★대관 시 외부인 출입·운영시간 통제 확인.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"남원체육관",lat:33.2776473,lng:126.7053152,region:"남부(남원읍)",lv:1,safe:"ok",araTime:"남원읍 남원리, 태위로 551-28",length:"실내 공간 반복 운동",slope:"인공 평지",surface:"실내 목재 마루·실외 구역",bf:"가능(진입로 정비)",infra:"관중석 400석·주차장",shade:"실내 구역 전천후 차광·방우",rain:"기상 조건 무관(실내)",time:"데이터 없음",health:"실내 목재 마루의 전천후 체육 공간. 진입로 정비로 접근 가능. 기상 무관하게 운동에만 집중 가능. ★동호회 등 단체 우선 사용 시 개인 이용률 변동.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"대정읍성",lat:33.2518044,lng:126.276634,region:"남부(대정읍)",lv:1,safe:"care",araTime:"대정읍 도심지 인근",length:"성곽 둘레 보행",slope:"평지형 방어 읍성(단차 없음)",surface:"흙길·성곽 위 잔디밭",bf:"부분 가능",infra:"마을 내 주차 공간",shade:"성곽 주변 일부 그늘",rain:"성곽 위 우천 시 미끄럼",time:"데이터 없음",health:"평지형 방어 읍성 둘레 보행로로 단차가 없음. 조선시대 제주 3대 읍성. ★성벽 문화재 보호 규정상 지정 보행로·계단만 이용.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"가파도 둘레길",lat:33.1707573,lng:126.2726748,region:"남부(대정읍 도서)",lv:1,safe:"care",araTime:"대정읍 가파리(해상 도서)",length:"해안선 따라 종주",slope:"제주 부속섬 중 가장 평탄(최고 해발 20.5m)",surface:"시멘트 도로 포장·마을 흙길",bf:"일부 가능",infra:"정기여객선 선착장·자전거 대여소·카페",shade:"교목류 전무, 땡볕 노출",rain:"높음 — 강풍·비바람 시 피난처 절대 부족",time:"종주 수 시간",health:"제주 부속섬 중 가장 평탄한 구릉(최고 20.5m)으로 종주 부담 적음. 청보리밭과 한라산 동시 조망. ★그늘 전무·땡볕 노출, 모슬포항 정기여객선·막배 시간 엄수.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"마라도 둘레길",lat:33.1206371,lng:126.2671204,region:"남부(대정읍 도서)",lv:1,safe:"care",araTime:"대정읍 마라리(최남단 해상 도서)",length:"1~2시간 섬 전체 횡단",slope:"해안 절벽으로 솟아 있으나 섬 내부는 매우 완만",surface:"포장 통행로·천연 잔디길",bf:"진입부 외 내부 일부 가능",infra:"선착장·공중화장실·짜장면 상가",shade:"목본류 식생 부재로 그늘 없음",rain:"높음 — 폭풍우 시 피할 곳 적고 결항률 높음",time:"1~2시간",health:"섬 내부는 매우 완만해 1~2시간 횡단 가능. 대한민국 최남단 영토 기념비와 해안 기암절벽. ★그늘 절대 없음, 폭풍우 시 결항 잦아 출항 정보 수시 점검.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"한라산둘레길 산림휴양길",lat:33.4393622,lng:126.62990999,region:"중산간(휴양림 연계)",lv:1,safe:"care",araTime:"중산간 휴양림 연계지(절물 일대)",length:"2.3km / 초단거리",slope:"아주 완만한 산림 사면 경사",surface:"정비된 목재 데크·다져진 흙길",bf:"부분적 무장애 가능",infra:"휴양림 관리소",shade:"숲 그늘 풍부",rain:"데크 표면 물기 미끄럼",time:"초단거리",health:"한라산 둘레길 9개 코스 중 가장 짧은 2.3km 초단거리. 거칠지 않고 쾌적하게 다듬어진 산림 휴양 구간으로 초심자 입문에 적합. 부분 무장애 가능. ★데크 물기 미끄럼.",src:"공간정보 조사 / hallatrail.or.kr"},
+ {name:"서귀포자연휴양림 무장애 산책로",lat:33.3114287,lng:126.4588606,region:"중산간(1100도로 일대)",lv:1,safe:"care",araTime:"서귀포 중산간 1100도로 고도역",length:"목적에 따른 순환형 산책로 다수",slope:"인공 구조물 통한 평탄 무장애 광범위 조성",surface:"목재 데크·매끄러운 휠체어용 무장애 포장",bf:"적극 가능(무장애 적용 80%~100%)",infra:"장애인 전용 주차·휠체어 리프트·공중화장실 완비",shade:"수십 년 수령 숲 터널",rain:"비온 뒤 목재 데크 젖음 미끄럼 우려",time:"코스별 가변",health:"험준한 산악 지형임에도 데크·무장애 포장을 80~100% 도입한 순환형 무장애 산책 구간. 휠체어 리프트·전용 주차 완비로 영유아·휠체어 이용자에 최적화. 고지대 천연 힐링 수림. ★데크 젖음 주의.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"서귀포 치유의숲",lat:33.2988369,lng:126.5222283,region:"중산간(산록남로 고지대)",lv:1,safe:"care",araTime:"서귀포 산록남로 일대 고지대",length:"프로그램 코스별 다양(가베롱·벤조롱숲길 등)",slope:"지형 자체 일부 자연 경사 존재",surface:"목재 데크·충격 완화 야자매트 보설",bf:"적극 가능(보행약자용 무장애 80%~100%)",infra:"종합 탐방안내소·치유 프로그램 휴게시설",shade:"짙푸른 상록수 숲 그늘",rain:"데이터 없음",time:"코스별 가변",health:"보행약자용 무장애 구간을 80~100% 확보한 산림치유 숲. 야자매트로 충격 완화. 산림치유지도사 동행 웰니스 공간. ★당일 현장 발권 불가, 인터넷 사전 예약 필수.",src:"공간정보 조사 / Google Places 실측"},
+ {name:"한라산둘레길 절물 조릿대길",lat:33.4393622,lng:126.6299100,region:"중산간(절물 자연휴양림 방면)",lv:2,safe:"care",araTime:"사려니 종점~절물자연휴양림 방면",length:"데이터 없음",slope:"중산간 고도 내 파도형 흙길 굴곡",surface:"산죽(조릿대) 군락 덮인 흙길",bf:"불가",infra:"절물자연휴양림 측 공공 인프라 공유",shade:"대숲 그늘 다수 존재",rain:"빗물 맺혀 하반신 젖음 현상 극심",time:"데이터 없음",health:"허리까지 자란 조릿대가 바다처럼 펼쳐진 군락길. 대숲 그늘 다수. 중강도 흙길 굴곡. ★피부 긁힘·이슬 맺힘 방지 위해 긴바지·스패츠 착용 권장, 무장애 불가.",src:"공간정보 조사 / hallatrail.or.kr"},
+{name:"하도리 철새도래지",lat:33.5038245,lng:126.8919426,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"코스 연계",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약20~30분",health:"철새 서식지, 해안선 풍광. 조류 서식지이므로 과도한 소음 주의",src:"공간정보 조사"},
+{name:"석다원 해안로",lat:33.5270996,lng:126.8892479,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약20분",health:"해안선과 현무암 바위 경관. 월파·강풍 위험, 해안도로변 차량 주의",src:"공간정보 조사"},
+{name:"김녕미로공원 산책로",lat:33.5368768,lng:126.7725371,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약30분",health:"조경수 식생. 복잡한 미로형, 동선 이탈 주의. 유료 시설",src:"공간정보 조사"},
+{name:"만장굴 지상부 산책",lat:33.5282463,lng:126.7702874,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약40분",health:"세계자연유산 용암동굴계 외부 숲. 동굴 내부는 별도 기준",src:"공간정보 조사"},
+{name:"아부오름",lat:33.447607,lng:126.7772601,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"전형적 원형 분화구와 삼나무 조림지. 표고 301.4m, 분화구 내부 수목",src:"공간정보 조사"},
+{name:"조천리 용천수탐방길",lat:33.540066,lng:126.63616,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"4.9~19.1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"40분~7시간30분",health:"23개의 용천수 연결망, 연북정, 돌담 풍경. 좁은 골목길 차량 교행 주의",src:"공간정보 조사"},
+{name:"김녕고장난길",lat:33.5578697,lng:126.74708,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"6.24km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"김녕 해안을 따라 걷는 지질·생태 경관. 자전거·보행자 혼용 주의",src:"공간정보 조사"},
+{name:"숨비소리길",lat:33.5236474,lng:126.8634357,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"5.7~19.4km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1.5~5시간",health:"해녀항일기념탑, 서문동 우물, 별방진 성벽. 강풍 시 체력 소모 심화",src:"공간정보 조사"},
+{name:"닭머르 해안길",lat:33.5474,lng:126.6444,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"왕복30분",health:"닭의 머리 닮은 기암괴석과 바다·억새. 주차 협소, 해안 낭떠러지 주의",src:"공간정보 조사"},
+{name:"청굴물",lat:33.5582697,lng:126.7512108,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"얼음장같이 차가운 해안 용천수 뷰. 만조·우천 시 접근 불가, 노면 미끄럼 주의",src:"공간정보 조사"},
+{name:"조천체육관",lat:33.5390118,lng:126.6427149,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"공공 체육시설, 실내 마루바닥. 우천 무관 최적 인프라",src:"공간정보 조사"},
+{name:"구좌체육공원",lat:33.5563059,lng:126.7624362,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"넓은 공공 육상 체육 거점, 우레탄 트랙·인조잔디. 휠체어 진입 가능",src:"공간정보 조사"},
+{name:"한담해안산책로",lat:33.4591293,lng:126.3103796,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"900m~13.5km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"20분~4시간30분",health:"옥빛 바다와 검은 용암바위가 밀착한 절경. 상시 붐빔, 해안 낭떠러지 실족 주의",src:"공간정보 조사"},
+{name:"선운정사 주변길",lat:33.4293517,lng:126.3071931,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"애월 내륙의 한적한 사찰 주변 풍경. 올레 15코스 동선 이탈 주의",src:"공간정보 조사"},
+{name:"비양도 둘레길",lat:33.4093643,lng:126.2257213,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"3.5~4.1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1.5~2.5시간",health:"1002년 솟아난 기생화산의 신비, 한라산 원경 조망. 풍랑주의보 시 입도 통제, 도선 시간 확인",src:"공간정보 조사"},
+{name:"하영올레1코스",lat:33.2541141,lng:126.5589916,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"10.30km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"5~12시간",health:"걸매생태공원·천지연폭포·칠십리시공원 거쳐 새연교로. 도심 횡단보도·차량 교차로 보행 안전",src:"공간정보 조사"},
+{name:"하영올레3코스",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"7.3km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"솜반천 탐방로와 지장샘 잇는 도심 수변 생태계. 집중호우 시 솜반천 범람 치명적",src:"공간정보 조사"},
+{name:"서귀포 칠십리시공원",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"순환 자유",health:"섶섬·문섬·천지연폭포 조망 도심 전망대. 휠체어 진입 가능, 무장애 우수",src:"공간정보 조사"},
+{name:"엉또폭포 조망길",lat:33.2686052,lng:126.4999881,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"폭우 후 생성되는 거대한 기암폭포. 폭우 시 노면 붕괴·낙석 극도 유의",src:"공간정보 조사"},
+{name:"하논분화구",lat:33.2504724,lng:126.5447279,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"국내 유일 마르(Maar)형 분화구, 내부 벼농사 생태경관. 농기계 운행 경로, 보행 간격 유지",src:"공간정보 조사"},
+{name:"외돌개 및 돔베낭길",lat:33.2400718,lng:126.5333708,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"올레7코스 구간",health:"바다 위 우뚝 솟은 외돌개 기암절경과 해송. 돌풍·추락 위험, 바위지대 실족 주의",src:"공간정보 조사"},
+{name:"걸매생태공원",lat:33.2499864,lng:126.5551498,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"순환 자유",health:"하천·봄철 매화 군락. 침수 외 위험 적음, 펜스 밖 진입 금지",src:"공간정보 조사"},
+{name:"천지연폭포 산책로",lat:33.246944,lng:126.554417,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"왕복30~40분",health:"기암절벽에서 쏟아지는 천지연·무태장어 서식지. 입장료·관광객 혼잡",src:"공간정보 조사"},
+{name:"새연교 및 새섬",lat:33.2374705,lng:126.5597705,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1시간 이내 순환",health:"서귀포항 가로지르는 랜드마크 교량과 난대림 생태. 강풍 시 통행 위험, 게이트 통제 확인",src:"공간정보 조사"},
+{name:"작가의 산책길",lat:33.2453211,lng:126.5638438,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약8.6km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"이중섭 화가 자취 서린 문화예술 거리. 올레시장 통과 시 보행 밀집도 최고조",src:"공간정보 조사"}
+];
+
+const ALL=[
+ {name:"애향운동장",sp:"run",lv:"c",lat:33.4954029,lng:126.5178387,region:"제주시 도심",dist:"1회전 0.4km(약 500걸음)",time:"개인 훈련 역량에 따라",phys:"우레탄 인공 트랙, 누적표고차 0m(완전 평탄)",infra:"본관 화장실, 공공체육시설, 야간 조명(22시까지)·24시 개방",safety:"보행자/차량 통제됨, 야간 조명 확보 — 가장 안전",view:"통제된 도심 체육시설",req:"공공체육시설 예약통합관리시스템",ara:"제주시서 15분 내 도심",src:"공간정보·스포츠레저 조사 / psf.kr"},
+ {name:"용담이호해안도로",sp:"run",lv:"m",lat:33.5091423,lng:126.4720073,region:"제주시 북부 해안",dist:"러닝 15~20분 거리(중거리 지속주)",time:"15~20분",phys:"아스팔트·콘크리트 포장, 해수면 인접",infra:"해안가 관광 인프라 혼재",safety:"★측면 해풍으로 체력 소모↑·체온저하 가능, 차량 간섭 주의",view:"파란 하늘과 수평선의 조화",req:"요건 없음",ara:"도심서 북쪽 해안 신속 접근",src:"공간정보·스포츠레저 조사 / jbedu"},
+ {name:"사려니숲길(트레일러닝)",sp:"run",lv:"h",lat:33.3949678,lng:126.6839679,region:"중산간 동부",dist:"10km~최대 15·16km",time:"약 170분~3시간+",phys:"화산송이 비포장 자연림(자연 쿠셔닝), 전반 평탄",infra:"주차장·버스(231/232) 노선, 대여소 없음",safety:"우천·폭설 시 입장제한, 장거리 탈수 위험",view:"유네스코 생물권보존지역 삼나무 숲",req:"입장 무료, 해설사 이용 시만 예약",ara:"남조로·비자림로로 중산간 진입",src:"공간정보·스포츠레저 조사 / tour.jejudsi.kr"},
+ {name:"제주환상자전거길(용두암 기점)",sp:"bike",lv:"c",lat:33.5157583,lng:126.5116346,region:"제주시 도심·해안 일주",dist:"전체 234km 중 구간 분할",time:"전체 완주 15시간30분",phys:"우측 파란 실선 분리 아스팔트, 해수면 인접 최저 표고차",infra:"기점별 국토종주 인증센터",safety:"분리 도로로 교통 위험도 비교적 낮음",view:"제주 해안 절경·일주도로 풍경",req:"자전거 행복나눔 인증 스탬프 가능",ara:"용두암 기점 차량 15분 내외",src:"공간정보·스포츠레저 조사 / goodsh.tistory"},
+ {name:"1100고지(1139번 지방도)",sp:"bike",lv:"h",lat:33.3577959,lng:126.4624949,region:"중산간·한라산 서부 내륙",dist:"제주시~서귀포 관통(데이터 없음)",time:"파워(W)에 따라 편차 큼",phys:"포장도로, ★최고 경사도 14~15%(해발 380m 부근)·7~8%(500m 부근)",infra:"도로변 인프라 희소",safety:"★급커브·다운힐 조향상실 고위험. 개인 장비 정비 필수",view:"고도 상승에 따른 한라산 원시림·생태 변화",req:"없음",ara:"제주시서 1139도로 진입 용이",src:"공간정보·스포츠레저 조사 / namu.wiki"},
+ {name:"성판악 코스(516도로)",sp:"bike",lv:"h",lat:33.3849311,lng:126.6191854,region:"중산간·한라산 동부 내륙",dist:"데이터 없음",time:"라이더 역량에 따름",phys:"포장도로, 지속적 업힐 구조",infra:"데이터 없음",safety:"차량 혼재·다운힐 브레이크 과열 주의",view:"숲 터널 등 내륙 산림 경관",req:"없음",ara:"제주시서 516도로 직결, 접근성 최상",src:"공간정보·스포츠레저 조사 / namu.wiki"},
+ {name:"섶섬 다이빙 포인트",sp:"dive",lv:"c",lat:33.2310000,lng:126.5730000,region:"남부 서귀포 앞바다",dist:"서귀포항서 보트 약 15분",time:"공기 소모·계획에 따라",phys:"완만한 포인트 다수(너알동산·구두미·큰한개창)",infra:"Splash Dive 등 서귀포항 기점 다이빙샵 다수",safety:"기상 악화 시 보트 진입 너울 주의",view:"펀다이빙 대상 해양생물 산재",req:"오픈워터 자격으로 펀다이빙 가능",ara:"서귀포항까지 516/평화로, 항구서 보트",src:"공간정보·스포츠레저 조사 / splash-dive (좌표 근사)"},
+ {name:"문섬 다이빙 포인트",sp:"dive",lv:"h",lat:33.2268034,lng:126.5659131,region:"남부 서귀포 앞바다",dist:"보트 진입(데이터 없음)",time:"강한 수평 조류로 빠른 이동",phys:"★최대수심 20~22m 수직 직벽, 시야 3~4m",infra:"서귀포항 인근 다이빙 인프라",safety:"★제한 시야(3~4m)+강조류 → 버디 이탈·조난·감압병 위험 고조",view:"새끼섬 수중 직벽 다이나믹 해저 지형",req:"딥·드리프트 통제 가능한 고급 자격 필수",ara:"보트 이용 접근",src:"공간정보·스포츠레저 조사 / vdive.co.kr"},
+ {name:"한라산 성판악 탐방로",sp:"hike",lv:"h",lat:33.3849311,lng:126.6191854,region:"중산간·한라산",dist:"데이터 없음(한라산 본반)",time:"데이터 없음",phys:"한라산 정상부 등반로(본반 정량 데이터 결여)",infra:"탐방안내소·사물함(무료)·버스 정류장",safety:"★온라인 사전 예약 필수(1일 1,000명), 기상 확인·하산 시간 엄수",view:"남한 최고봉(1,947m) 백록담",req:"★한라산 탐방 예약 필수(공식 사이트)",ara:"제주시서 516도로로 진입 용이",src:"공간정보·스포츠레저 조사 / 한라산국립공원"},
+ {name:"사려니숲길 완주(붉은오름~물찻오름)",sp:"hike",lv:"m",lat:33.3949678,lng:126.6839679,region:"중산간 동부",dist:"편도 10km(오름 연계 최대 15·16km)",time:"170분~최대 5시간",phys:"화산송이 평탄 노면(충격 흡수), 누적표고차 거의 없음",infra:"주차장·버스(231/232) 인프라 양호",safety:"긴 보행 시간 수분 고갈·체력저하, 동절기 일몰 전 하산. 성판악 방면 진입 통제 구간 확인",view:"물찻오름 산정호수·생물권보전지역 원시림",req:"평상시 무료, 해설사 동반 시 예약",ara:"비자림로 입구 차량 20분 내외",src:"공간정보·스포츠레저 조사 / foresttrip"},
+ {name:"사려니 새왓내 숲길 / 미로의 숲",sp:"walk",lv:"c",lat:33.3949678,lng:126.6839679,region:"중산간 동부",dist:"0.15~0.55km",time:"약 40분~1시간",phys:"부드러운 화산송이 길, 완벽한 평지 수준",infra:"버스정류장 연계(휠체어/유모차 대여 불가)",safety:"우천·폭설 시 통제, 17:00 의무 퇴장",view:"조밀한 삼나무 숲 터널의 상쾌함",req:"연중무휴 무료, 해설사 동반 시 예약",ara:"비자림로 입구 차량 20분 내외",src:"공간정보·스포츠레저 조사 / tour.jejudsi.kr"},
+ {name:"이호테우 해변 및 해안도로",sp:"run",lv:"c",lat:33.4979571,lng:126.4531502,region:"제주시 도심(이호동)",dist:"해안도로 연계 시 수 km 연장 가능",time:"데이터 없음(연장 가변)",phys:"보도블록·해변 모래·피아노건반길, 표고 0m 완전 평지",infra:"조명·말등대·어린이 풀장(여름), 올레 17코스 연계",safety:"공항 인접 소음·야간 인파 혼잡, 해풍·월파 주의",view:"조명 야경·말등대·코스모스/버베나 꽃밭",req:"요건 없음",ara:"공항 서북측, 도심서 근거리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"도두 무지개 해안도로",sp:"bike",lv:"c",lat:33.509258,lng:126.4719749,region:"제주시 도심(도두동)",dist:"약 1~2km 내외",time:"데이터 없음",phys:"아스팔트·인도 포장, 표고 0m 완만",infra:"벤치·카페거리·무지개 방호벽",safety:"도로 인접으로 인한 교통안전 주의",view:"무지개색 해안 방호벽·비행기 이착륙 뷰",req:"요건 없음",ara:"공항 북측 해안",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"도두봉",sp:"hike",lv:"c",lat:33.508095,lng:126.468593,region:"제주시 도심(도두동)",dist:"2.25km",time:"약 1시간 7분~2시간",phys:"나무 데크·포장로·흙길, 표고 61.8m 완만한 오름",infra:"사찰(장안사)·전망대·벤치",safety:"공항 인접으로 소음 큼",view:"비행기 이착륙 뷰·바다 조망",req:"요건 없음",ara:"공항 바로 북쪽 해안",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"용두암 해안 산책로",sp:"walk",lv:"c",lat:33.5157583,lng:126.5116346,region:"제주시 도심(용담동)",dist:"도두봉에서 도보 약 1시간 거리",time:"약 1시간",phys:"보도블록·현무암 판석 포장, 해안 암반 평탄화",infra:"공영주차장·야간 조명·화장실",safety:"강풍 시 해수 물보라(염무) 노출, 현무암 젖을 시 미끄럼",view:"기암괴석(용두암)·바다 파도",req:"요건 없음",ara:"용담동 해안도로 연결부",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"탑동광장",sp:"run",lv:"c",lat:33.5180392,lng:126.5265318,region:"제주시 도심(삼도동)",dist:"광장 중심 왕복 수 km",time:"데이터 없음",phys:"우레탄·콘크리트·보도블록, 표고 0m 평지, 단차 최소화",infra:"해변공연장·농구장·인라인·야자수·방파제",safety:"풍랑 시 파도 월파, 인라인/자전거/보행자 동선 겹침 주의",view:"제주국제관악제 공연·야경·비행기 뷰",req:"요건 없음",ara:"구제주 앞바다, 도심 중심",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼양 검은모래 해안도로",sp:"bike",lv:"c",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",dist:"연계 코스 1~3km 내외",time:"데이터 없음",phys:"아스팔트·콘크리트, 표고 0m 평지",infra:"정자 구조물·주차장",safety:"차량 통행로 인접 주의",view:"한적한 동부 해안의 일몰",req:"요건 없음",ara:"삼양동 북측 해안",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼양 검은모래 해수욕장(어싱)",sp:"walk",lv:"m",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",dist:"백사장 왕복",time:"데이터 없음",phys:"검은 모래(현무암 풍화토), 모래 저항으로 하체 부하 큼",infra:"공영 화장실·세족 시설",safety:"모래찜질 객과 동선 충돌 주의, 휠체어 진입 불가",view:"7월 검은 모래 해변 축제",req:"요건 없음",ara:"삼양동 해변",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼무공원(배두리오름)",sp:"walk",lv:"c",lat:33.4918224,lng:126.4917277,region:"제주시 도심(연동)",dist:"둘레 617m",time:"1회전 약 10분",phys:"우레탄 포설·야자매트·돌계단, 표고 85m·비고 10m",infra:"팔각정·체육시설·벤치·화장실·음식점 상권",safety:"아침 6시 에어로빅 등 체조 시 혼잡",view:"미카 증기기관차 전시(1944년 제작)",req:"요건 없음",ara:"신제주 연동 도심 한가운데",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"신산근린공원",sp:"run",lv:"c",lat:33.5059296,lng:126.532976,region:"제주시 도심(일도동)",dist:"총 코스 약 1.2km",time:"데이터 없음",phys:"포장도로·흙길 혼재, 완전 평지",infra:"벤치·화장실·운동기구",safety:"봄철 벚꽃 축제 시 인파 밀집",view:"20~100년 왕벚나무 터널, 분홍/흰색 벚꽃",req:"요건 없음",ara:"구제주 일도동 주거지 인근",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"전농로 왕벚나무 거리",sp:"walk",lv:"c",lat:33.5043987,lng:126.5193278,region:"제주시 도심(삼도동)",dist:"연계 코스에 따라 가변",time:"데이터 없음",phys:"아스팔트·인도 포장, 평지",infra:"50년 전통 노포 상점·벤치",safety:"벚꽃 시즌 차량 통행 혼잡 극심",view:"50년 전통 노포와 벚꽃길, 왕벚나무 터널",req:"요건 없음",ara:"삼도동 원도심 상권",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주향교 산책길",sp:"walk",lv:"c",lat:33.5111112,lng:126.5156105,region:"제주시 도심(용담동)",dist:"경내 관람 포함 수십 분",time:"수십 분",phys:"보도블록·흙길·포장 혼재, 평지",infra:"유형문화재 건축물·야간 경관 조명",safety:"정숙 요망(교육 및 종교시설)",view:"대성전·용방록 등 조선 건축",req:"요건 없음",ara:"용담1동 향교 일대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"노형근린공원",sp:"run",lv:"c",lat:33.4802652,lng:126.4826757,region:"제주시 도심(노형동)",dist:"단거리 순환",time:"데이터 없음",phys:"우레탄·블록 포장, 평지",infra:"운동기구·농구장·축구장·테니스장·화장실·야간 조명",safety:"특이사항 없음",view:"일상적 도심 녹지",req:"요건 없음",ara:"신제주 노형동 주거지",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"사라봉(사라오름)",sp:"hike",lv:"m",lat:33.5177405,lng:126.5449135,region:"제주시 도심(사라봉동)",dist:"개별 산책로 30분~",time:"30분~",phys:"포장 흙길·야자매트·우레탄, 해발 143m 지속 경사",infra:"팔각정·운동기구 다수·사찰·등대",safety:"도민들의 핵심 체력단련장으로 혼잡",view:"영주십경 '사봉낙조'(최고의 일몰)",req:"요건 없음",ara:"구제주 동문로터리 동쪽 2km",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"별도봉 장수산책로",sp:"hike",lv:"m",lat:33.5187659,lng:126.5484053,region:"제주시 도심(화북동)",dist:"완주 최소 2시간",time:"최소 2시간",phys:"좁은 오솔길·흙길·데크 일부, 해발 136m 해안 절벽 비탈",infra:"중간 벤치(인프라 상대적 적음)",safety:"★절벽 옆 강풍 및 추락 주의 요망, 초급자용 우회로 있음",view:"제주항·제주발전소·한라산 조망",req:"요건 없음",ara:"사라봉 바로 동측 연접",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"원당봉 둘레길",sp:"hike",lv:"m",lat:33.5251229,lng:126.5988027,region:"제주시 도심(삼양동)",dist:"둘레 3,411m / 분화구 진입 1~2시간",time:"1~2시간",phys:"소나무 숲길·흙길·부분 정비 매트, 표고 170.7m·비고 120m",infra:"공영주차장·굼부리길 전망대·정자",safety:"★분화구 등반 시 가파름, 분화구 내 사찰 위치로 정숙",view:"불탑사 오층석탑(보물)·봉수대 터",req:"요건 없음",ara:"삼양동 권역 도심 외곽",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"광이오름(한라수목원)",sp:"hike",lv:"m",lat:33.468104,lng:126.4952574,region:"제주시 도심(연동)",dist:"둘레 1,970m / 약 1~2시간",time:"1~2시간",phys:"목재 데크길·흙길, 표고 266.8m",infra:"정자·거슨샘(약수터)·매점·주차장",safety:"목재 데크 미끄러움 주의, 수목원 내부 주차 시 요금",view:"황근·수국·무궁화 등 식생",req:"요건 없음",ara:"신제주 남측 한라수목원 內",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"민오름(오라동)",sp:"hike",lv:"m",lat:33.4787885,lng:126.5080619,region:"제주시 도심(오라동)",dist:"광이~민오름 연계 시 수시간",time:"수시간(연계)",phys:"흙길·야자매트·암반, 산체 큼 고도 상당",infra:"없음(자연 상태), 산책로 연결망",safety:"연계 산행 시 체력 안배 필수",view:"제주시가지와 바다 동시 조망",req:"요건 없음",ara:"도지사 공관 인접",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"남조순오름(남짓은오름)",sp:"hike",lv:"h",lat:33.473063,lng:126.4971147,region:"제주시 도심(연동)",dist:"둘레 3,072m",time:"데이터 없음",phys:"원시 흙길·해송 밑동, 표고 296.7m",infra:"없음",safety:"★정상부 군부대 위치로 통제 가능, 경사 및 우거진 숲",view:"깊은 굼부리와 고립된 해송림",req:"요건 없음",ara:"해군제주방어사령부 입구 측",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"소산오름(소산봉)",sp:"hike",lv:"h",lat:33.4454544,lng:126.5542929,region:"제주시 도심(아라동)",dist:"둘레 659m",time:"데이터 없음",phys:"거친 흙길·수목 뿌리, 표고 412m 급경사",infra:"없음",safety:"★급경사 주의, 인적이 드물어 조난 및 사고 주의",view:"호종단의 혈 차단 전설",req:"요건 없음",ara:"아라동 중산간 지대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"한라수목원 산림욕장",sp:"walk",lv:"c",lat:33.4699272,lng:126.4932445,region:"제주시 도심(노형동)",dist:"전체 관람 시 1.5~2시간",time:"1.5~2시간",phys:"목재 데크·블록 포장, 완만한 구릉 비고 48m",infra:"생태학습관·매표소·주차장",safety:"자전거 출입 등 제한 규정, 데크 단차 주의",view:"다양한 식물 군락·연못 수련",req:"입장 무료",ara:"한라수목원 서쪽~남쪽 코스",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"오라올레 숲길(방선문 가는 길)",sp:"hike",lv:"h",lat:33.4526301,lng:126.517673,region:"제주시 도심(오라동)",dist:"약 1.7km 이상 / 편도 40분~",time:"편도 40분~",phys:"거대한 기암괴석·야자매트·포장 혼재, 한천 계곡 급경사 계단",infra:"한북교 다리·벤치·방선문 주차장",safety:"★폭우 시 계곡 범람 사망 위험, 인적 드물어 단독 등반 자제",view:"한천 계곡의 절경·거북바위·참꽃",req:"요건 없음",ara:"오라동 한천(漢川) 계곡 라인",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"아라동 역사문화탐방로",sp:"hike",lv:"m",lat:33.4473312,lng:126.5545059,region:"제주시 도심(아라동)",dist:"전체 3.5km(코스 가변)",time:"데이터 없음",phys:"흙길·나뭇가지·곶자왈 천연 노면, 계단·폭포 굴곡 다수",infra:"편백나무 쉼터",safety:"★일부 탐방로 수시 폐쇄됨 사전 확인, 숲길 젖음 미끄러움",view:"칼다리폭포·깊은 곶자왈 숲",req:"요건 없음",ara:"아라동 곶자왈 편백나무 숲 일대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"항파두리 항몽유적지 산책길",sp:"walk",lv:"c",lat:33.4525645,lng:126.4081369,region:"애월읍 고성리(광역권)",dist:"유적지 둘레 산책",time:"데이터 없음",phys:"정비된 흙길·포장로, 평탄 지형 위주",infra:"사적 공원 인프라",safety:"삼별초 최후 항쟁 역사적 정숙성",view:"애월 바다와 한라산의 동시 풍광",req:"요건 없음",ara:"구제주 외곽 서쪽 근교",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"이시돌목장 순례지(십자가의 길)",sp:"walk",lv:"c",lat:33.3478198,lng:126.328292,region:"한림읍 금악리(광역권)",dist:"14처 코스 순환 보행",time:"데이터 없음",phys:"잔디·정비된 오솔길, 평평한 황무지 개간 지형",infra:"부설 예배당·십자가 조형물",safety:"종교 시설 내 정숙 및 명상 분위기 유지",view:"광활한 들판과 특이한 건축 외관",req:"요건 없음",ara:"구제주 외곽 한림읍 근교",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"거문오름(세계자연유산)",sp:"hike",lv:"h",lat:33.4546419,lng:126.7179249,region:"조천읍 선흘리(광역권)",dist:"정상 2.1km / 분화구 5km / 전체 6.7km",time:"1시간~3시간 30분",phys:"목재 데크·화산 송이 흙길, 숲 내부 업다운 다수",infra:"탐방 안내소·화장실(내부 이용 불가)",safety:"★사전 예약 필수, 탐방 중 화장실 없음, 입장료 유료",view:"유네스코 유산 원시 식생·용암협곡",req:"★사전 예약 필수, 유료",ara:"제주시 동부 근교 중산간",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"용눈이오름 억새 산책길",sp:"walk",lv:"c",lat:33.4599676,lng:126.831477,region:"구좌읍(광역권)",dist:"도보 15분 정상 도달",time:"약 15분~1시간 30분",phys:"야자매트·초지, 극히 완만한 능선",infra:"인근 목장 방목지 연계",safety:"비/바람 노출 심함, 그늘 없어 한여름 회피 요망",view:"가을 은빛 억새 군락·방목 말 조우",req:"요건 없음",ara:"동부 근교 초원 지대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"송악산 둘레길",sp:"hike",lv:"m",lat:33.1977951,lng:126.2919219,region:"서귀포 대정읍(광역권)",dist:"약 2.8km / 1시간",time:"약 1시간",phys:"흙길·보도 정비, 해안 절벽 평이한 경사",infra:"대규모 무료 주차장·선착장",safety:"풍랑 및 강풍 시 해안 절벽 주의, 한낮 폭염 시 피사",view:"맥문동(8월)·화순층 포트홀·바다 풍광",req:"요건 없음",ara:"도심에서 떨어진 서남단 해안",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"돝(돗)오름",sp:"hike",lv:"m",lat:33.4821034,lng:126.8003128,region:"동부(구좌읍)",dist:"데이터 없음",time:"약 1시간",phys:"흙길, 표고 데이터 없음",infra:"지정 주차장(평대리 산16)",safety:"우천 시 미끄럼, 네비 검색 시 주차장 지번 별도 입력 요망",view:"천연기념물 비자림 및 주변 오름 군락 조망",req:"요건 없음",ara:"구좌읍 송당리/평대리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"비자림 숲길",sp:"walk",lv:"c",lat:33.484272,lng:126.8064793,region:"동부(구좌읍)",dist:"약 3.2km",time:"1~2시간",phys:"화산송이·흙길, 평탄",infra:"화장실·주차장",safety:"수림로 이탈 금지, 일부 자갈 구간",view:"천년 비자나무·연리목",req:"입장료 있음",ara:"구좌읍 비자숲길 55",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"용눈이오름",sp:"hike",lv:"c",lat:33.4599676,lng:126.831477,region:"동부(구좌읍)",dist:"왕복 약 40~60분",time:"40~60분",phys:"흙길·잔디길 혼합",infra:"화장실·주차장 없음",safety:"직사광선 노출, 빗물에 의한 토사 유실 우려",view:"능선의 부드러운 곡선미",req:"편한 신발 필수(자연휴식년제 2023.7.1 이후 해제)",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"함덕서우봉 해수욕장",sp:"run",lv:"c",lat:33.5434417,lng:126.6694472,region:"동부(조천읍)",dist:"데이터 없음",time:"데이터 없음",phys:"모래·해안 포장로, 해수면 기준(0m)",infra:"공영주차장·야영",safety:"★강풍 동반 시 위험(9.3m/s 관측)",view:"넓은 사빈과 서우봉 해안 지형",req:"해양레포츠 시 풍속 경험치 요구",ara:"조천읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"김녕성세기 해수욕장",sp:"dive",lv:"c",lat:33.5582327,lng:126.759787,region:"동부(구좌읍)",dist:"단거리 산책",time:"데이터 없음",phys:"모래·포장 보행로, 평지",infra:"화장실·샤워시설",safety:"풍랑 주의, 정식 해수욕장 외 구역 편의시설 부족",view:"수심 얕고 파도 잔잔, 풍력발전기 조망",req:"패들보드 등 가능",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"김녕 지질트레일 A코스",sp:"walk",lv:"c",lat:33.5582327,lng:126.759787,region:"동부(구좌읍)",dist:"2.2km",time:"약 40분~1시간",phys:"화산송이 깔린 평지, 거의 없는 표고차",infra:"안내판",safety:"데이터 없음",view:"비자나무 숲과 독특한 지질 특성",req:"요건 없음",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"월정리해변 해안산책로",sp:"walk",lv:"c",lat:33.5559739,lng:126.7961709,region:"동부(구좌읍)",dist:"데이터 없음",time:"데이터 없음",phys:"포장(보도블럭 한정), 해수면(0m)",infra:"인근 카페거리 다수",safety:"해풍·파도 노출, 보행자·차량 혼재 동선 주의",view:"한적한 바다 조망과 카페뷰",req:"요건 없음",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"동검은이오름",sp:"hike",lv:"h",lat:33.4493424,lng:126.8046901,region:"동부(구좌읍)",dist:"데이터 없음",time:"데이터 없음",phys:"흙·자연 노면, 급경사 추정",infra:"없음",safety:"★미끄러움 주의, 다랑쉬오름 면의 등 동부권 다중 오름 연계 시 체력 안배",view:"동부권 다중 오름 군락 조망",req:"요건 없음",ara:"구좌읍 송당리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"백약이오름",sp:"hike",lv:"m",lat:33.4377473,lng:126.7917034,region:"동부(구좌읍 접경)",dist:"데이터 없음",time:"데이터 없음",phys:"흙길·잔디길, 최고 해발 356.9m",infra:"계단식 등반로",safety:"우천 시 흙길 패임",view:"백여 가지 약초 자생 생태 및 주변 풍광",req:"요건 없음",ara:"제주시(구좌읍 접경)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"지미봉",sp:"hike",lv:"h",lat:33.4992833,lng:126.901947,region:"동부(구좌읍)",dist:"5~6시간(주변 올레 연계 코스 포함 기준)",time:"5~6시간(연계)",phys:"급경사 흙길, 최고 해발 165.8m",infra:"없음",safety:"★강우 시 토사 유출, 경사 매우 가파르므로 하산 시 관절 주의",view:"해안 경관과 조각보 형상 밭담, 토끼섬 조망",req:"요건 없음",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"토끼섬",sp:"walk",lv:"c",lat:33.5242768,lng:126.9028214,region:"동부(구좌읍)",dist:"짧음",time:"짧음",phys:"현무암·모래, 평지 수준",infra:"없음",safety:"★만조 시 접근 불가 및 위험, 물때(조수간만) 필히 확인",view:"천연기념물 문주란 자생지(여름 개화 시 절경)",req:"물때 확인 후 진입",ara:"구좌읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"동백동산",sp:"run",lv:"m",lat:33.4776624,lng:126.7135079,region:"동부(조천읍)",dist:"데이터 없음",time:"데이터 없음",phys:"자연 흙길·돌길 일부, 완만한 구릉",infra:"데이터 없음",safety:"습지 환경상 이끼 미끄럼, 발목 안정성 확보 필요",view:"곶자왈 숲길 고유의 원시 생태와 습지",req:"러닝 시 트레일 신발 권장",ara:"조천읍 선흘리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼다수숲길(1·2코스)",sp:"run",lv:"m",lat:33.4207696,lng:126.666594,region:"동부(조천읍 교래리)",dist:"5.2km(약 1시간 30분)~8.2km(약 2~3시간)",time:"1.5~3시간",phys:"흙길·임도, 진흙 지대 형성",infra:"주차·안내소",safety:"★길 잃음 주의, 진흙 지대",view:"수림대 기반 짙은 그늘, 도민 산림 이용 문화",req:"추천 러닝 코스",ara:"조천읍 교래리 614",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주 환상자전거길(18코스 조천 구간)",sp:"bike",lv:"c",lat:33.5437787,lng:126.6688353,region:"동부(조천읍)",dist:"전체 약 18.7km / 도보 시 6~7시간",time:"6~7시간(도보)",phys:"자전거 도로 전용 포장 일부, 평지 및 약한 구릉",infra:"볼록거울 반사경·쉼터",safety:"우천 시 제동거리 길어짐, 일부 차도·인도·포장공사 혼재",view:"돌담·비닐하우스 사잇길, 원당봉 능선·해안 조망",req:"요건 없음",ara:"조천읍(제주항~조천만세동산 구간)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"말 방목 공원",sp:"walk",lv:"c",lat:33.4493424,lng:126.8046901,region:"동부(조천·구좌 권역)",dist:"단거리",time:"단거리",phys:"잔디·흙길 일부, 평탄 지형",infra:"주차시설 없음",safety:"동물 접근 시 안전거리 유지",view:"말·염소 등 동물이 방목된 목장 경관",req:"요건 없음",ara:"조천·구좌 권역",src:"공간정보·스포츠레저 조사 / Google Places 실측(동검은이 인근 추정)"},
+ {name:"함덕 카페거리 산책로",sp:"walk",lv:"c",lat:33.5437787,lng:126.6688353,region:"동부(조천읍)",dist:"단거리",time:"단거리",phys:"보도 포장, 해수면 인근",infra:"카페·상업 인프라 밀집",safety:"차량 통행로 인접",view:"레트로 감성·오션뷰",req:"요건 없음",ara:"조천읍 신북로 523 인근",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"수월봉 지질트레일·전망대",sp:"bike",lv:"c",lat:33.2944141,lng:126.1628076,region:"서부(한경면)",dist:"데이터 없음",time:"데이터 없음",phys:"아스팔트 포장, 완만한 경사",infra:"주차장 완비",safety:"강풍 노출 위험, 자전거·차량 통행 혼재 주의",view:"지질트레일 단면층·차귀도 해상 조망",req:"요건 없음",ara:"한경면 고산리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"신창 풍차해안도로",sp:"bike",lv:"c",lat:33.3412384,lng:126.1668087,region:"서부(한경면)",dist:"도보·자전거용 단거리",time:"데이터 없음",phys:"콘크리트 포장, 해안 인접 평지",infra:"상업시설 드묾",safety:"★해풍 높은 파도 덮침 주의, 피난처 적음",view:"거대한 풍력발전기와 이국적 해안선",req:"요건 없음",ara:"한경면 신창",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"애월 해안도로",sp:"bike",lv:"m",lat:33.4765233,lng:126.3600749,region:"서부(애월읍)",dist:"데이터 없음",time:"데이터 없음",phys:"아스팔트·인도 보도블럭, 도로 굴곡·소폭 오르내림",infra:"상업시설·주차장 다수",safety:"차량 물보라 주의, 보행로·차량 동선 밀접해 접촉사고 주의",view:"복잡한 해안 절벽과 편의시설의 조화",req:"휠체어 일부 제약(인도 턱)",ara:"애월읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주올레 8코스(애월~한경)",sp:"hike",lv:"m",lat:33.4765233,lng:126.3600749,region:"서부(애월읍~한경면)",dist:"16.5km / 도보 약 5~6시간",time:"5~6시간",phys:"농촌 흙길·포장 해안길 혼합, 평탄 위주 일부 오르막",infra:"데이터 없음",safety:"★16km 이상 장거리로 사전 체력 안배 필수, 흙길 진창(문헌상 명칭 유의)",view:"바다와 밭담이 어우러진 농촌 풍경",req:"요건 없음",ara:"애월해변~저지리해변 인근",src:"공간정보·스포츠레저 조사 / Google Places 실측(애월 기점)"},
+ {name:"제주올레 7-1코스(한림~조천)",sp:"hike",lv:"m",lat:33.394261,lng:126.2399011,region:"서부(한림읍)~동부",dist:"11.2km / 도보 약 3~4시간",time:"3~4시간",phys:"농로·해안선 비포장/포장 혼재, 약간의 구릉지 오르막",infra:"시작점/종점 인근 인프라",safety:"★제주시 횡단형 코스이므로 경로 이탈 주의",view:"전통 마을 구조와 농촌 경관",req:"요건 없음",ara:"협재해변~신촌리 방면",src:"공간정보·스포츠레저 조사 / Google Places 실측(협재 기점)"},
+ {name:"제주올레 7코스(한림~애월)",sp:"hike",lv:"m",lat:33.394261,lng:126.2399011,region:"서부(한림읍~애월읍)",dist:"11.8km / 도보 약 4~5시간",time:"4~5시간",phys:"농촌길·해안선 자연로, 전반적 평탄 및 완만한 경사",infra:"곽지·협재 공공시설",safety:"★해안로 파도 주의, 휴양지 밀집 구역 통과로 유동인구 많음",view:"해안선과 농경지가 교차하는 자연 경관",req:"요건 없음",ara:"협재해변~곽지해변",src:"공간정보·스포츠레저 조사 / Google Places 실측(협재 기점)"},
+ {name:"금오름",sp:"hike",lv:"h",lat:33.355577,lng:126.3056877,region:"서부(한림읍 금악리)",dist:"약 20분간 지속 등반",time:"약 20분(가파름)",phys:"아스팔트 포장길, 짧지만 매우 가파른 수직 상승",infra:"주차공간 제한적",safety:"★강우 직후 산정화구호 수위 급상승, 아스팔트 반사열로 체온 상승",view:"빗물 고이면 거대한 호수로 변하는 산정 분화구",req:"경사로 수동 휠체어 불가",ara:"한림읍 금악북로",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"금능으뜸원 해수욕장",sp:"dive",lv:"c",lat:33.3899107,lng:126.2353674,region:"서부(한림읍)",dist:"단거리 산책",time:"단거리",phys:"젖은 모래·데크, 평지(해발 0m)",infra:"야영장·화장실",safety:"풍랑 조심, 밀물 시 백사장 축소",view:"수심 얕고 투명한 바닷물, 협재 인접",req:"요건 없음",ara:"한림읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"협재해수욕장",sp:"dive",lv:"c",lat:33.394261,lng:126.2399011,region:"서부(한림읍 협재리)",dist:"단거리 산책",time:"단거리",phys:"모래·블럭 포장, 평지",infra:"대형 주차장·편의점·상가 밀집",safety:"성수기 유동인구 과도해 러닝 시 충돌 우려",view:"고운 모래와 비양도의 극적 대비",req:"요건 없음",ara:"한림읍 협재리 2514",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"곽지해수욕장 및 야영장",sp:"walk",lv:"c",lat:33.450902,lng:126.3057298,region:"서부(애월읍 곽지리)",dist:"야영장 순환 보행",time:"데이터 없음",phys:"모래·야영지 포장, 평지",infra:"공영주차장 13면·글램핑/카라반",safety:"텐트 등 야영장비 침수 주의",view:"넓은 해변과 용천수 노천탕",req:"등록된 야영구역 내에서만 취사/휴식",ara:"애월읍 곽지리 1565",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"광령1리 에코힐 글램핑",sp:"walk",lv:"c",lat:33.4663000,lng:126.4220000,region:"서부(애월읍 광령1리)",dist:"캠프장 내 근거리 보행",time:"데이터 없음",phys:"토양 기반 자연 노면, 이동 제약",infra:"일반 야영시설·개수대",safety:"토사 유출·진창 주의",view:"한적한 마을 숲 인근 자연친화적 야영지",req:"방문 전 예약 및 운영시간 유선 확인",ara:"애월읍 광령1리",src:"공간정보·스포츠레저 조사 / 추정 좌표(광령1리 일대)"},
+ {name:"괴오름",sp:"hike",lv:"h",lat:33.4209495,lng:126.3072167,region:"서부(애월읍 봉성리)",dist:"데이터 없음",time:"데이터 없음",phys:"비포장 자연 지형, 급경사 형성",infra:"주변 주차 인프라 미비",safety:"★등산로 유실 위험, 탐방객 드물어 나홀로 산행 지양",view:"애월 중산간 일대 오름 군락 조망",req:"주변 오름과 연계 탐방",ara:"애월읍 봉성리",src:"공간정보·스포츠레저 조사 / Google Places 실측(어도오름으로 검색됨)"},
+ {name:"한림복지문화체육시설",sp:"run",lv:"m",lat:33.4055445,lng:126.2664193,region:"서부(한림읍 대림리)",dist:"시설 내 트랙 활용",time:"데이터 없음",phys:"우레탄 트랙·실내 마루, 평탄(규격)",infra:"100명 수용·전용 주차장",safety:"우천 시 야외 우레탄 마찰계수 하락",view:"규격화된 공공 체육시설 인프라",req:"행사 대관 시 개인 이용 제한 가능",ara:"한림읍 대림리 1877",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"송악산 둘레길",sp:"hike",lv:"m",lat:33.1977951,lng:126.2919219,region:"남부(대정읍)",dist:"주변 연계 종주 시 5~6시간",time:"5~6시간(연계)",phys:"흙길·도로 포장 혼재, 해안 절벽 국지적 고도 변동",infra:"하모체육공원 내 화장실·개수대 연계",safety:"★풍랑주의보·강풍 시 해안 절벽 추락 위험, 경사 구간 진입 제한",view:"웅장한 산방산과 바다 건너 가파도·마라도 조망",req:"코스 연장 시 체력·식수 배분 요망",ara:"대정읍 해안 및 하모체육공원 연계",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"가세오름",sp:"hike",lv:"m",lat:33.3320372,lng:126.7815401,region:"남부(표선면 토산리)",dist:"데이터 없음",time:"데이터 없음",phys:"흙길 위주 탐방로, 중산간 표고차 상승",infra:"주차장 외 부족",safety:"우천 시 점토질 흙길 미끄럼 가중",view:"표선 내륙 특유의 한적한 오름 능선 경관",req:"정비되지 않은 샛길 진입 금지",ara:"표선면 토산리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"개오름",sp:"hike",lv:"m",lat:33.4227657,lng:126.7719721,region:"남부(표선면 성읍리)",dist:"약 2km(둘레길 포함)",time:"데이터 없음",phys:"비포장 산지, 중형 규모 단차",infra:"인프라 부족",safety:"토사 유출 주의, 주변 사유지·목장 무단 출입 주의",view:"성읍민속마을 인근의 지형적 요새 관찰",req:"요건 없음",ara:"표선면 성읍리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"붉은오름(표선)",sp:"hike",lv:"m",lat:33.3989394,lng:126.6792747,region:"남부(표선면 가시리)",dist:"휴양림 코스에 따라 가변(약 1km/30분)",time:"코스 가변",phys:"화산송이(붉은 화산쇄설물)·휴양림 내 일부 데크",infra:"휴양림 연계 통합 인프라",safety:"침수 위험 적으나 습기 잔존",view:"붉은빛의 화산흙과 빽빽한 삼나무 수림",req:"자연휴양림 코스와 연계 탐방 권장",ara:"표선면 가시리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"표선 성읍리 소형 오름",sp:"hike",lv:"c",lat:33.3820000,lng:126.7990000,region:"남부(표선면 성읍리)",dist:"정상까지 약 15~20분",time:"15~20분",phys:"포장·흙길, 표고차 매우 낮고 경사 극히 완만",infra:"정비된 전용 주차장 완비",safety:"데이터 없음",view:"한라산 백록담~성산일출봉~풍차발전기 파노라마",req:"노약자 동행 가능(명칭 미상)",ara:"표선면 성읍리 산1",src:"공간정보·스포츠레저 조사 / Google Places 실측(개오름 인근 추정)"},
+ {name:"남원 큰엉 해안산책로",sp:"walk",lv:"c",lat:33.2733146,lng:126.7048177,region:"남부(남원읍)",dist:"1~2시간 소요 수준",time:"1~2시간",phys:"포장도로·흙길 혼합, 평탄한 해안 절벽 윗면",infra:"주차장·화장실 완비",safety:"★태풍·고파랑 시 절벽 파도 덮침, 무장애 구간 경계 사전 확인",view:"한반도 지형 빼닮은 수림 터널 포토존·수직 기암절벽",req:"요건 없음",ara:"남원읍 남원관광지구 내",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"혼인지",sp:"walk",lv:"c",lat:33.4160056,lng:126.8938445,region:"남부(성산읍)",dist:"단거리 산책",time:"단거리",phys:"정비된 평탄 보행블록·잔디, 완전 평지",infra:"공공화장실·관리소",safety:"평탄지형 국지적 물고임, 관람로 이탈 절대 금지",view:"탐라국 개국신화 깃든 연못과 정통 조경",req:"요건 없음",ara:"성산읍",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"성산국민체육센터 운동장",sp:"run",lv:"c",lat:33.4669124,lng:126.90497,region:"남부(성산읍)",dist:"400m 규격×5레인 트랙 루프",time:"데이터 없음",phys:"탄성 우레탄 트랙, 인공 평지(표고차 제로)",infra:"관중석 488석·화장실·주차장",safety:"집중호우 시 우레탄 수막현상 미끄럼, 대관 시 출입·운영시간 통제",view:"철저히 정비된 인공 육상 트랙 환경",req:"대관 시 외부인 출입 제한",ara:"성산읍 일대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"남원체육관",sp:"run",lv:"c",lat:33.2776473,lng:126.7053152,region:"남부(남원읍)",dist:"실내 공간 반복 운동",time:"데이터 없음",phys:"실내 목재 마루·실외 구역, 인공 평지",infra:"관중석 400석·주차장",safety:"동호회 등 단체 우선 사용 여부에 따라 개인 이용률 변동",view:"기상 무관 목적지향적 공공 시설",req:"진입로 정비",ara:"남원읍 남원리, 태위로 551-28",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"용머리해안",sp:"hike",lv:"m",lat:33.2316155,lng:126.3148321,region:"남부(안덕면)",dist:"1시간 이내 단거리",time:"1시간 이내",phys:"자연 생성 사암층 암반·현무암 층리 바닥, 지면 요철 매우 심함",infra:"인접 상업구역·대형 주차",safety:"★만조·풍랑 도달 시 파도가 들이쳐 출입 전면 통제(기상위험도 최고), 계단·바위 단차 극심으로 휠체어 절대 불가",view:"수만 년 퇴적 사암층 암벽 층리의 압도적 절경",req:"★당일 아침 출입 통제 여부 유선 확인 필수",ara:"안덕면",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"가파도",sp:"bike",lv:"c",lat:33.1707573,lng:126.2726748,region:"남부(대정읍 도서)",dist:"해안선 따라 종주",time:"수 시간",phys:"시멘트 도로 포장·마을 흙길, 최고 해발 20.5m 수준",infra:"정기여객선 선착장·자전거 대여소·카페",safety:"★그늘 전무 땡볕 노출, 강풍·비바람 시 피난처 절대 부족",view:"청보리밭 물결과 수평선·한라산 동시 조망",req:"모슬포항 정기여객선 출항·막배 시간 엄수",ara:"대정읍 가파리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"마라도",sp:"walk",lv:"c",lat:33.1206371,lng:126.2671204,region:"남부(대정읍 도서)",dist:"1~2시간 섬 전체 횡단",time:"1~2시간",phys:"포장 통행로·천연 잔디길, 해안 절벽으로 솟았으나 내부 완만",infra:"선착장·공중화장실·짜장면 상가",safety:"★목본류 식생 부재로 그늘 없음, 폭풍우 시 피할 곳 적고 결항률 높음",view:"대한민국 최남단 영토 기념비와 웅장한 해안 기암절벽",req:"출항 정보 수시 점검",ara:"대정읍 마라리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"대정읍성",sp:"walk",lv:"c",lat:33.2518044,lng:126.276634,region:"남부(대정읍)",dist:"성곽 둘레 보행",time:"데이터 없음",phys:"흙길·성곽 위 잔디밭, 평지형 방어 읍성(단차 없음)",infra:"마을 내 주차 공간",safety:"성곽 위 우천 시 미끄럼, 성벽 문화재 보호 규정",view:"조선시대 제주 3대 읍성 중 하나의 역사 문화",req:"지정 보행로·계단만 이용",ara:"대정읍 도심지 인근",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"한라산둘레길 동백길",sp:"hike",lv:"h",lat:33.3000000,lng:126.4900000,region:"중산간(서귀포 방면)",dist:"11.3km / 통과 약 4시간 40분",time:"약 4시간 40분",phys:"산림 흙길·돌밭·일부 임도 혼재, 산정 계곡 연계 큰 수직 표고차",infra:"탐방안내소·노선버스 정류소 거점",safety:"★집중호우 시 계곡 하천 수위 급상승·범람 위험, 발목 보호 위해 중등산화 필수",view:"천연 동백나무 수림과 돈내코 계곡 절경",req:"요건 없음(선형 코스, 들머리 무오법정사~돈내코)",ara:"무오법정사~시오름~돈내코",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr(들머리 인근 좌표)"},
+ {name:"한라산둘레길 돌오름길",sp:"hike",lv:"m",lat:33.3126512,lng:126.4564136,region:"중산간",dist:"8.0km / 통과 약 2시간 20분",time:"약 2시간 20분",phys:"임도(차량 작업로)·자연 숲길 교차, 상대적 완만하나 중산간 단차",infra:"중간 용바위 부근 자연 휴식지",safety:"★임도 구간 진창, 코스 중간 탈출 시 대중교통·택시 연계 불가로 자력 하산 계획 필수",view:"표고버섯 재배 역사적 장소·거대한 용바위 군락",req:"요건 없음(선형 코스)",ara:"보림농장 삼거리~표고재배사~거린사슴",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr(둘레길 인근 좌표)"},
+ {name:"한라산둘레길 수악길",sp:"hike",lv:"h",lat:33.3126512,lng:126.4564136,region:"중산간",dist:"16.7km / 통과 약 6시간 10분",time:"약 6시간 10분",phys:"흙길·이끼 낀 자연석, 산정화구 횡단 누적 고도 상승 큼",infra:"안내소 배치",safety:"★폭우 시 통제 가능성 상존, 초장거리 산악 코스로 탈진 방지용 여분 식수·고칼로리 행동식 지참 필수",view:"고도에 자리잡은 산정화구 및 이승악 일대 원시림",req:"요건 없음(선형 최장 구간)",ara:"돈내코~산정화구~사려니오름 방면",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr(둘레길 인근 좌표)"},
+ {name:"사려니숲길(둘레길 제7코스)",sp:"walk",lv:"m",lat:33.4084444,lng:126.6397500,region:"중산간(조천읍 교래리)",dist:"16.0km / 약 3시간",time:"약 3시간",phys:"두껍게 깔린 붉은 화산송이·다져진 평탄한 흙길, 체감 표고차 거의 없음",infra:"대형 주차장·푸드트럭",safety:"침수 위험 극히 낮으나 비 온 뒤 흙 질척임, ★탐방객 밀집 시 빠른 러닝은 충돌 부상 주의",view:"쭉 뻗은 삼나무가 양옆으로 도열한 숲길",req:"요건 없음",ara:"사려니 입구 삼거리~붉은오름 입구",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr(이덕구산전 부근 좌표)"},
+ {name:"한라산둘레길 천아숲길",sp:"hike",lv:"h",lat:33.3700000,lng:126.4700000,region:"중산간(극상)",dist:"12.7km / 평균 5~6시간(체력 저하자 최대 7시간)",time:"5~7시간",phys:"땅에서 솟은 뾰족한 돌밭·불규칙 흙, 계곡 바닥과 사면 오르내리는 V자형 급경사",infra:"입출구 외 거점 적음",safety:"★호우 시 계곡 급류 발생 위험 매우 높음, 택시·통신망 접속 어려움. 칼로리 소모 극단적으로 빨라 스포츠음료 준비 강력 권고",view:"가을 단풍이 붉게 물든 천아계곡 절경",req:"요건 없음(선형 코스)",ara:"천아수원지 계곡~노로오름~보림농장",src:"공간정보·스포츠레저 조사 / 추정 좌표(천아수원지 일대)"},
+ {name:"한라산둘레길 산림휴양길",sp:"walk",lv:"c",lat:33.4393622,lng:126.62990999,region:"중산간(휴양림 연계)",dist:"2.3km / 초단거리",time:"초단거리",phys:"정비된 목재 데크·다져진 흙길, 아주 완만한 사면",infra:"휴양림 관리소",safety:"데크 표면 물기 미끄럼",view:"거칠지 않고 쾌적하게 다듬어진 산림 휴양 구역",req:"9개 둘레길 중 가장 짧아 초심자 입문 적합",ara:"중산간 휴양림 연계지",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr"},
+ {name:"한라산둘레길 시험림길(제6코스)",sp:"hike",lv:"m",lat:33.4084444,lng:126.6397500,region:"중산간(이승악 일대)",dist:"약 29km 종주 코스망의 핵심 일부(7.4km 내외 추정)",time:"데이터 없음",phys:"자연 흙길, 구릉형 업다운 지속",infra:"이승악 입구 측 소형 주차장",safety:"★자연휴식년제·통제 기간 상존, 여름철 수풀지대 뱀 출몰 유의",view:"난대·온대 산림 식생군 보존 연구 시험구역",req:"공지사항 확인 필수(선형 코스)",ara:"이승악 소형 주차장~사려니 연계",src:"공간정보·스포츠레저 조사 / 추정 좌표(이승악 일대)"},
+ {name:"한라산둘레길 절물 조릿대길(제8코스)",sp:"hike",lv:"m",lat:33.4393622,lng:126.6299100,region:"중산간(절물 자연휴양림)",dist:"데이터 없음",time:"데이터 없음",phys:"산죽(조릿대) 군락 덮인 흙길, 파도형 굴곡",infra:"절물자연휴양림 측 공공 인프라 공유",safety:"★빗물 맺혀 하반신 젖음 극심, 긴바지·스패츠 착용 권장",view:"허리까지 자란 조릿대가 바다처럼 펼쳐진 풍경",req:"요건 없음(선형 코스)",ara:"사려니 종점~절물자연휴양림 방면",src:"공간정보·스포츠레저 조사 / hallatrail.or.kr"},
+ {name:"한라산둘레길 숫모르 편백숲길(제9코스)",sp:"walk",lv:"m",lat:33.431635899,lng:126.603808,region:"중산간(한라생태숲 방면)",dist:"구간별 변동(약 8km 규모 추정)",time:"데이터 없음",phys:"토양·낙엽길, 임도 수준 오르막, 일부 평탄화",infra:"산림욕장 편의시설 연계",safety:"토질 특성상 진흙탕 형성, ★산림 보호 위한 휴식년제·구간 통제 공지 사전 점검",view:"편백나무가 하늘을 가린 짙은 그늘, 강력한 피톤치드",req:"요건 없음(선형 코스)",ara:"절물 인접~한라생태숲 방면",src:"공간정보·스포츠레저 조사 / Google Places 실측(한라생태숲 기점)"},
+ {name:"서귀포자연휴양림 무장애 산책로",sp:"walk",lv:"c",lat:33.3114287,lng:126.4588606,region:"중산간(1100도로 일대)",dist:"순환형 산책로 다수",time:"코스 가변",phys:"목재 데크·휠체어용 무장애 포장, 평탄",infra:"장애인 전용 주차·휠체어 리프트·공중화장실",safety:"비 온 뒤 목재 데크 젖음 미끄럼",view:"수십 년 수령 숲 터널",req:"무장애 적용 80~100%",ara:"서귀포 중산간 1100도로 고도역",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"서귀포 치유의숲",sp:"walk",lv:"c",lat:33.2988369,lng:126.5222283,region:"중산간(산록남로 고지대)",dist:"프로그램 코스별 다양",time:"코스 가변",phys:"목재 데크·충격 완화 야자매트, 일부 자연 경사",infra:"종합 탐방안내소·치유 프로그램 휴게시설",safety:"보행약자용 무장애 80~100% 확보",view:"짙푸른 상록수 숲, 산림치유 웰니스 공간",req:"★당일 현장 발권 불가, 인터넷 사전 예약 필수",ara:"서귀포 산록남로 일대 고지대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"머체왓숲길",sp:"hike",lv:"h",lat:33.3305697,lng:126.6740675,region:"중산간(서귀포 한남리)",dist:"6.7km 순환 / 통상 2~3시간",time:"2~3시간",phys:"용암이 식으며 형성된 거친 화산암 덩어리(머체)·나무뿌리 얽힌 흙길, 지면 요철 극심",infra:"데이터 없음",safety:"★비에 젖은 이끼 낀 화산암반 밟을 시 낙상 위험, 트레일화 등 접지력 높은 신발·발목 꺾임 주의",view:"돌무더기 위에 뿌리내린 기괴한 원시림 생태계의 절정",req:"요건 없음(원본 위도 37.15는 오기, 33.33으로 교정)",ara:"서귀포 한남리 중산간",src:"공간정보·스포츠레저 조사 / Google Places 실측(원본 좌표 오류 교정)"},
+ {name:"성널오름",sp:"hike",lv:"h",lat:33.3570635,lng:126.5115628,region:"중산간(서귀포 경계 산간)",dist:"데이터 없음",time:"데이터 없음",phys:"화산석·비정형 등산로 흙길, 주변 평지 대비 높은 융기 고도",infra:"주변 인프라 빈약",safety:"★고강도 수직 이동, 비정형 코스 특성상 길 잃음 주의·충분한 체력 확보",view:"한라산 주봉 자락과 어우러지는 수려하고 웅장한 오름 산세",req:"요건 없음(영실 자락 좌표)",ara:"서귀포 경계 산간",src:"공간정보·스포츠레저 조사 / Google Places 실측(영실 인근)"},
+ {name:"존자암 탐방로",sp:"hike",lv:"m",lat:33.3475678,lng:126.4819891,region:"중산간(영실 진입로 인근)",dist:"사찰 진입로 도보 약 30분",time:"약 30분",phys:"산림 속 정비된 흙길·돌계단 혼재, 계단식 구간",infra:"영실 코스 매표소 인근 주차장 공유",safety:"★급격한 온도 저하·동절기 빙판 결빙 주의, 해발 약 1200m 전후로 심폐 부담",view:"해발 가장 높은 곳의 신비로운 불교 사찰 역사 탐방로",req:"계단식 구간으로 휠체어 불가",ara:"영실 인근 고지대(약 해발 1200m)",src:"공간정보·스포츠레저 조사 / Google Places 실측(영실 기점)"},
+ {name:"이덕구산전(사려니 연계 역사탐방)",sp:"hike",lv:"h",lat:33.4084444,lng:126.63975,region:"중산간(조천읍 교래리)",dist:"사려니숲길서 2km 진입 후 1.5km 이동",time:"데이터 없음",phys:"정비되지 않은 거친 산길·자연 방치 지형, 계곡·가파른 언덕 단차",infra:"진입로 내부 인프라 전무",safety:"★강우 시 길 흔적 사라져 고립 위험, 정규 탐방로 이탈해야 하는 지리적 특성상 독도법 부재 시 길 잃음·조난 위험 극도로 높아 전문 가이드 동행 필수",view:"제주 4.3사건 역사 현장(수십 년 전 은신처)",req:"★전문 가이드 동행 필수",ara:"조천읍 교래리 산137-1 일대",src:"공간정보·스포츠레저 조사 / PDF 좌표(33.408, 126.640)"},
+{name:"거슨세미오름",sp:"hike",lv:"m",lat:33.4513006,lng:126.7605342,region:"동부(조천·구좌)",dist:"왕복 약4km",time:"1~2시간37분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"정상부 400m 가파른 경사, 한라산 뷰. 거문오름 연계 시 1일 400명 예약 한정",view:"정상부 400m 가파른 경사, 한라산 뷰. 거문오름 연계 시 1일 400명 예약 한정",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"셋개오리오름",sp:"hike",lv:"m",lat:33.4421,lng:126.6502,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"오름 군락 입구 탐방로, 흙길 위주. 경관 확인 필요. [인근 거점 좌표(교래리 오름군락(큰지그리 인근)), 정확한 들머리 확인 필요]",view:"오름 군락 입구 탐방로, 흙길 위주. 경관 확인 필요. [인근 거점 좌표(교래리 오름군락(큰지그리 인근)), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"하도리 철새도래지",sp:"walk",lv:"c",lat:33.5038245,lng:126.8919426,region:"동부(조천·구좌)",dist:"코스 연계",time:"약20~30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"철새 서식지, 해안선 풍광. 조류 서식지이므로 과도한 소음 주의",view:"철새 서식지, 해안선 풍광. 조류 서식지이므로 과도한 소음 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"석다원 해안로",sp:"walk",lv:"c",lat:33.5270996,lng:126.8892479,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"약20분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"해안선과 현무암 바위 경관. 월파·강풍 위험, 해안도로변 차량 주의",view:"해안선과 현무암 바위 경관. 월파·강풍 위험, 해안도로변 차량 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"김녕미로공원 산책로",sp:"walk",lv:"c",lat:33.5368768,lng:126.7725371,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"약30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"조경수 식생. 복잡한 미로형, 동선 이탈 주의. 유료 시설",view:"조경수 식생. 복잡한 미로형, 동선 이탈 주의. 유료 시설",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"만장굴 지상부 산책",sp:"walk",lv:"c",lat:33.5282463,lng:126.7702874,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"약40분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"세계자연유산 용암동굴계 외부 숲. 동굴 내부는 별도 기준",view:"세계자연유산 용암동굴계 외부 숲. 동굴 내부는 별도 기준",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"바농오름",sp:"hike",lv:"m",lat:33.453725,lng:126.653948,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"거문오름 용암동굴계 인접 산림. 거문오름 연계 시 예약·제한 주의",view:"거문오름 용암동굴계 인접 산림. 거문오름 연계 시 예약·제한 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"꾀꼬리오름",sp:"hike",lv:"m",lat:33.4635865,lng:126.6784027,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"중산간 오름 능선 경관",view:"중산간 오름 능선 경관",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"우진제비오름",sp:"hike",lv:"m",lat:33.4691588,lng:126.6987114,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"거문오름 전망대에서 조망되는 동양화 뷰",view:"거문오름 전망대에서 조망되는 동양화 뷰",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"높은오름",sp:"hike",lv:"h",lat:33.4569623,lng:126.7925889,region:"동부(조천·구좌)",dist:"4.0km",time:"1시간20분~3시간30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"구좌읍 최고봉(해발 405.3m). 콜로세움형 분화구·억새. 정상 화장실 없음",view:"구좌읍 최고봉(해발 405.3m). 콜로세움형 분화구·억새. 정상 화장실 없음",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"아부오름",sp:"walk",lv:"c",lat:33.447607,lng:126.7772601,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"전형적 원형 분화구와 삼나무 조림지. 표고 301.4m, 분화구 내부 수목",view:"전형적 원형 분화구와 삼나무 조림지. 표고 301.4m, 분화구 내부 수목",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"당오름",sp:"hike",lv:"m",lat:33.4663889,lng:126.7777778,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"솔잎 깔린 비코스 하산길. 전망은 없으나 최고 수준의 숲길",view:"솔잎 깔린 비코스 하산길. 전망은 없으나 최고 수준의 숲길",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"괭이모루",sp:"hike",lv:"m",lat:33.4651944,lng:126.7522943,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"당오름과 연결된 자연 상태 흙길. 숲 사이로 높은오름 일부 조망. [인근 거점 좌표(송당리 당오름 인근), 정확한 들머리 확인 필요]",view:"당오름과 연결된 자연 상태 흙길. 숲 사이로 높은오름 일부 조망. [인근 거점 좌표(송당리 당오름 인근), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"체오름",sp:"hike",lv:"h",lat:33.4546,lng:126.7361,region:"동부(조천·구좌)",dist:"3.4~4km 순환",time:"2~5시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"웅장한 굼부리·한라산 전경. 약530m 극심한 급경사 계단, 하산 비코스 가시·잡목. [인근 거점 좌표(구좌 송당 체오름), 들머리 확인 필요]",view:"웅장한 굼부리·한라산 전경. 약530m 극심한 급경사 계단, 하산 비코스 가시·잡목. [인근 거점 좌표(구좌 송당 체오름), 들머리 확인 필요]",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"손자봉",sp:"hike",lv:"m",lat:33.4564823,lng:126.8195176,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"올망졸망 오름 군락의 다도해적 풍광. 접근 경로 사전 파악 요망. [인근 거점 좌표(종달리 손지오름 인근), 정확한 들머리 확인 필요]",view:"올망졸망 오름 군락의 다도해적 풍광. 접근 경로 사전 파악 요망. [인근 거점 좌표(종달리 손지오름 인근), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"둔지오름",sp:"hike",lv:"m",lat:33.506114,lng:126.797917,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"약45분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"어대오름 연계, 한라산 전방 조망. 가파른 계단 코스와 완만 도로 코스 선택",view:"어대오름 연계, 한라산 전방 조망. 가파른 계단 코스와 완만 도로 코스 선택",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"뒤굽은이오름",sp:"hike",lv:"m",lat:33.4797426,lng:126.7670605,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"체오름 방면 조망. 기슭 능선 진입부 잡목 극복 필요",view:"체오름 방면 조망. 기슭 능선 진입부 잡목 극복 필요",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"어대오름",sp:"hike",lv:"m",lat:33.4957199,lng:126.7613187,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"둔지봉 방면 조망",view:"둔지봉 방면 조망",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"안돌오름",sp:"hike",lv:"m",lat:33.4577559,lng:126.755269,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"비밀의 숲과 연계된 아름다운 오름 풍경. 개인 사유지 인접, 통행료·통행 주의",view:"비밀의 숲과 연계된 아름다운 오름 풍경. 개인 사유지 인접, 통행료·통행 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"조천리 용천수탐방길",sp:"run",lv:"c",lat:33.540066,lng:126.63616,region:"동부(조천·구좌)",dist:"4.9~19.1km",time:"40분~7시간30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"23개의 용천수 연결망, 연북정, 돌담 풍경. 좁은 골목길 차량 교행 주의",view:"23개의 용천수 연결망, 연북정, 돌담 풍경. 좁은 골목길 차량 교행 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"김녕고장난길",sp:"walk",lv:"c",lat:33.5578697,lng:126.74708,region:"동부(조천·구좌)",dist:"6.24km",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"김녕 해안을 따라 걷는 지질·생태 경관. 자전거·보행자 혼용 주의",view:"김녕 해안을 따라 걷는 지질·생태 경관. 자전거·보행자 혼용 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"숨비소리길",sp:"hike",lv:"c",lat:33.5236474,lng:126.8634357,region:"동부(조천·구좌)",dist:"5.7~19.4km",time:"1.5~5시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"해녀항일기념탑, 서문동 우물, 별방진 성벽. 강풍 시 체력 소모 심화",view:"해녀항일기념탑, 서문동 우물, 별방진 성벽. 강풍 시 체력 소모 심화",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"닭머르 해안길",sp:"run",lv:"c",lat:33.5474,lng:126.6444,region:"동부(조천·구좌)",dist:"약1km",time:"왕복30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"닭의 머리 닮은 기암괴석과 바다·억새. 주차 협소, 해안 낭떠러지 주의",view:"닭의 머리 닮은 기암괴석과 바다·억새. 주차 협소, 해안 낭떠러지 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"청굴물",sp:"walk",lv:"c",lat:33.5582697,lng:126.7512108,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"얼음장같이 차가운 해안 용천수 뷰. 만조·우천 시 접근 불가, 노면 미끄럼 주의",view:"얼음장같이 차가운 해안 용천수 뷰. 만조·우천 시 접근 불가, 노면 미끄럼 주의",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"조천체육관",sp:"run",lv:"c",lat:33.5390118,lng:126.6427149,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"공공 체육시설, 실내 마루바닥. 우천 무관 최적 인프라",view:"공공 체육시설, 실내 마루바닥. 우천 무관 최적 인프라",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"구좌체육공원",sp:"run",lv:"c",lat:33.5563059,lng:126.7624362,region:"동부(조천·구좌)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"넓은 공공 육상 체육 거점, 우레탄 트랙·인조잔디. 휠체어 진입 가능",view:"넓은 공공 육상 체육 거점, 우레탄 트랙·인조잔디. 휠체어 진입 가능",req:"정보 확인 필요",ara:"동부(조천·구좌)",src:"공간정보·스포츠레저 조사"},
+{name:"한담해안산책로",sp:"run",lv:"c",lat:33.4591293,lng:126.3103796,region:"서부(애월·한림·한경)",dist:"900m~13.5km",time:"20분~4시간30분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"옥빛 바다와 검은 용암바위가 밀착한 절경. 상시 붐빔, 해안 낭떠러지 실족 주의",view:"옥빛 바다와 검은 용암바위가 밀착한 절경. 상시 붐빔, 해안 낭떠러지 실족 주의",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"선운정사 주변길",sp:"walk",lv:"c",lat:33.4293517,lng:126.3071931,region:"서부(애월·한림·한경)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"애월 내륙의 한적한 사찰 주변 풍경. 올레 15코스 동선 이탈 주의",view:"애월 내륙의 한적한 사찰 주변 풍경. 올레 15코스 동선 이탈 주의",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"과오름 둘레길",sp:"hike",lv:"m",lat:33.4455454,lng:126.3231083,region:"서부(애월·한림·한경)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"과오름을 둘러싼 울창한 자연 식생. 곽금올레 연계 등반 시 체력 소모 대비",view:"과오름을 둘러싼 울창한 자연 식생. 곽금올레 연계 등반 시 체력 소모 대비",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"고내봉",sp:"hike",lv:"m",lat:33.4591265,lng:126.3418004,region:"서부(애월·한림·한경)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"애월 바다가 내려다보이는 해안 단구 위의 오름. 계단 미끄러움",view:"애월 바다가 내려다보이는 해안 단구 위의 오름. 계단 미끄러움",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"비양도 둘레길",sp:"walk",lv:"c",lat:33.4093643,lng:126.2257213,region:"서부(애월·한림·한경)",dist:"3.5~4.1km",time:"1.5~2.5시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"1002년 솟아난 기생화산의 신비, 한라산 원경 조망. 풍랑주의보 시 입도 통제, 도선 시간 확인",view:"1002년 솟아난 기생화산의 신비, 한라산 원경 조망. 풍랑주의보 시 입도 통제, 도선 시간 확인",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"비양봉",sp:"hike",lv:"m",lat:33.4087252,lng:126.2270787,region:"서부(애월·한림·한경)",dist:"정보 확인 필요",time:"둘레길 외 추가",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"산꼭대기 화산구멍과 제주 본섬 파노라마. 비양도 도선 출항 시간 압박 고려",view:"산꼭대기 화산구멍과 제주 본섬 파노라마. 비양도 도선 출항 시간 압박 고려",req:"정보 확인 필요",ara:"서부(애월·한림·한경)",src:"공간정보·스포츠레저 조사"},
+{name:"하영올레1코스",sp:"hike",lv:"m",lat:33.2541141,lng:126.5589916,region:"남부(서귀포)",dist:"10.30km",time:"5~12시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"걸매생태공원·천지연폭포·칠십리시공원 거쳐 새연교로. 도심 횡단보도·차량 교차로 보행 안전",view:"걸매생태공원·천지연폭포·칠십리시공원 거쳐 새연교로. 도심 횡단보도·차량 교차로 보행 안전",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"하영올레3코스",sp:"run",lv:"m",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",dist:"7.3km",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"솜반천 탐방로와 지장샘 잇는 도심 수변 생태계. 집중호우 시 솜반천 범람 치명적",view:"솜반천 탐방로와 지장샘 잇는 도심 수변 생태계. 집중호우 시 솜반천 범람 치명적",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"서귀포 칠십리시공원",sp:"walk",lv:"c",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",dist:"정보 확인 필요",time:"순환 자유",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"섶섬·문섬·천지연폭포 조망 도심 전망대. 휠체어 진입 가능, 무장애 우수",view:"섶섬·문섬·천지연폭포 조망 도심 전망대. 휠체어 진입 가능, 무장애 우수",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"무오법정사 진입둘레길",sp:"hike",lv:"h",lat:33.3098899,lng:126.4744626,region:"남부(서귀포)",dist:"14km",time:"5시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"해발 600m 이상 한라산 환상숲길의 웅장함. 폭우 시 진입 금지, 입산 통제 확인",view:"해발 600m 이상 한라산 환상숲길의 웅장함. 폭우 시 진입 금지, 입산 통제 확인",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"엉또폭포 조망길",sp:"walk",lv:"c",lat:33.2686052,lng:126.4999881,region:"남부(서귀포)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"폭우 후 생성되는 거대한 기암폭포. 폭우 시 노면 붕괴·낙석 극도 유의",view:"폭우 후 생성되는 거대한 기암폭포. 폭우 시 노면 붕괴·낙석 극도 유의",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"고근산",sp:"hike",lv:"m",lat:33.2662629,lng:126.5138442,region:"남부(서귀포)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"서귀포 앞바다와 범섬을 한눈에 담는 시야. 하산 시 무릎 하중 주의",view:"서귀포 앞바다와 범섬을 한눈에 담는 시야. 하산 시 무릎 하중 주의",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"하논분화구",sp:"walk",lv:"c",lat:33.2504724,lng:126.5447279,region:"남부(서귀포)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"국내 유일 마르(Maar)형 분화구, 내부 벼농사 생태경관. 농기계 운행 경로, 보행 간격 유지",view:"국내 유일 마르(Maar)형 분화구, 내부 벼농사 생태경관. 농기계 운행 경로, 보행 간격 유지",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"외돌개 및 돔베낭길",sp:"hike",lv:"m",lat:33.2400718,lng:126.5333708,region:"남부(서귀포)",dist:"정보 확인 필요",time:"올레7코스 구간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"바다 위 우뚝 솟은 외돌개 기암절경과 해송. 돌풍·추락 위험, 바위지대 실족 주의",view:"바다 위 우뚝 솟은 외돌개 기암절경과 해송. 돌풍·추락 위험, 바위지대 실족 주의",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"수봉로 및 법환포구",sp:"walk",lv:"m",lat:33.2408514,lng:126.5198139,region:"남부(서귀포)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"제주 해녀의 삶이 녹아있는 포구와 범섬 조망. 갯바위 구간 파도 주의",view:"제주 해녀의 삶이 녹아있는 포구와 범섬 조망. 갯바위 구간 파도 주의",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"강정천 및 월평포구",sp:"hike",lv:"m",lat:33.2325183,lng:126.4889562,region:"남부(서귀포)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"사철 맑은 물 흐르는 강정천 은어 서식지. 증수 시 도하 불가, 하천 횡단 시 미끄럼 주의",view:"사철 맑은 물 흐르는 강정천 은어 서식지. 증수 시 도하 불가, 하천 횡단 시 미끄럼 주의",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"걸매생태공원",sp:"walk",lv:"c",lat:33.2499864,lng:126.5551498,region:"남부(서귀포)",dist:"정보 확인 필요",time:"순환 자유",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"하천·봄철 매화 군락. 침수 외 위험 적음, 펜스 밖 진입 금지",view:"하천·봄철 매화 군락. 침수 외 위험 적음, 펜스 밖 진입 금지",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"천지연폭포 산책로",sp:"walk",lv:"c",lat:33.246944,lng:126.554417,region:"남부(서귀포)",dist:"정보 확인 필요",time:"왕복30~40분",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"기암절벽에서 쏟아지는 천지연·무태장어 서식지. 입장료·관광객 혼잡",view:"기암절벽에서 쏟아지는 천지연·무태장어 서식지. 입장료·관광객 혼잡",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"새연교 및 새섬",sp:"walk",lv:"c",lat:33.2374705,lng:126.5597705,region:"남부(서귀포)",dist:"정보 확인 필요",time:"1시간 이내 순환",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"서귀포항 가로지르는 랜드마크 교량과 난대림 생태. 강풍 시 통행 위험, 게이트 통제 확인",view:"서귀포항 가로지르는 랜드마크 교량과 난대림 생태. 강풍 시 통행 위험, 게이트 통제 확인",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"작가의 산책길",sp:"run",lv:"c",lat:33.2453211,lng:126.5638438,region:"남부(서귀포)",dist:"약8.6km",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"이중섭 화가 자취 서린 문화예술 거리. 올레시장 통과 시 보행 밀집도 최고조",view:"이중섭 화가 자취 서린 문화예술 거리. 올레시장 통과 시 보행 밀집도 최고조",req:"정보 확인 필요",ara:"남부(서귀포)",src:"공간정보·스포츠레저 조사"},
+{name:"돈내코 탐방로",sp:"hike",lv:"h",lat:33.3149224,lng:126.5702482,region:"중산간(한라산권)",dist:"약14km",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"깎아지른 한라산 남벽을 향해 오르는 압도적 산악 풍경. 동절기 입산 통제 엄수, 폭우 시 출입 금지",view:"깎아지른 한라산 남벽을 향해 오르는 압도적 산악 풍경. 동절기 입산 통제 엄수, 폭우 시 출입 금지",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"시오름",sp:"hike",lv:"m",lat:33.3058333,lng:126.5163889,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"둘레길 5시간 구간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"한라산둘레길 동백길 선상 원시 산악림. 깊은 숲속 길 잃음 주의",view:"한라산둘레길 동백길 선상 원시 산악림. 깊은 숲속 길 잃음 주의",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"물찻오름",sp:"hike",lv:"m",lat:33.3955503,lng:126.6516596,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"가을 억새와 환상적 신비의 화구호. 생태휴식년제 출입 전 확인 요망",view:"가을 억새와 환상적 신비의 화구호. 생태휴식년제 출입 전 확인 요망",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"따라비오름",sp:"hike",lv:"m",lat:33.3870582,lng:126.7534582,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"억새 천국으로 불리는 오름. 능선길 강풍 시 체온 저하 유의",view:"억새 천국으로 불리는 오름. 능선길 강풍 시 체온 저하 유의",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"큰사슴이오름",sp:"hike",lv:"h",lat:33.3960213,lng:126.7288746,region:"중산간(한라산권)",dist:"종주 장거리",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"소록산과 짝을 이루는 중산간 광야 조망. 가시리 풍력단지·영주산 연계 시 체력 분배",view:"소록산과 짝을 이루는 중산간 광야 조망. 가시리 풍력단지·영주산 연계 시 체력 분배",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"소록산",sp:"hike",lv:"m",lat:33.399,lng:126.726,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"대록산과 맞닿은 안부 생태계. 단독보다 종주 코스로 활용",view:"대록산과 맞닿은 안부 생태계. 단독보다 종주 코스로 활용",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"비치미오름",sp:"hike",lv:"m",lat:33.4275222,lng:126.7646157,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"부드러운 산세의 동부 기생화산 전형. 접근성 다소 떨어짐",view:"부드러운 산세의 동부 기생화산 전형. 접근성 다소 떨어짐",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"돌거미오름",sp:"hike",lv:"m",lat:33.4275222,lng:126.7646157,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"주변 오름 군락 조망. 입구 식별 난이도 있음. [인근 거점 좌표(동부 중산간 비치미 인근), 정확한 들머리 확인 필요]",view:"주변 오름 군락 조망. 입구 식별 난이도 있음. [인근 거점 좌표(동부 중산간 비치미 인근), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"좌보미오름",sp:"run",lv:"h",lat:33.4359037,lng:126.8070751,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"5개 봉우리 겹친 복잡한 구릉, 다이내믹 능선. 길 잃기 쉬워 GPS 확보 필수",view:"5개 봉우리 겹친 복잡한 구릉, 다이내믹 능선. 길 잃기 쉬워 GPS 확보 필수",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"모지오름",sp:"hike",lv:"m",lat:33.3963893,lng:126.7728588,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"어머니가 아이를 품은 듯한 안온한 화산 분화구",view:"어머니가 아이를 품은 듯한 안온한 화산 분화구",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"영주산",sp:"hike",lv:"h",lat:33.4048901,lng:126.7976481,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"왕복1시간 이상",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"천국의 계단이라 불리는 길고 가파른 능선. 뷰 없는 계단 심폐 부하 극심",view:"천국의 계단이라 불리는 길고 가파른 능선. 뷰 없는 계단 심폐 부하 극심",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"모구리오름",sp:"walk",lv:"c",lat:33.4072585,lng:126.8282617,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"야영장과 맞물린 쾌적한 편백나무 산림욕. 캠핑객 차량 진출입 조심",view:"야영장과 맞물린 쾌적한 편백나무 산림욕. 캠핑객 차량 진출입 조심",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"남산봉",sp:"hike",lv:"m",lat:33.3829259,lng:126.8113521,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"원형 분화구 경사 지닌 고즈넉한 성읍 관문 오름",view:"원형 분화구 경사 지닌 고즈넉한 성읍 관문 오름",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"설오름",sp:"hike",lv:"m",lat:33.3702822,lng:126.7700574,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"숲이 빽빽한 숨겨진 중산간 비경. 출입구 수풀 방해 극복 요망",view:"숲이 빽빽한 숨겨진 중산간 비경. 출입구 수풀 방해 극복 요망",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"병곳오름",sp:"hike",lv:"m",lat:33.467344,lng:126.777994,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"오름 능선 파노라마. 주변 사유 목장 지침범 주의. [인근 거점 좌표(송당리 안돌 방면 인근), 정확한 들머리 확인 필요]",view:"오름 능선 파노라마. 주변 사유 목장 지침범 주의. [인근 거점 좌표(송당리 안돌 방면 인근), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"물영아리오름",sp:"hike",lv:"h",lat:33.3692294,lng:126.6935554,region:"중산간(한라산권)",dist:"3.4km 순환",time:"약2시간",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"람사르 습지와 거대한 삼나무 숲길. 안개·진흙 위험 극상, 계단/능선 코스 분기 선택",view:"람사르 습지와 거대한 삼나무 숲길. 안개·진흙 위험 극상, 계단/능선 코스 분기 선택",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"},
+{name:"민오름(중산간)",sp:"hike",lv:"m",lat:33.4784269,lng:126.502595,region:"중산간(한라산권)",dist:"정보 확인 필요",time:"정보 확인 필요",phys:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",safety:"사방이 뚫려 다도해 섬처럼 올망졸망한 오름 군락 조망. 여름철 일사병 주의. [인근 거점 좌표(중산간 오름지대(오라동 민오름 기준)), 정확한 들머리 확인 필요]",view:"사방이 뚫려 다도해 섬처럼 올망졸망한 오름 군락 조망. 여름철 일사병 주의. [인근 거점 좌표(중산간 오름지대(오라동 민오름 기준)), 정확한 들머리 확인 필요]",req:"정보 확인 필요",ara:"중산간(한라산권)",src:"공간정보·스포츠레저 조사"}
+];
+
+// ============ 공통 상수 ============
+const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
+const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
+const SPC={run:'#ff6b4a',bike:'#f2c14e',dive:'#2b8fd6',hike:'#5ec46a',walk:'#a98bd6'};
+const SPN={run:'러닝',bike:'자전거',dive:'다이빙',hike:'등산',walk:'트레킹/산책'};
+const LVN2={c:'초급',m:'중급',h:'고급'};
+
+let map,markers={},mode=null,selName=null;
+let meActive={1:true,2:true,3:true};
+let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
+
+function enter(m){
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').classList.remove('hidden');
+  mode=m;selName=null;
+  const app=document.getElementById('app');
+  app.className=(m==='me'?'theme-me':'theme-all');app.classList.remove('hidden');
+  document.getElementById('swMe').classList.toggle('active',m==='me');
+  document.getElementById('swAll').classList.toggle('active',m==='all');
+  buildFilters();initMap();render();
+  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':'러닝·자전거·다이빙·등산·트레킹 종목별';
+  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':'종목별 코스';
+  document.getElementById('panelSub').textContent = '핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.';
+  document.getElementById('vfoot').innerHTML = (m==='me'
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v6 (2026.05.24)'
+    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v6 (2026.05.24)');
+}
+function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
+
+function buildFilters(){
+  const f=document.getElementById('filters');f.innerHTML='';
+  if(mode==='me'){
+    f.innerHTML='<span class="flabel">강도</span>'+
+      [1,2,3].map(l=>`<div class="chip ${meActive[l]?'on':'off'}" onclick="tME(${l})"><span class="dot" style="background:${LV1[l]}"></span>${LVN[l]}</div>`).join('');
+  }else{
+    f.innerHTML='<span class="flabel">종목</span>'+
+      Object.keys(SPN).map(s=>`<div class="chip ${allSp[s]?'on':'off'}" onclick="tSP('${s}')"><span class="dot" style="background:${SPC[s]}"></span>${SPN[s]}</div>`).join('')+
+      '<span class="flabel" style="margin-left:8px">난이도</span>'+
+      Object.keys(LVN2).map(l=>`<div class="chip ${allLv[l]?'on':'off'}" onclick="tLV('${l}')">${LVN2[l]}</div>`).join('');
+  }
+}
+function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
+function tSP(s){allSp[s]=!allSp[s];buildFilters();render();}
+function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
+
+function initMap(){
+  if(map){map.remove();}
+  map=L.map('map',{scrollWheelZoom:true}).setView([33.38,126.55],10);
+  const tile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+  L.tileLayer(tile,{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  if(mode==='me') L.circleMarker(ARA,{radius:8,color:'#1a6b6b',fillColor:'#e8722c',fillOpacity:1,weight:3}).addTo(map).bindTooltip("기준 위치(제주시)");
+}
+function pin(color,ring){return L.divIcon({className:'',html:`<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid ${ring};box-shadow:0 2px 5px rgba(26,107,107,.35)"></div>`,iconSize:[22,22],iconAnchor:[11,22]});}
+
+function render(){
+  const list=document.getElementById('list');list.innerHTML='';
+  Object.values(markers).forEach(m=>map.removeLayer(m));markers={};
+  const data = mode==='me' ? ME.filter(p=>meActive[p.lv]) : ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
+  if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
+  data.forEach(p=>{
+    let color,ring;
+    if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}else{color=SPC[p.sp];ring='#fff';}
+    const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
+    const sub = mode==='me'?`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`:`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
+    m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
+    m.on('click',()=>select(p.name));markers[p.name]=m;
+    const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
+    const has3d=p.splatUrl?'<span class="has3d">3D</span>':'';
+    let head,meta,detail='';
+    if(mode==='me'){
+      head=`<span class="badge" style="background:${LV1[p.lv]}">${LVN[p.lv]}</span> <span class="lvb" style="background:${SAFE[p.safe][1]};color:${SAFE[p.safe][2]};border:1px solid ${SAFE[p.safe][3]}">${SAFE[p.safe][0]}</span>`;
+      meta=`${p.region} · ${p.length} · ${p.araTime}`;
+      if(selName===p.name) detail=detailME(p);
+    }else{
+      head=`<span class="badge" style="background:${SPC[p.sp]};color:#fff">${SPN[p.sp]}</span> <span class="lvb" style="border:1px solid #b9c6c3">${LVN2[p.lv]}</span>`;
+      meta=`${p.region} · ${p.dist} · ${p.time}`;
+      if(selName===p.name) detail=detailALL(p);
+    }
+    card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
+    card.onclick=()=>select(p.name);list.appendChild(card);
+  });
+}
+function splatBtn(p){return p.splatUrl?`<a class="splat-btn" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:'';}
+function detailME(p){return `<div class="detail">
+  <div class="infobox" style="background:${SAFE[p.safe][1]};border-left:4px solid ${SAFE[p.safe][3]};color:${SAFE[p.safe][2]}"><b>안전 안내</b><br>${p.health}</div>
+  <dt>접근성</dt><dd>${p.araTime}</dd><dt>코스/소요</dt><dd>${p.length} · ${p.time}</dd>
+  <dt>경사</dt><dd>${p.slope}</dd><dt>노면</dt><dd>${p.surface}</dd><dt>무장애</dt><dd>${p.bf}</dd>
+  <dt>인프라</dt><dd>${p.infra}</dd><dt>그늘</dt><dd>${p.shade}</dd><dt>우천 위험</dt><dd>${p.rain}</dd>
+  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+function detailALL(p){return `<div class="detail">
+  <div class="infobox" style="background:#fff0eb;border-left:4px solid #ff6b4a;color:#9c3d22"><b>안전·주의</b><br>${p.safety}</div>
+  <dt>거리</dt><dd>${p.dist}</dd><dt>소요시간</dt><dd>${p.time}</dd>
+  <dt>핵심 물리(노면/수심/표고)</dt><dd>${p.phys}</dd><dt>인프라</dt><dd>${p.infra}</dd>
+  <dt>경관·볼거리</dt><dd>${p.view}</dd><dt>자격/예약</dt><dd>${p.req}</dd>
+  <dt>접근성</dt><dd>${p.ara}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+
+function select(nm){selName=(selName===nm?null:nm);render();
+  if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
+    setTimeout(()=>{const el=document.getElementById('c-'+nm);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);}}
+</script>
+</body>
+</html>
