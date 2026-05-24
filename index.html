@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v7
-  작성일: 2026.05.24 (v7)
+  버전: v8
+  작성일: 2026.05.24 (v8)
   변경: 전체 밝은 테마 통일. 랜딩·일반인용 지도를 어두운 톤 → 밝은 톤으로 전환.
         지도 타일 둘 다 CARTO light_all(밝은 지도)로 통일. 운동하기 좋은 밝은 페이지.
-  이력: v3 권역1 27곳 → v4 권역2~5 1차 통합 → v5 밝은 테마 → v6 권역2~5 보충 63곳 → v7 대표 관광지·해변 18곳 추가(개장기간 포함)
+  이력: v3 권역1 27곳 → v4 권역2~5 1차 통합 → v5 밝은 테마 → v6 권역2~5 보충 63곳 → v7 대표 관광지·해변 18곳 추가 → v8 모바일 세로화면 지도 표시 수정
   데이터: ME 47곳 / ALL 95곳 (변동 없음)
   베이스: index.html v2 (건강정보 제거 완료본)
   좌표계: EPSG:4326 / 좌표: Google Places 실측 (머체왓 원본 위도 오기 교정)
@@ -104,7 +104,14 @@
   .theme-all .vfoot{color:#8a8270;border-color:#d3ddda;} .theme-all .src{color:#8a8270;} .theme-all .mapbox{background:#dfe6e6;}
   .theme-all .topbar,.theme-all .filters{border-color:#d3ddda;}
 
-  @media(max-width:760px){.wrap{flex-direction:column;}.panel{width:100%;max-width:100%;border-left:none;border-top:2px solid var(--sea);}.choice{width:100%;max-width:340px;}}
+  @media(max-width:760px){
+    .wrap{flex-direction:column;overflow-y:auto;}
+    .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
+    .panel{flex:none;width:100%;max-width:100%;border-left:none;border-top:2px solid var(--sea);overflow-y:visible;}
+    .panel-head{position:static;}
+    .choice{width:100%;max-width:340px;}
+    .topbar{padding:9px 14px;} .filters{padding:8px 14px;} .vfoot{padding:9px 14px;}
+  }
 </style>
 </head>
 <body>
@@ -450,8 +457,8 @@ function enter(m){
   document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':'종목별 코스';
   document.getElementById('panelSub').textContent = '핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.';
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v7 (2026.05.24)'
-    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v7 (2026.05.24)');
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v8 (2026.05.24)'
+    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v8 (2026.05.24)');
 }
 function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
 
@@ -477,7 +484,12 @@ function initMap(){
   const tile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
   L.tileLayer(tile,{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
   if(mode==='me') L.circleMarker(ARA,{radius:8,color:'#1a6b6b',fillColor:'#e8722c',fillOpacity:1,weight:3}).addTo(map).bindTooltip("기준 위치(제주시)");
+  // 모바일 등에서 컨테이너 크기 확정 후 지도 재계산
+  setTimeout(()=>{if(map)map.invalidateSize();},200);
+  setTimeout(()=>{if(map)map.invalidateSize();},600);
 }
+window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(map)map.invalidateSize();},300);});
+window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
 function pin(color,ring){return L.divIcon({className:'',html:`<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid ${ring};box-shadow:0 2px 5px rgba(26,107,107,.35)"></div>`,iconSize:[22,22],iconAnchor:[11,22]});}
 
 function render(){
