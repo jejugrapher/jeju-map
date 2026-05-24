@@ -1,14 +1,15 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v8
-  작성일: 2026.05.24 (v8)
-  변경: 전체 밝은 테마 통일. 랜딩·일반인용 지도를 어두운 톤 → 밝은 톤으로 전환.
-        지도 타일 둘 다 CARTO light_all(밝은 지도)로 통일. 운동하기 좋은 밝은 페이지.
-  이력: v3 권역1 27곳 → v4 권역2~5 1차 통합 → v5 밝은 테마 → v6 권역2~5 보충 63곳 → v7 대표 관광지·해변 18곳 추가 → v8 모바일 세로화면 지도 표시 수정
-  데이터: ME 47곳 / ALL 95곳 (변동 없음)
-  베이스: index.html v2 (건강정보 제거 완료본)
-  좌표계: EPSG:4326 / 좌표: Google Places 실측 (머체왓 원본 위도 오기 교정)
+  버전: v9
+  작성일: 2026.05.24 (v9)
+  변경: 카페 지도 모드 신설(옵션 B). 랜딩 세 번째 카드 "카페 지도" + 상단 "카페" 스위치 추가.
+        독립 CAFE[] 배열(45곳) + 카페 전용 따뜻한 베이지 테마 + 유형별 필터(오션뷰/베이커리/로스터리/디저트/감성·정원/숲속·중산간).
+        v8의 모바일 세로화면 수정(48vh+invalidateSize) 유지.
+  이력: v3 권역1 27곳 → v4 권역2~5 통합 → v5 밝은 테마 → v6 권역2~5 보충 → v7 대표 관광지·해변 18곳 → v8 모바일 표시 수정 → v9 카페 모드 신설
+  데이터: ME 85곳 / ALL 176곳 / CAFE 45곳 (총 306). ※v8 주석의 ME47/ALL95는 구버전 오기였으며 실제 배열은 85/176로 v9에서 정정.
+  베이스: jeju_map_20260524_v8.html (모바일 수정본)
+  좌표계: EPSG:4326 / 좌표: Google Places 실측
 -->
 <html lang="ko">
 <head>
@@ -41,6 +42,7 @@
   .choice .who{display:inline-block;font-size:11px;font-weight:700;font-family:sans-serif;padding:3px 10px;border-radius:12px;margin-top:9px;}
   .who.me{background:#d8f0e8;color:#1a6b6b;border:1px solid var(--sea);}
   .who.all{background:#ffe3d6;color:#c4502a;border:1px solid var(--coral);}
+  .who.cafe{background:#efe6d6;color:#8a6a2a;border:1px solid #c8a063;}
   .choice p{color:#5a6b6b;font-size:13px;margin-top:12px;line-height:1.55;}
   .choice .go{margin-top:16px;font-family:sans-serif;font-weight:700;font-size:13px;color:var(--sea);}
   #landing .foot{margin-top:34px;font-size:11px;color:#8a8270;text-align:center;line-height:1.6;max-width:620px;}
@@ -104,6 +106,18 @@
   .theme-all .vfoot{color:#8a8270;border-color:#d3ddda;} .theme-all .src{color:#8a8270;} .theme-all .mapbox{background:#dfe6e6;}
   .theme-all .topbar,.theme-all .filters{border-color:#d3ddda;}
 
+  /* 카페 테마 (따뜻한 베이지) */
+  .theme-cafe{background:#f7f2e9;color:#3a2e1e;}
+  .theme-cafe .topbar,.theme-cafe .filters{background:#efe6d4;border-color:#d8c8a8;}
+  .theme-cafe .home,.theme-cafe .switch{color:#8a6a2a;border-color:#c8a063;}
+  .theme-cafe .switch button{color:#8a6a2a;} .theme-cafe .switch button.active{background:#c8a063;color:#fff;}
+  .theme-cafe .vtitle{color:#7a6a4a;} .theme-cafe .chip{background:#fff;color:#3a2e1e;border-color:#d8c8a8;}
+  .theme-cafe .panel{background:#fbf7ef;border-color:#c8a063;} .theme-cafe .panel-head{background:#fbf7ef;border-color:#e0d3b8;}
+  .theme-cafe .panel-head h2{color:#8a6a2a;} .theme-cafe .panel-head p{color:#7a6a4a;}
+  .theme-cafe .card{border-color:#e8ddc6;} .theme-cafe .card:hover{background:#f3ecdc;} .theme-cafe .card.sel{background:#f0e6cf;border-left:5px solid #c8a063;}
+  .theme-cafe .card .nm{color:#3a2e1e;} .theme-cafe .card .meta{color:#7a6a4a;} .theme-cafe .detail dt{color:#8a6a2a;} .theme-cafe .detail dd{color:#3a2e1e;}
+  .theme-cafe .vfoot{color:#8a7a5a;border-color:#e0d3b8;} .theme-cafe .src{color:#8a7a5a;} .theme-cafe .mapbox{background:#e6ddc9;}
+
   @media(max-width:760px){
     .wrap{flex-direction:column;overflow-y:auto;}
     .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
@@ -136,6 +150,13 @@
       <p>러닝·자전거·스쿠버/프리다이빙·등산·트레킹. 종목별 + 난이도별 코스. 거리·소요시간·자격요건 표시.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enter('cafe')">
+      <div class="ico">☕</div>
+      <h2>카페 지도</h2>
+      <span class="who cafe">제주 전역 카페</span>
+      <p>오션뷰·베이커리·로스터리·디저트·감성정원·숲속 카페. 권역별 + 유형별. 영업시간·대표메뉴·뷰·주차·주의사항 표시.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
   </div>
   <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
 </div>
@@ -147,6 +168,7 @@
     <div class="switch">
       <button id="swMe" onclick="enter('me')">건강관리용</button>
       <button id="swAll" onclick="enter('all')">일반인용</button>
+      <button id="swCafe" onclick="enter('cafe')">카페</button>
     </div>
     <span class="vtitle" id="vtitle"></span>
   </div>
@@ -243,7 +265,7 @@ const ME=[
 {name:"대포 주상절리대",lat:33.237994,lng:126.426017,region:"남부(중문동)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약30분",slope:"정보 확인 필요",surface:"목재 데크/아스팔트",bf:"진입 가능(휠체어 이동 가능한 목재 관람 데크 완비)",infra:"관리사무소·화장실·거대 주차장(21,764㎡)",shade:"없음",rain:"고 — 태풍·너울성 파도 시 해안절벽 데크 위로 월파 위험",time:"저강도 산책",health:"기상 악화·해상 풍랑특보 시 안전사고 예방 위해 해안 관람 데크 출입 전면 통제",src:"공간정보·스포츠레저 조사 / clubrichtour.co.kr"},
 {name:"이호테우 말등대",lat:33.496197,lng:126.455893,region:"도심(이호이동)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"왕복 20분",slope:"정보 확인 필요",surface:"아스팔트/평탄한 시멘트 방파제",bf:"진입 가능(방파제 끝까지 단차 없는 아스팔트)",infra:"인근 해안도로 주차 공간",shade:"없음",rain:"중 — 바다 한가운데 돌출 방파제, 강풍 시 돌풍·월파 추락 위험",time:"저강도 산책",health:"방파제 테트라포드(TTP) 위로 올라가는 행위 절대 금지. 야간·풍랑 시 유의",src:"공간정보·스포츠레저 조사 / data.go.kr"},
 {name:"표선해수욕장",lat:33.3272829,lng:126.8376558,region:"남부(표선면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"간조 시 편도 800m 횡단",slope:"정보 확인 필요",surface:"단단하고 고운 패사(조개껍데기 모래)",bf:"일부(배후 야영장·산책로 접근 가능, 넓은 백사장은 어려움)",infra:"공영주차장·화장실·종합샤워장·야영장",shade:"풍부(배후 소나무 숲)",rain:"저 — 수심 도내 최저·조간대 방대, 파도·이안류 위험 극히 낮음",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 엄격 적용",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
-{name:"중문색달해수욕장",lat:33.2451968,lng:126.4111861,region:"남부(색달동)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"해변 길이 560m",slope:"정보 확인 필요",surface:"진모살(흑·백·적·회색 섞인 굵은 모래)",bf:"일부(절벽 내려가는 급경사로, 보호자 동반 시 제한적)",infra:"대형주차장·화장실·종합샤워장·탈의장",shade:"없음",rain:"고 — 수심 급격히 깊어지는 단애, 거친 연안 조류 이안류 도내 최고",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 이안류 휩쓸림 사고 위험 상존, 안전요원 지정 입수구역 통제 절대 엄수",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
+{name:"중문색달해수욕장",lat:33.2451968,lng:126.4111861,region:"남부(색달동)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"해변 길이 560m",slope:"정보 확인 필요",surface:"진모살(흑·백·적·회색 섞인 굵은 모래)",bf:"일부(절벽 내려가는 급경사로, 동반자 동행 시 제한적)",infra:"대형주차장·화장실·종합샤워장·탈의장",shade:"없음",rain:"고 — 수심 급격히 깊어지는 단애, 거친 연안 조류 이안류 도내 최고",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 이안류 휩쓸림 사고 위험 상존, 안전요원 지정 입수구역 통제 절대 엄수",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
 {name:"신양섭지해수욕장",lat:33.43514,lng:126.923452,region:"동부(성산읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해안선 약1km",slope:"정보 확인 필요",surface:"부드러운 일반 모래",bf:"진입 가능(배후지~백사장 고도 단차 적어 이동 용이)",infra:"주차장·화장실·샤워장·탈의실",shade:"없음",rain:"저 — 섭지코지 반도가 먼바다 파도 막아주는 내해형 만 구조, 수면 잔잔",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 적용",src:"공간정보·스포츠레저 조사 / data.go.kr"},
 {name:"화순금모래해수욕장",lat:33.2395922,lng:126.3357689,region:"남부(안덕면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해변 길이 약250m",slope:"정보 확인 필요",surface:"검고 짙은 금빛 쇄설물 굵은 모래",bf:"진입 가능",infra:"공영주차장·공중화장실·개수대·담수 노천탕",shade:"없음",rain:"중 — 강우 시 인접 한라산 하천·지하 용천수 유입량 급증, 해안 수온 변화 극심",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 용천수 인근은 바닷물보다 수온 현저히 낮으므로 입수 시 심장·체온 저하 주의",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
 {name:"함덕 제2해변(펫비치)",lat:33.5433402,lng:126.6634618,region:"동부(조천읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"200m 내외",slope:"정보 확인 필요",surface:"부드러운 하얀 규사",bf:"일부(모래사장 진입 직전까지 포장도로)",infra:"전용 주차구역·배설물 수거함·화장실",shade:"없음",rain:"저 — 함덕 본구역과 마찬가지로 얕고 완만한 지형",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 비반려인 마찰 방지 위해 펫비치 경계선 준수, 반려견 배설물 수거 등 펫티켓 철저. [좌표=함덕 인근 거점, 동측 제2해변 위치 확인 필요]",src:"공간정보·스포츠레저 조사 / ihalla.com"},
@@ -422,7 +444,7 @@ const ALL=[
 {name:"산방산",sp:"hike",lv:"m",lat:33.2410682,lng:126.3134467,region:"남부(안덕면)",dist:"약40분",time:"중강도 도보(산방굴사까지)",phys:"돌계단/화장실",infra:"공영주차장·화장실",safety:"식생 보호·암벽 위험으로 산 정상부 등반 법적 절대 통제, 산방굴사까지만 관람 가능",view:"점성 높은 조면암질 마그마가 굳어 형성된 거대한 종 모양 융기형 용암 돔",req:"불가(산 중턱 암벽으로 오르는 가파른 계단)",ara:"남부(안덕면)",src:"공간정보·스포츠레저 조사 / 자체 분석"},
 {name:"이호테우 말등대",sp:"walk",lv:"c",lat:33.496197,lng:126.455893,region:"도심(이호이동)",dist:"왕복 20분",time:"저강도 산책",phys:"아스팔트/평탄한 시멘트 방파제",infra:"인근 해안도로 주차 공간",safety:"방파제 테트라포드(TTP) 위로 올라가는 행위 절대 금지. 야간·풍랑 시 유의",view:"제주 전통 조랑말을 본떠 건립된 적색·백색 항만 방파제 랜드마크 등대",req:"진입 가능(방파제 끝까지 단차 없는 아스팔트)",ara:"도심(이호이동)",src:"공간정보·스포츠레저 조사 / data.go.kr"},
 {name:"표선해수욕장",sp:"walk",lv:"c",lat:33.3272829,lng:126.8376558,region:"남부(표선면)",dist:"간조 시 편도 800m 횡단",time:"저강도 산책",phys:"단단하고 고운 패사(조개껍데기 모래)",infra:"공영주차장·화장실·종합샤워장·야영장",safety:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 엄격 적용",view:"간조 시 드러나는 거대한 원형 은빛 모래 평원과 잔디 광장",req:"일부(배후 야영장·산책로 접근 가능, 넓은 백사장은 어려움)",ara:"남부(표선면)",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
-{name:"중문색달해수욕장",sp:"walk",lv:"m",lat:33.2451968,lng:126.4111861,region:"남부(색달동)",dist:"해변 길이 560m",time:"저강도 산책",phys:"진모살(흑·백·적·회색 섞인 굵은 모래)",infra:"대형주차장·화장실·종합샤워장·탈의장",safety:"★개장기간: 2026.06.24~2026.09.06 · 이안류 휩쓸림 사고 위험 상존, 안전요원 지정 입수구역 통제 절대 엄수",view:"병풍처럼 굽이치는 해안절벽 아래 거센 파도가 밀려오는 대한민국 최고의 역동적 서핑 명소",req:"일부(절벽 내려가는 급경사로, 보호자 동반 시 제한적)",ara:"남부(색달동)",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
+{name:"중문색달해수욕장",sp:"walk",lv:"m",lat:33.2451968,lng:126.4111861,region:"남부(색달동)",dist:"해변 길이 560m",time:"저강도 산책",phys:"진모살(흑·백·적·회색 섞인 굵은 모래)",infra:"대형주차장·화장실·종합샤워장·탈의장",safety:"★개장기간: 2026.06.24~2026.09.06 · 이안류 휩쓸림 사고 위험 상존, 안전요원 지정 입수구역 통제 절대 엄수",view:"병풍처럼 굽이치는 해안절벽 아래 거센 파도가 밀려오는 대한민국 최고의 역동적 서핑 명소",req:"일부(절벽 내려가는 급경사로, 동반자 동행 시 제한적)",ara:"남부(색달동)",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
 {name:"신양섭지해수욕장",sp:"walk",lv:"c",lat:33.43514,lng:126.923452,region:"동부(성산읍)",dist:"해안선 약1km",time:"저강도 산책",phys:"부드러운 일반 모래",infra:"주차장·화장실·샤워장·탈의실",safety:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 적용",view:"섭지코지와 성산일출봉 배경의 반원형 초승달 모양 평화롭고 얕은 유아 친화 해변",req:"진입 가능(배후지~백사장 고도 단차 적어 이동 용이)",ara:"동부(성산읍)",src:"공간정보·스포츠레저 조사 / data.go.kr"},
 {name:"화순금모래해수욕장",sp:"walk",lv:"c",lat:33.2395922,lng:126.3357689,region:"남부(안덕면)",dist:"해변 길이 약250m",time:"저강도 산책",phys:"검고 짙은 금빛 쇄설물 굵은 모래",infra:"공영주차장·공중화장실·개수대·담수 노천탕",safety:"★개장기간: 2026.06.24~2026.09.06 · 용천수 인근은 바닷물보다 수온 현저히 낮으므로 입수 시 심장·체온 저하 주의",view:"산방산·형제섬 조망 속 얼음 용천수가 솟는 담수풀장, 담수욕과 해수욕 동시 체험",req:"진입 가능",ara:"남부(안덕면)",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
 {name:"함덕 제2해변(펫비치)",sp:"walk",lv:"c",lat:33.5433402,lng:126.6634618,region:"동부(조천읍)",dist:"200m 내외",time:"저강도 산책",phys:"부드러운 하얀 규사",infra:"전용 주차구역·배설물 수거함·화장실",safety:"★개장기간: 2026.06.24~2026.09.06 · 비반려인 마찰 방지 위해 펫비치 경계선 준수, 반려견 배설물 수거 등 펫티켓 철저. [좌표=함덕 인근 거점, 동측 제2해변 위치 확인 필요]",view:"반려동물과 함께 에메랄드빛 바다에 입수·산책할 수 있는 반려견 전용 특화 구역",req:"일부(모래사장 진입 직전까지 포장도로)",ara:"동부(조천읍)",src:"공간정보·스포츠레저 조사 / ihalla.com"},
@@ -433,32 +455,101 @@ const ALL=[
 {name:"사계해변",sp:"walk",lv:"c",lat:33.2311963,lng:126.3104542,region:"남부(안덕면)",dist:"체류 시간 1시간 내",time:"저강도 산책",phys:"암반/마린 포트홀",infra:"사계리체육공원 인근 주차장·사계항 화장실",safety:"★개장기간: 미확인(해수욕 불가 구역) · 썰물 때 가야 하므로 기상청 간조(물때) 시간 사전 확인 필수",view:"바닷물 빠지는 썰물 때만 모습 드러내는, 달의 분화구 같은 신비로운 마린 포트홀 지형",req:"불가(화산 폭발로 응회암 지층이 울퉁불퉁 굳어진 요철 암반 지대)",ara:"남부(안덕면)",src:"공간정보·스포츠레저 조사 / tripinfo.co.kr"}
 ];
 
+const CAFE=[
+ // ===== 권역1 도심 (16곳) =====
+ {name:"앙뚜아네트 카페앤비스트로",lat:33.516156,lng:126.5088246,region:"도심",area:"제주시 용담동",type:"오션뷰·베이커리",hours:"매일 08:00~20:00",closed:"미확인",menu:"베이커리·브런치",view:"공항 인근 바다 조망, 2층 통창·고천장 럭셔리 비스트로",parking:"미확인",bf:"미확인",kid:"미확인",note:"공항 근처·이른 08시 오픈, 빵은 09시부터. 상층 혼잡·하층 한적",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"디앤디파트먼트 제주 by 아라리오",lat:33.5176855,lng:126.5234639,region:"도심",area:"제주시 삼도동(탑동)",type:"감성·정원",hours:"10:30~18:30",closed:"수요일",menu:"커피·디저트",view:"노출 콘크리트 d로고 핫플, 소품샵·숙박 결합",view2:"",parking:"구조상 협소",bf:"미확인",kid:"미확인",note:"SNS 인증샷 명소라 혼잡. 디자인 소품샵·팝업 병설",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"에스프레소라운지",lat:33.4765028,lng:126.480067,region:"도심",area:"제주시 노형동",type:"로스터리·대형",hours:"미확인",closed:"미확인",menu:"에스프레소·아이스크림",view:"화려한 금장+인더스트리얼 2층 대형 공간, 직접 로스팅",parking:"있음(주간 혼잡)",bf:"불가",kid:"미확인",note:"주변 프리미엄 다이닝가",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"그럼외도",lat:33.4942916,lng:126.43403,region:"도심",area:"제주시 외도동(월대)",type:"디저트·감성·정원",hours:"11:00~19:00",closed:"화요일",menu:"돌멩이라떼·증편버터구이·탐라주악",view:"바닷가 옛집 분위기, 마당 있는 독특한 디저트 공간",parking:"미확인",bf:"미확인",kid:"아이동반 가능(한적 시간대)",note:"번호표 대신 조약돌 제공",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"마음에온",lat:33.51454,lng:126.5260173,region:"도심",area:"제주시 일도동(칠성로)",type:"디저트·감성·정원",hours:"10:00~20:00",closed:"화요일",menu:"칠성라떼·치즈곶감말이",view:"도심 속 자연을 품은 히든 한옥, 작은 입구",parking:"미확인",bf:"미확인",kid:"미확인",note:"고양이 상주, 입구가 작아 지나치기 쉬움. 상점가 위치",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"무화과한입",lat:33.5150452,lng:126.5274405,region:"도심",area:"제주시 삼도동(서부두)",type:"디저트·감성·정원",hours:"12:00~19:00",closed:"월요일",menu:"무화과크림라떼·단유자차",view:"원도심 아지트 감성의 북카페, 정원",parking:"미확인",bf:"미확인",kid:"미확인",note:"고양이 상주, 비건 옵션(두유)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"순아커피",lat:33.5130785,lng:126.5227249,region:"도심",area:"제주시 삼도동(관덕로)",type:"감성·정원",hours:"평일 09:00~17:00, 토 10:00~19:00",closed:"일·월요일",menu:"유기농차·드립커피·초콜릿케이크",view:"100년 적산가옥 개조, 2층 다다미 관덕정 뷰",parking:"협소",bf:"미확인",kid:"미확인",note:"2층은 신발 벗고 입장",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"유동커피 본점",lat:33.2444906,lng:126.5638992,region:"도심",area:"서귀포시 송산동(태평로)",type:"로스터리",hours:"매일 08:00~18:00",closed:"미확인",menu:"송산동커피·소금크림빵·티라미수",view:"각종 수상 이력의 커피 장인 콘셉트, 시크+레트로",parking:"불가(이면도로 임시 정차)",bf:"미확인",kid:"미확인",note:"바리스타 영어 가능, 화장실 인테리어 유명. 비건(두유·오트)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"커피템플",lat:33.4781416,lng:126.5702901,region:"도심",area:"제주시 영평동",type:"로스터리",hours:"09:00~18:00(금 ~16:00)",closed:"토요일",menu:"스페셜티 드립·블렌드",view:"바리스타 전문 로스터리, 따뜻한 조명의 아늑한 공간",parking:"가능(주차시설 있음)",bf:"미확인",kid:"미확인",note:"향 맡고 원두 고르는 시음 안내. 라스트오더 폐점 30분 전",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"콜로세움",lat:33.480486,lng:126.5016971,region:"도심",area:"제주시 민오름길",type:"디저트·대형·베이커리",hours:"매일 10:00~21:00",closed:"미확인",menu:"피자·카이막·빵·수제맥주",view:"도심 속 언덕 자연에 둘러싸인 높은 천장, 실내외 결합",parking:"있음",bf:"미확인",kid:"아이동반 가능",note:"튀르키예식 조식(피데+카이막) 가능. 신축 모던",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"사랑자유평화낭만",lat:33.5009206,lng:126.5328857,region:"도심",area:"제주시 광양",type:"감성·정원",hours:"평일 08:00~18:00, 토 10:00~18:00",closed:"일요일",menu:"브런치·커피",view:"도심 속 에메랄드빛 감성 분위기",parking:"미확인",bf:"미확인",kid:"미확인",note:"공항서 약 10분, 큰길가라 찾기 쉬움",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"웃뜨리",lat:33.4594103,lng:126.4297811,region:"도심·서부 경계",area:"제주시 애월읍 광성로",type:"베이커리·감성·정원",hours:"매일 08:00~20:00",closed:"미확인",menu:"크림치즈 치아바타·귤스무디·깨음료",view:"해안과 클레이 테니스코트를 굽어보는 3층, 야외 귤밭",parking:"미확인",bf:"미확인",kid:"미확인",note:"이른 08시 오픈. 빵·쿠키 퀄리티 호평",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"아라파파 연동점",lat:33.4784728,lng:126.4909204,region:"도심",area:"제주시 연동",type:"베이커리",hours:"매일 08:00~21:00",closed:"미확인",menu:"홍차잼·풍미 깊은 베이커리",view:"공항 인근 연동의 빵 매력",parking:"앞쪽 공영주차 편의",bf:"미확인",kid:"미확인",note:"이른 08시 오픈, 가성비 페이스트리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"시소 카이막 동문시장점",lat:33.5121035,lng:126.5289675,region:"도심",area:"제주시 동문시장 인근",type:"디저트",hours:"매일 09:00~20:00",closed:"미확인",menu:"카이막·꿀·우유",view:"동문시장 인근 고급 카이막 디저트",parking:"동문시장 주차장 활용",bf:"미확인",kid:"미확인",note:"테이크아웃 위주 소형 매장",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"파우커피파티",lat:33.243096,lng:126.5676450,region:"도심",area:"서귀포시 서귀동(칠십리로)",type:"감성·오션뷰",hours:"화~일 10:00~18:00",closed:"월요일",menu:"귤꽃 와인·맥주·귤라떼",view:"바다 조망, 사장님 직접 만든 음료·수제품",view2:"",parking:"미확인",bf:"미확인",kid:"미확인",note:"귤꽃 와인·맥주 수제 제조, 친절한 응대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"푸아루",lat:33.5100057,lng:126.5217267,region:"도심",area:"제주시 남성로(공항 인근)",type:"감성·소형",hours:"08:00~17:00",closed:"목요일",menu:"배치브루·아사이볼·잠봉뵈르",view:"큰 창의 밝고 아담한 1인 혼카페 공간",parking:"미확인",bf:"미확인",kid:"미확인",note:"공항서 도보 약 10분. (PDF상 '중산간 추정'이었으나 실측 결과 도심 공항 인근으로 교정)",src:"공간정보·스포츠레저 조사 / Google Places 실측(위치 교정)"},
+
+ // ===== 권역2 동부 (9곳) =====
+ {name:"카페 델문도",lat:33.5437787,lng:126.6688353,region:"동부",area:"조천읍 함덕(조함해안로)",type:"오션뷰·베이커리",hours:"매일 06:00~24:00",closed:"미확인",menu:"한라봉리코타·땅콩라떼",view:"함덕해변 절경의 압도적 바다 뷰, 2층 규모",parking:"미확인",bf:"미확인",kid:"미확인",note:"06시 오픈·24시 마감. 호텔·식당 도보권, 관광객 매우 많음",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페한라산",lat:33.5246978,lng:126.8629837,region:"동부",area:"구좌읍 면수1길",type:"오션뷰·감성·정원",hours:"매일 09:30~21:00",closed:"미확인",menu:"당근케이크·라떼",view:"바다를 배경으로 한 사진 명소, 아담한 옛집·고양이",parking:"미확인",bf:"미확인",kid:"미확인",note:"단체·커플 방문 추천. 빈티지 TV 박스 포토존",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페코지",lat:33.4683204,lng:126.9291329,region:"동부",area:"성산읍 한도로",type:"베이커리·오션뷰",hours:"매일 09:00~21:00",closed:"미확인",menu:"마늘버터 소금빵·토스트·선셋티",view:"통창·야외석 바다 조망, 클래식 음악·보드게임",parking:"미확인",bf:"미확인",kid:"미확인",note:"단체·식사 방문 추천, 따뜻한 응대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"솔옆수",lat:33.3067477,lng:126.8064164,region:"동부",area:"표선면 민속해안로",type:"로스터리·디저트",hours:"11:00~17:00",closed:"매월 마지막주 익월 공지",menu:"핸드드립·다쿠아즈·시즌메뉴",view:"마당 뷰, 커피와 함께하는 그림·사진 전시",parking:"미확인",bf:"미확인",kid:"아이동반 가능",note:"강아지(순애) 상주, 올레4코스 인근. 사진·엽서 판매",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"보라지붕",lat:33.5407402,lng:126.6702427,region:"동부",area:"조천읍 함덕19길",type:"디저트·감성·정원",hours:"10:00~18:00",closed:"일요일",menu:"바스크치즈케이크·당근케이크·당근주스",view:"보라 지붕의 함덕 구옥 마당 감성, 정원",parking:"매장 앞 협소(함덕 주차장 활용)",bf:"미확인",kid:"미확인",note:"좌석 적어 만석 잦음·천장 낮음. 고양이 상주, 리조트 인근",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페 모어모어",lat:33.5292019,lng:126.8757928,region:"동부",area:"구좌읍 해맞이해안로",type:"오션뷰·디저트·브런치",hours:"09:00~18:00",closed:"목요일",menu:"수플레 팬케이크·우도땅콩라떼",view:"탁 트인 오션뷰와 즐기는 푹신한 수플레 팬케이크",parking:"미확인",bf:"미확인",kid:"아이동반 가능",note:"평점 매우 높음, 양 푸짐",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"오른",lat:33.4717785,lng:126.9157889,region:"동부",area:"성산읍 오조리",type:"오션뷰·베이커리",hours:"매일 10:00~20:00",closed:"미확인",menu:"오른라떼·한라봉생강차·소금빵·두부브라우니",view:"바다 조망 + 웅장한 성산 뷰, 모던 미니멀 건축",parking:"미확인",bf:"미확인",kid:"미확인",note:"비건 옵션(두부브라우니·오트밀크), 영어 가능. 시즌 베이커리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"보롬왓",lat:33.4136187,lng:126.7527705,region:"동부",area:"표선면 번영로",type:"감성·정원·대형",hours:"매일 09:00~18:00",closed:"미확인",menu:"코코아·계절 음료",view:"계절별 꽃밭(가을 핑크뮬리·여름 라벤더), 정원·기차",parking:"있음",bf:"미확인",kid:"아이동반 가능",note:"식물원형 대형 정원, 입장료 별도. 외진 위치라 택시 귀가 주의",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"레이오버",lat:33.5584969,lng:126.8124040,region:"동부",area:"구좌읍 해맞이해안로(코난해변)",type:"오션뷰",hours:"매일 10:30~18:30",closed:"미확인",menu:"오버 아메리카노·디저트",view:"1·2층 뻥 뚫린 통창 구조로 코난해변 일몰·바다 조망",parking:"미확인",bf:"미확인",kid:"미확인",note:"반려동물 동반 가능, 좌석 적은 편. 방송 노출 이력",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역3 서부 (8곳) =====
+ {name:"제주당",lat:33.3541964,lng:126.3559404,region:"서부",area:"애월읍 월각로",type:"대형·베이커리",hours:"매일 10:00~21:00",closed:"미확인",menu:"농부빵·까르보나라·흑파스타",view:"새별오름 조망, 800평 규모·내부 스마트팜 채소 활용",parking:"가능(대규모)",bf:"미확인",kid:"아이동반 가능(가족·연인 누구나)",note:"오픈런 필수·빵 빠르게 소진. 좌석 다양(소파·계단)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"섬앤썸",lat:33.4855049,lng:126.3819337,region:"서부",area:"애월읍 애월해안로",type:"오션뷰",hours:"월~토 09:30~20:00, 일 10:30~22:00",closed:"미확인",menu:"커피·케이크",view:"해변에 바로 면한 오션뷰, 파도와 바위가 부서지는 경관",parking:"미확인",bf:"미확인",kid:"미확인",note:"연인·커플 인기. 흐린 날 파도 스펙터클",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페 파람",lat:33.3417993,lng:126.1713215,region:"서부",area:"한경면 한경해안로",type:"오션뷰",hours:"매일 10:00~20:00",closed:"미확인",menu:"커피·와플·녹차라떼·아이스초코",view:"신창 풍차 해안 인근, 호젓한 해안도로 드라이브 코스 조망",parking:"미확인",bf:"미확인",kid:"미확인",note:"강아지(벤) 상주. 강풍 잦은 해안가",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"하소로커피",lat:33.2955618,lng:126.2179904,region:"서부",area:"한경면 불금못로",type:"로스터리·감성·정원",hours:"매일 10:00~18:00",closed:"미확인",menu:"조수리라떼·핸드드립 스페셜티·매실주스",view:"조수리 마을 옛 창고 개조, 높은 천장·목재 인테리어",parking:"가능(앞 갓길·소규모)",bf:"미확인",kid:"미확인",note:"직접 로스팅·드립백 판매, 고양이 상주. 라스트오더 17:30",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"미깡창고",lat:33.4602789,lng:126.4451865,region:"서부",area:"애월읍 중산간서로",type:"감성·정원",hours:"11:00~17:00",closed:"일요일",menu:"말차라떼·돌담음료·케이크",view:"딱 제주스러운 따뜻한 감성 공간, 뒤편 귤밭·안마당",parking:"미확인",bf:"미확인",kid:"미확인",note:"라스트오더 16:00. 단체(8인 등) 입장 제한 가능",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"찻집 지안",lat:33.4408379,lng:126.4023651,region:"서부",area:"애월읍 유수암리",type:"감성·정원·차",hours:"12:00~18:00",closed:"화요일",menu:"중국차·다도 체험·티클래스",view:"다도 체험과 티클래스가 가능한 정적인 힐링 찻집",parking:"미확인",bf:"미확인",kid:"미확인",note:"1인 5만원대 다도 체험(차 직접 우림). 정숙·예약 권장",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"봄날",lat:33.4624568,lng:126.3096148,region:"서부",area:"애월읍 애월로1길",type:"오션뷰",hours:"매일 09:00~21:30",closed:"미확인",menu:"귤밀크티·고구마라떼·아이스초코",view:"애월 카페거리의 시초급 오션뷰, 창가서 파도 조망",parking:"제한적(혼잡)",bf:"미확인",kid:"미확인",note:"입장 시 1인 1음료, 해외카드 불가. 일몰 명소",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"평균이하",lat:33.4634489,lng:126.3145823,region:"서부",area:"애월읍 애월로4길",type:"감성·정원·로스터리",hours:"11:00~18:00",closed:"수요일",menu:"핸드드립(다양한 원두)·수플레",view:"애월 골목 옛집 개조, 다락방·작은 정원·스테인드글라스",parking:"가능(쉬움)",bf:"미확인",kid:"미확인",note:"고양이 2마리 상주, 드립 전문. 야외석 있음",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역4 남부 (5곳) =====
+ {name:"뷰스트",lat:33.2278135,lng:126.303557,region:"남부",area:"안덕면 형제해안로(사계해안)",type:"오션뷰·베이커리",hours:"매일 10:00~21:00",closed:"미확인",menu:"콘브레드·딸기화산라떼·마늘바게트",view:"사계해안 지형을 코앞에서 조망, 3층+옥상 루프, 액자 포토존",parking:"미확인",bf:"미확인",kid:"미확인",note:"3층이 뷰 최적. 앞 해변 돌개구멍(포트홀) 볼거리",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페 두가시",lat:33.235479,lng:126.366714,region:"남부",area:"안덕면 대평감산로",type:"디저트·감성·정원",hours:"10:00~19:00",closed:"화·수요일",menu:"우도땅콩라떼·말차초코케이크·피스타치오케이크",view:"달콤한 디저트와 어우러진 평화로운 서귀포 정원 뷰",parking:"미확인",bf:"미확인",kid:"미확인",note:"비건·이탈리안 식사 가능, 벽돌오븐 피자·샐러드 호평",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카멜리아힐(내부 카페)",lat:33.2898049,lng:126.3682983,region:"남부",area:"안덕면 병악로",type:"감성·정원·대형",hours:"매일 08:30~18:00",closed:"미확인",menu:"음료·디저트",view:"동백꽃과 팜파스가 어우러진 가을 정원, 너머 한라산 뷰",parking:"있음(일반 100대·전기차·대형버스)",bf:"휠체어·유아차 일부(진입로 주의)",kid:"아이동반 가능",note:"식물원형 대형 정원, 입장료 별도·최소 2~3시간 소요",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"우드노트",lat:33.2728857,lng:126.6985011,region:"남부",area:"남원읍 남원리(태위로)",type:"디저트·숲속·중산간",hours:"매일 11:00~19:00",closed:"미확인",menu:"까눌레·휘낭시에·플랫화이트",view:"깊은 숲속에 있는 듯한 한적한 힐링, 높은 천장·목재·사방 유리벽",parking:"매장 앞",bf:"미확인",kid:"미확인",note:"호주 듀크스 원두·라마르조코 머신. 2층 게스트하우스, 강아지(쇼팽)",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"베케",lat:33.2617716,lng:126.6043305,region:"남부",area:"서귀포시 효돈동",type:"감성·정원",hours:"09:30~18:30",closed:"화요일",menu:"베케커피·흑임자라떼·스콘·머핀",view:"이색적 전문 조경 정원 풀멍 힐링, 노출콘크리트·통창",parking:"별도(표지판 따라)",bf:"미확인",kid:"아이동반 가능",note:"정원 입장료 합리적. 허브향 가득한 진입로",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역5 중산간 (7곳) =====
+ {name:"풍림다방",lat:33.4718344,lng:126.7856128,region:"중산간",area:"구좌읍 송당(중산간동로)",type:"숲속·중산간·로스터리·디저트",hours:"09:30~18:00",closed:"미확인",menu:"풍림브륄레브레베(천연바닐라빈)·더치라떼·롤케이크",view:"넓은 정원의 옛 주택 개조, 시골집 레트로 무드",parking:"넓은 주차장",bf:"미확인",kid:"실내 노키즈(좌석 협소·안전), 야외 가능",note:"브륄레 음료 시그니처. 방송 노출로 혼잡",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"시시소소",lat:33.4720935,lng:126.7828629,region:"중산간",area:"구좌읍 송당(중산간동로)",type:"디저트·숲속·중산간",hours:"매일 11:00~18:00",closed:"미확인",menu:"아몬드크림라떼·에그타르트·바나나브레드",view:"내외부로 식물이 가득한 편안한 빈티지 감성",parking:"미확인",bf:"미확인",kid:"미확인",note:"에그타르트·바나나브레드 호평, 친절한 응대",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"우연히, 그곳",lat:33.4717055,lng:126.7829178,region:"중산간",area:"구좌읍 송당리",type:"베이커리·숲속·중산간",hours:"11:00~18:00",closed:"목요일",menu:"엑설런트라떼·휘낭시에·스콘·에그타르트·까눌레",view:"송당리 감성의 돌집 리모델링, 개방형 야외 테라스·유리테라스",parking:"뒤편 좁은 골목 주차",bf:"미확인",kid:"미확인",note:"반려동물 환영(동반 우호적), 가성비 좋음. 재즈 음악",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"카페선흘",lat:33.4854986,lng:126.6992952,region:"중산간",area:"조천읍 선흘리(선교로)",type:"감성·정원·숲속·중산간·브런치",hours:"10:00~20:00",closed:"수요일",menu:"더치베이비팬케이크·버섯크림파스타·수제 사워도우",view:"실내가 반전인 화실·온실 자드부팡 감성, 유럽 남부 느낌",parking:"가능",bf:"미확인",kid:"미확인",note:"예약 가능·친절한 부부 운영. 사워도우 직접 구움, 재료 소진 잦음",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"블루보틀 제주",lat:33.43318,lng:126.7507907,region:"중산간",area:"구좌읍 번영로",type:"대형·숲속·중산간",hours:"매일 08:30~19:00",closed:"미확인",menu:"드립·라떼·제주 한정 페이스트리",view:"후원에 오름·삼나무 방풍림, 스칸디·재패니즈 미니멀 고천장",parking:"넓음",bf:"미확인",kid:"미확인",note:"제주 유일 블루보틀(조사 시점). 인근 숙박·자연 체험 연계",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"안도르",lat:33.4566696,lng:126.7720535,region:"중산간",area:"구좌읍 비자림로",type:"대형·숲속·중산간",hours:"매일 10:00~20:00",closed:"미확인",menu:"소금빵·말차라떼·바게트·케이크",view:"숲 사이 웅장한 건물 인프라, 자연광·넓은 좌석·피아노 음악",parking:"넓음",bf:"미확인",kid:"미확인",note:"웨딩 촬영 명소, 다소 외진 위치",src:"공간정보·스포츠레저 조사 / Google Places 실측"},
+ {name:"스누피가든(내부 카페)",lat:33.4441972,lng:126.7783058,region:"중산간",area:"구좌읍 금백조로",type:"대형·감성·정원",hours:"매일 09:00~18:00",closed:"미확인",menu:"한라봉초코파운드·아메리카노(루시카페)",view:"오름과 목초지 사이 거대 캐릭터 이색 정원 융합",parking:"있음",bf:"미확인",kid:"아이동반 가능",note:"대형 테마정원, 입장료 별도·반나절 소요. 내부 루시카페",src:"공간정보·스포츠레저 조사 / Google Places 실측"}
+];
+
 // ============ 공통 상수 ============
 const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
 const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
 const SPC={run:'#ff6b4a',bike:'#f2c14e',dive:'#2b8fd6',hike:'#5ec46a',walk:'#a98bd6'};
 const SPN={run:'러닝',bike:'자전거',dive:'다이빙',hike:'등산',walk:'트레킹/산책'};
 const LVN2={c:'초급',m:'중급',h:'고급'};
+// 카페 유형별 색상/필터 (유형 문자열에 키워드 포함 여부로 판정 — 복수 유형 허용)
+const CTYPE={ocean:['오션뷰','#2b8fd6'],bakery:['베이커리','#e0a127'],roastery:['로스터리','#7a5230'],dessert:['디저트','#d6739a'],garden:['감성·정원','#5ec46a'],forest:['숲속·중산간','#2e8b57']};
+const CTYPE_KEY={ocean:'오션뷰',bakery:'베이커리',roastery:'로스터리',dessert:'디저트',garden:'감성',forest:'숲속'};
+const CTYPE_LABEL={ocean:'오션뷰',bakery:'베이커리',roastery:'로스터리',dessert:'디저트',garden:'감성·정원',forest:'숲속·중산간'};
+function cafeColor(p){ // 대표색: 유형 문자열 첫 매칭 키워드 색
+  for(const k of ['ocean','bakery','roastery','dessert','garden','forest']){ if(p.type.includes(CTYPE_KEY[k]))return CTYPE[k][1]; }
+  return '#8a6a2a';
+}
 
 let map,markers={},mode=null,selName=null;
 let meActive={1:true,2:true,3:true};
 let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
+let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
 
 function enter(m){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='me'?'theme-me':'theme-all');app.classList.remove('hidden');
+  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':'theme-cafe'));app.classList.remove('hidden');
   document.getElementById('swMe').classList.toggle('active',m==='me');
   document.getElementById('swAll').classList.toggle('active',m==='all');
+  document.getElementById('swCafe').classList.toggle('active',m==='cafe');
   buildFilters();initMap();render();
-  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':'러닝·자전거·다이빙·등산·트레킹 종목별';
-  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':'종목별 코스';
-  document.getElementById('panelSub').textContent = '핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.';
+  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':'제주 전역 카페 — 권역·유형별');
+  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':'권역·유형별 카페');
+  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.';
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v8 (2026.05.24)'
-    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v8 (2026.05.24)');
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v9 (2026.05.24)'
+    : (m==='all'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v9 (2026.05.24)'
+    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v9 (2026.05.24)'));
 }
 function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
 
@@ -467,16 +558,20 @@ function buildFilters(){
   if(mode==='me'){
     f.innerHTML='<span class="flabel">강도</span>'+
       [1,2,3].map(l=>`<div class="chip ${meActive[l]?'on':'off'}" onclick="tME(${l})"><span class="dot" style="background:${LV1[l]}"></span>${LVN[l]}</div>`).join('');
-  }else{
+  }else if(mode==='all'){
     f.innerHTML='<span class="flabel">종목</span>'+
       Object.keys(SPN).map(s=>`<div class="chip ${allSp[s]?'on':'off'}" onclick="tSP('${s}')"><span class="dot" style="background:${SPC[s]}"></span>${SPN[s]}</div>`).join('')+
       '<span class="flabel" style="margin-left:8px">난이도</span>'+
       Object.keys(LVN2).map(l=>`<div class="chip ${allLv[l]?'on':'off'}" onclick="tLV('${l}')">${LVN2[l]}</div>`).join('');
+  }else{
+    f.innerHTML='<span class="flabel">유형</span>'+
+      Object.keys(CTYPE).map(k=>`<div class="chip ${cafeType[k]?'on':'off'}" onclick="tCAFE('${k}')"><span class="dot" style="background:${CTYPE[k][1]}"></span>${CTYPE_LABEL[k]}</div>`).join('');
   }
 }
 function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
 function tSP(s){allSp[s]=!allSp[s];buildFilters();render();}
 function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
+function tCAFE(k){cafeType[k]=!cafeType[k];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
@@ -495,13 +590,21 @@ function pin(color,ring){return L.divIcon({className:'',html:`<div style="width:
 function render(){
   const list=document.getElementById('list');list.innerHTML='';
   Object.values(markers).forEach(m=>map.removeLayer(m));markers={};
-  const data = mode==='me' ? ME.filter(p=>meActive[p.lv]) : ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
+  let data;
+  if(mode==='me') data = ME.filter(p=>meActive[p.lv]);
+  else if(mode==='all') data = ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
+  else data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
   if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
   data.forEach(p=>{
     let color,ring;
-    if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}else{color=SPC[p.sp];ring='#fff';}
+    if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}
+    else if(mode==='all'){color=SPC[p.sp];ring='#fff';}
+    else{color=cafeColor(p);ring='#fff';}
     const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
-    const sub = mode==='me'?`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`:`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
+    let sub;
+    if(mode==='me') sub=`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`;
+    else if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
+    else sub=`${p.type}<br>${p.area}`;
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
@@ -511,10 +614,14 @@ function render(){
       head=`<span class="badge" style="background:${LV1[p.lv]}">${LVN[p.lv]}</span> <span class="lvb" style="background:${SAFE[p.safe][1]};color:${SAFE[p.safe][2]};border:1px solid ${SAFE[p.safe][3]}">${SAFE[p.safe][0]}</span>`;
       meta=`${p.region} · ${p.length} · ${p.araTime}`;
       if(selName===p.name) detail=detailME(p);
-    }else{
+    }else if(mode==='all'){
       head=`<span class="badge" style="background:${SPC[p.sp]};color:#fff">${SPN[p.sp]}</span> <span class="lvb" style="border:1px solid #b9c6c3">${LVN2[p.lv]}</span>`;
       meta=`${p.region} · ${p.dist} · ${p.time}`;
       if(selName===p.name) detail=detailALL(p);
+    }else{
+      head=`<span class="badge" style="background:${cafeColor(p)};color:#fff">${p.type.split('·')[0]}</span>`;
+      meta=`${p.region} · ${p.area} · ${p.hours}`;
+      if(selName===p.name) detail=detailCAFE(p);
     }
     card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
@@ -533,6 +640,13 @@ function detailALL(p){return `<div class="detail">
   <dt>핵심 물리(노면/수심/표고)</dt><dd>${p.phys}</dd><dt>인프라</dt><dd>${p.infra}</dd>
   <dt>경관·볼거리</dt><dd>${p.view}</dd><dt>자격/예약</dt><dd>${p.req}</dd>
   <dt>접근성</dt><dd>${p.ara}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+function detailCAFE(p){return `<div class="detail">
+  <div class="infobox" style="background:#f6efe2;border-left:4px solid #c8a063;color:#7a5e2a"><b>뷰·콘셉트</b><br>${p.view}</div>
+  <dt>유형</dt><dd>${p.type}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
+  <dt>영업시간</dt><dd>${p.hours}</dd><dt>정기휴무</dt><dd>${p.closed}</dd>
+  <dt>대표 메뉴</dt><dd>${p.menu}</dd><dt>주차</dt><dd>${p.parking}</dd>
+  <dt>무장애</dt><dd>${p.bf}</dd><dt>아이동반</dt><dd>${p.kid}</dd>
+  <dt>주의사항</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 
 function select(nm){selName=(selName===nm?null:nm);render();
   if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
