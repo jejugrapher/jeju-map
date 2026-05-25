@@ -1,10 +1,11 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v14
-  작성일: 2026.05.25 (v14)
-  변경: 문화·공원 2차 전수 조사 반영 — CULT 22곳→65곳(+43). 권역1 도심 +16, 권역2 동부 +6, 권역3 서부 +6, 권역4 남부 +5, 권역5 중산간 +10(노루 기존 유지). 공연장 유형 객체 추가(하늘극장·제주아트센터·제주문예회관·서귀포예술의전당). 좌표 전수 Google Places 실측.
-  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원 모드 신설(22곳) → v14 문화·공원 2차 전수 +43(65곳)
+  버전: v15
+  작성일: 2026.05.25 (v15)
+  변경: '내 위치' 기능 추가 — 상단바 "📍 내 위치" 버튼(전 모드 공통). 클릭 시 브라우저 GPS로 현재 위치 펄스 마커+정확도 원 표시 후 지도 이동. 권한 거부·미지원·HTTPS 아님·시간초과 시 토스트 안내. 위치는 브라우저에서만 처리(서버 전송·저장 없음). HTTPS에서만 작동.
+  이력(v14): 문화·공원 2차 전수 조사 반영 — CULT 22곳→65곳(+43). 공연장 유형 추가(하늘극장·제주아트센터·제주문예회관·서귀포예술의전당). 좌표 전수 Google Places 실측.
+  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v14 문화·공원 2차 전수 +43(65곳) → v15 내 위치 기능 추가
   데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 65곳 (총 431).
   PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가 / (문화·공원) 미디어아트 전시관(가칭, 정체·좌표 불명확). 좌표 날조 금지로 제외.
   베이스: jeju_map_20260524_v8.html (모바일 수정본)
@@ -52,6 +53,19 @@
   #app{height:100%;display:flex;flex-direction:column;}
   .topbar{display:flex;align-items:center;gap:14px;padding:11px 22px;border-bottom:2px solid var(--sea);flex-wrap:wrap;}
   .topbar .home{cursor:pointer;font-family:'Black Han Sans',sans-serif;color:var(--sea);font-size:15px;border:none;background:none;}
+  .locbtn{cursor:pointer;font-family:'Gowun Batang',serif;font-weight:700;font-size:13px;padding:6px 13px;border:2px solid var(--sea);border-radius:20px;background:#fff;color:var(--sea);display:flex;align-items:center;gap:5px;transition:.15s;white-space:nowrap;}
+  .locbtn:hover{background:var(--sea);color:#fff;}
+  .locbtn:disabled{opacity:.55;cursor:default;}
+  .locbtn.busy{opacity:.7;cursor:progress;}
+  /* 테마별 내 위치 버튼 색 */
+  .theme-cafe .locbtn{border-color:#c8a063;color:#8a6a2a;} .theme-cafe .locbtn:hover{background:#c8a063;color:#fff;}
+  .theme-well .locbtn{border-color:#5ca57e;color:#2e7d57;} .theme-well .locbtn:hover{background:#5ca57e;color:#fff;}
+  .theme-cult .locbtn{border-color:#7b6fb0;color:#534a8a;} .theme-cult .locbtn:hover{background:#7b6fb0;color:#fff;}
+  /* 현재 위치 펄스 마커 */
+  .me-dot{width:18px;height:18px;border-radius:50%;background:#2b8fd6;border:3px solid #fff;box-shadow:0 0 0 rgba(43,143,214,.6);animation:mepulse 1.8s infinite;}
+  @keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(43,143,214,.55);}70%{box-shadow:0 0 0 16px rgba(43,143,214,0);}100%{box-shadow:0 0 0 0 rgba(43,143,214,0);}}
+  .loctoast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:#1a2e2a;color:#fff;font-size:13px;font-family:'Gowun Batang',serif;padding:11px 18px;border-radius:8px;box-shadow:0 4px 16px rgba(0,0,0,.25);z-index:3000;max-width:88vw;line-height:1.5;opacity:0;transition:opacity .25s;pointer-events:none;}
+  .loctoast.show{opacity:1;}
   .switch{display:flex;border:2px solid var(--sea);border-radius:3px;overflow:hidden;}
   .switch button{font-family:'Gowun Batang',serif;font-weight:700;font-size:13px;padding:7px 14px;border:none;background:transparent;color:var(--sea);cursor:pointer;}
   .switch button.active{background:var(--sea);color:#fff;}
@@ -211,6 +225,7 @@
       <button id="swWell" onclick="enter('well')">웰니스</button>
       <button id="swCult" onclick="enter('cult')">문화·공원</button>
     </div>
+    <button class="locbtn" id="locBtn" onclick="locateMe()">📍 내 위치</button>
     <span class="vtitle" id="vtitle"></span>
   </div>
   <div class="filters" id="filters"></div>
@@ -749,6 +764,7 @@ function cultColor(p){
 }
 
 let map,markers={},mode=null,selName=null;
+let meLocMarker=null,meLocCircle=null,meWatchId=null;
 let meActive={1:true,2:true,3:true};
 let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
 let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
@@ -771,16 +787,16 @@ function enter(m){
   document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':'권역·유형별 문화·공원')));
   document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.'));
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v14 (2026.05.25)'
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v15 (2026.05.25)'
     : (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v14 (2026.05.25)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v15 (2026.05.25)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v14 (2026.05.25)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v15 (2026.05.25)'
     : (m==='well'
-    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v14 (2026.05.25)'
-    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v14 (2026.05.25)'))));
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v15 (2026.05.25)'
+    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v15 (2026.05.25)'))));
 }
-function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
+function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();if(map){map.remove();map=null;}}
 
 function buildFilters(){
   const f=document.getElementById('filters');f.innerHTML='';
@@ -812,6 +828,8 @@ function tCULT(k){cultType[k]=!cultType[k];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
+  meLocMarker=null;meLocCircle=null;
+  if(meWatchId!=null&&navigator.geolocation){navigator.geolocation.clearWatch(meWatchId);meWatchId=null;}
   map=L.map('map',{scrollWheelZoom:true}).setView([33.38,126.55],10);
   const tile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
   L.tileLayer(tile,{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
@@ -819,6 +837,49 @@ function initMap(){
   // 모바일 등에서 컨테이너 크기 확정 후 지도 재계산
   setTimeout(()=>{if(map)map.invalidateSize();},200);
   setTimeout(()=>{if(map)map.invalidateSize();},600);
+}
+// ===== 현재 위치 표시 (브라우저 GPS, 서버 전송 없음) =====
+function clearMeLoc(){
+  if(meWatchId!=null&&navigator.geolocation){navigator.geolocation.clearWatch(meWatchId);meWatchId=null;}
+  if(map&&meLocMarker){map.removeLayer(meLocMarker);}
+  if(map&&meLocCircle){map.removeLayer(meLocCircle);}
+  meLocMarker=null;meLocCircle=null;
+}
+function loctoast(msg){
+  let t=document.getElementById('loctoast');
+  if(!t){t=document.createElement('div');t.id='loctoast';t.className='loctoast';document.body.appendChild(t);}
+  t.textContent=msg;t.classList.add('show');
+  clearTimeout(t._h);t._h=setTimeout(()=>t.classList.remove('show'),3800);
+}
+function meIcon(){return L.divIcon({className:'',html:'<div class="me-dot"></div>',iconSize:[18,18],iconAnchor:[9,9]});}
+function locateMe(){
+  if(!map){return;}
+  const btn=document.getElementById('locBtn');
+  if(!('geolocation' in navigator)){loctoast('이 브라우저는 위치 기능을 지원하지 않습니다.');return;}
+  if(!window.isSecureContext){loctoast('보안 연결(HTTPS)에서만 위치를 사용할 수 있습니다.');return;}
+  btn.classList.add('busy');btn.textContent='📍 찾는 중…';
+  navigator.geolocation.getCurrentPosition(
+    pos=>{
+      btn.classList.remove('busy');btn.textContent='📍 내 위치';
+      const lat=pos.coords.latitude,lng=pos.coords.longitude,acc=pos.coords.accuracy||50;
+      clearMeLoc();
+      meLocMarker=L.marker([lat,lng],{icon:meIcon(),zIndexOffset:1000}).addTo(map).bindPopup('현재 내 위치');
+      meLocCircle=L.circle([lat,lng],{radius:acc,color:'#2b8fd6',weight:1,fillColor:'#2b8fd6',fillOpacity:.12}).addTo(map);
+      map.setView([lat,lng],14,{animate:true});
+      meLocMarker.openPopup();
+      // 제주 범위 밖이면 안내(섬 밖에서 접속 시)
+      if(lat<33.0||lat>33.7||lng<126.0||lng>127.2){loctoast('현재 위치가 제주 지도 범위 밖입니다. 지도를 축소해 확인하세요.');}
+    },
+    err=>{
+      btn.classList.remove('busy');btn.textContent='📍 내 위치';
+      let m='위치를 가져오지 못했습니다.';
+      if(err.code===1)m='위치 권한이 거부되었습니다. 브라우저 주소창의 위치 권한을 허용해 주세요.';
+      else if(err.code===2)m='위치 정보를 사용할 수 없습니다. 잠시 후 다시 시도해 주세요.';
+      else if(err.code===3)m='위치 확인 시간이 초과되었습니다. 다시 시도해 주세요.';
+      loctoast(m);
+    },
+    {enableHighAccuracy:true,timeout:10000,maximumAge:30000}
+  );
 }
 window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(map)map.invalidateSize();},300);});
 window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
