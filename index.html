@@ -1,11 +1,12 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v15
-  작성일: 2026.05.25 (v15)
-  변경: '내 위치' 기능 추가 — 상단바 "📍 내 위치" 버튼(전 모드 공통). 클릭 시 브라우저 GPS로 현재 위치 펄스 마커+정확도 원 표시 후 지도 이동. 권한 거부·미지원·HTTPS 아님·시간초과 시 토스트 안내. 위치는 브라우저에서만 처리(서버 전송·저장 없음). HTTPS에서만 작동.
+  버전: v16
+  작성일: 2026.05.25 (v16)
+  변경: 모바일 랜딩 스크롤 수정 — 카드 5개가 세로로 쌓이며 화면을 넘쳐 아래 카드(웰니스·문화공원) 선택 불가했던 문제 해결. #landing에 overflow-y:auto 추가, 모바일에서 세로 중앙정렬→상단정렬(flex-start)로 변경해 모든 카드 스크롤 접근 가능. 카드 여백·제목 크기 모바일 최적화. 데이터·기능 변경 없음.
+  이력(v15): '내 위치' 기능 추가 — 상단바 "📍 내 위치" 버튼(전 모드 공통, 브라우저 GPS, HTTPS 전용, 서버 전송 없음).
   이력(v14): 문화·공원 2차 전수 조사 반영 — CULT 22곳→65곳(+43). 공연장 유형 추가(하늘극장·제주아트센터·제주문예회관·서귀포예술의전당). 좌표 전수 Google Places 실측.
-  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v14 문화·공원 2차 전수 +43(65곳) → v15 내 위치 기능 추가
+  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v14 문화·공원 2차 전수 +43(65곳) → v15 내 위치 기능 → v16 모바일 랜딩 스크롤 수정
   데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 65곳 (총 431).
   PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가 / (문화·공원) 미디어아트 전시관(가칭, 정체·좌표 불명확). 좌표 날조 금지로 제외.
   베이스: jeju_map_20260524_v8.html (모바일 수정본)
@@ -30,6 +31,7 @@
 
   /* ===== 랜딩 ===== */
   #landing{position:fixed;inset:0;z-index:1000;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    overflow-y:auto;-webkit-overflow-scrolling:touch;
     background:#f4f1e8;background-image:radial-gradient(circle at 78% 12%,rgba(43,179,179,.20),transparent 50%),radial-gradient(circle at 12% 88%,rgba(255,107,74,.16),transparent 50%);padding:24px;transition:opacity .4s;}
   .brand{font-family:'Black Han Sans',sans-serif;font-size:13px;letter-spacing:3px;color:var(--sea);margin-bottom:6px;}
   #landing h1{font-family:'Black Han Sans',sans-serif;font-size:clamp(26px,5.5vw,50px);color:#1a2e2a;text-align:center;line-height:1.1;}
@@ -162,8 +164,15 @@
     .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
     .panel{flex:none;width:100%;max-width:100%;border-left:none;border-top:2px solid var(--sea);overflow-y:visible;}
     .panel-head{position:static;}
-    .choice{width:100%;max-width:340px;}
+    /* 랜딩: 카드가 세로로 길어 화면을 넘치므로 상단 정렬 + 스크롤 허용 (중앙정렬이면 위쪽 카드가 잘려 접근 불가) */
+    #landing{justify-content:flex-start;padding:20px 18px 40px;}
+    .choose{margin-top:22px;gap:16px;}
+    .choice{width:100%;max-width:340px;padding:20px 20px;}
+    #landing h1{font-size:clamp(24px,7vw,34px);}
+    #landing .tag{font-size:13px;margin-top:8px;}
+    #landing .foot{margin-top:24px;}
     .topbar{padding:9px 14px;} .filters{padding:8px 14px;} .vfoot{padding:9px 14px;}
+    .topbar{flex-wrap:wrap;}
   }
 </style>
 </head>
@@ -787,14 +796,14 @@ function enter(m){
   document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':'권역·유형별 문화·공원')));
   document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.'));
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v15 (2026.05.25)'
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v16 (2026.05.25)'
     : (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v15 (2026.05.25)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v16 (2026.05.25)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v15 (2026.05.25)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v16 (2026.05.25)'
     : (m==='well'
-    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v15 (2026.05.25)'
-    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v15 (2026.05.25)'))));
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v16 (2026.05.25)'
+    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v16 (2026.05.25)'))));
 }
 function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();if(map){map.remove();map=null;}}
 
