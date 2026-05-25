@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v12
-  작성일: 2026.05.24 (v12)
-  변경: 웰니스 지도 모드 신설(랜딩 4번째 카드 "웰니스" + 상단 "웰니스" 스위치). 독립 WELL[] 배열(16곳) + 웰니스 전용 그린 테마 + 유형별 필터(요가원/야외요가/숲해설/마음치유). 의료행위 아닌 일반 웰니스 정보로 한정, 효능 단정 표현 배제.
-  이력: ... → v9 카페 모드(45) → v10 단골 3곳(48) → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳)
-  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 (총 366).
-  PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가(특정 업체 미상). 좌표 날조 금지로 제외.
+  버전: v13
+  작성일: 2026.05.25 (v13)
+  변경: 문화·공원 지도 모드 신설(랜딩 5번째 카드 "문화·공원" + 상단 "문화·공원" 스위치). 독립 CULT[] 배열(22곳) + 차분한 보라/네이비 테마 + 유형별 필터(박물관/미술관/전시장/공연장/공원). 박물관·미술관·전시장·공연장·공원을 단일 지도로 통합, 내부 유형 필터로 구분.
+  이력: ... → v10 단골 3곳(48) → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원 모드 신설(22곳)
+  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 22곳 (총 388).
+  PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가 / (문화·공원) 미디어아트 전시관(가칭, 정체·좌표 불명확). 좌표 날조 금지로 제외.
   베이스: jeju_map_20260524_v8.html (모바일 수정본)
   좌표계: EPSG:4326 / 좌표: Google Places 실측
 -->
@@ -43,6 +43,7 @@
   .who.all{background:#ffe3d6;color:#c4502a;border:1px solid var(--coral);}
   .who.cafe{background:#efe6d6;color:#8a6a2a;border:1px solid #c8a063;}
   .who.well{background:#e3eee6;color:#2e7d57;border:1px solid #5ca57e;}
+  .who.cult{background:#e6e3f0;color:#534a8a;border:1px solid #7b6fb0;}
   .choice p{color:#5a6b6b;font-size:13px;margin-top:12px;line-height:1.55;}
   .choice .go{margin-top:16px;font-family:sans-serif;font-weight:700;font-size:13px;color:var(--sea);}
   #landing .foot{margin-top:34px;font-size:11px;color:#8a8270;text-align:center;line-height:1.6;max-width:620px;}
@@ -130,6 +131,18 @@
   .theme-well .card .nm{color:#23362b;} .theme-well .card .meta{color:#3f6b54;} .theme-well .detail dt{color:#2e7d57;} .theme-well .detail dd{color:#23362b;}
   .theme-well .vfoot{color:#5a7a68;border-color:#d2e6da;} .theme-well .src{color:#5a7a68;} .theme-well .mapbox{background:#d9e8df;}
 
+  /* 문화·공원 테마 (차분한 보라/네이비) */
+  .theme-cult{background:#f3f2f8;color:#2a2540;}
+  .theme-cult .topbar,.theme-cult .filters{background:#e7e4f0;border-color:#c5bedd;}
+  .theme-cult .home,.theme-cult .switch{color:#534a8a;border-color:#7b6fb0;}
+  .theme-cult .switch button{color:#534a8a;} .theme-cult .switch button.active{background:#7b6fb0;color:#fff;}
+  .theme-cult .vtitle{color:#5a5378;} .theme-cult .chip{background:#fff;color:#2a2540;border-color:#c5bedd;}
+  .theme-cult .panel{background:#f8f7fc;border-color:#7b6fb0;} .theme-cult .panel-head{background:#f8f7fc;border-color:#ded9ec;}
+  .theme-cult .panel-head h2{color:#534a8a;} .theme-cult .panel-head p{color:#5a5378;}
+  .theme-cult .card{border-color:#e0dcef;} .theme-cult .card:hover{background:#eeebf6;} .theme-cult .card.sel{background:#e8e4f4;border-left:5px solid #7b6fb0;}
+  .theme-cult .card .nm{color:#2a2540;} .theme-cult .card .meta{color:#5a5378;} .theme-cult .detail dt{color:#534a8a;} .theme-cult .detail dd{color:#2a2540;}
+  .theme-cult .vfoot{color:#6a6488;border-color:#ded9ec;} .theme-cult .src{color:#6a6488;} .theme-cult .mapbox{background:#dedbe8;}
+
   @media(max-width:760px){
     .wrap{flex-direction:column;overflow-y:auto;}
     .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
@@ -176,6 +189,13 @@
       <p>요가원·야외 요가·숲해설·마음치유 프로그램. 권역별 + 유형별. 프로그램·운영시간·예약·요금·소요시간·환경 표시.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enter('cult')">
+      <div class="ico">🏛</div>
+      <h2>문화·공원 지도</h2>
+      <span class="who cult">박물관·미술관·전시장·공원</span>
+      <p>박물관·미술관·전시장·공연장·공원을 한 지도에. 권역별 + 유형별. 운영시간·휴무·요금·소요시간·실내외·주차·무장애 표시.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
   </div>
   <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
 </div>
@@ -189,6 +209,7 @@
       <button id="swAll" onclick="enter('all')">일반인용</button>
       <button id="swCafe" onclick="enter('cafe')">카페</button>
       <button id="swWell" onclick="enter('well')">웰니스</button>
+      <button id="swCult" onclick="enter('cult')">문화·공원</button>
     </div>
     <span class="vtitle" id="vtitle"></span>
   </div>
@@ -609,6 +630,40 @@ const WELL=[
  {name:"파파빌레",lat:33.4607223,lng:126.6610258,region:"중산간",area:"조천읍 와흘리",wtype:"숲해설",program:"자연 자원 활용 자연·숲 힐링 탐방(곶자왈 정원), 카페 병설",hours:"11:00~16:00",booking:"미확인",fee:"미확인",duration:"미확인",env:"화산암반과 숲이 어우러진 야외 힐링 공간(한반도 모양 빌레)",prep:"미확인",note:"댕유자 카페 병설. 계절별 다른 풍경, 산림 힐링 체험",src:"공간정보·웰니스 조사 / Google Places 실측"}
 ];
 
+const CULT=[
+ // ===== 권역1 도심 (8곳) =====
+ {name:"한라수목원",lat:33.4699272,lng:126.4932445,region:"도심",area:"제주시 수목원길",ctype:"공원",theme:"1.7㎞ 산책로·오름 정상 코스·삼림욕장·야외 전시원·자연생태체험학습관",hours:"야외·산책로 연중무휴 상시개방 / 실내: 하절기 09:00~18:00, 동절기 09:00~17:00",closed:"설날·추석 당일 휴관(실내시설 한정)",fee:"무료 / 기획전시실 대관 10,000~15,000원(1일), 자연생태체험학습관 시청각실 5,000~20,000원",duration:"2~3시간",env:"실외 중심(약 5만 평 산책로)+일부 실내 생태체험학습관",parking:"유료(소형 1,000원·대형 4,000원, 최초 10분 무료)",bf:"체력단련시설, 주차료 장애인 50% 할인, 무장애관광지 지정",note:"아침 운동 도민·주말 가족 방문 다수. 야외는 상시·실내는 계절별 마감 상이",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"기당미술관",lat:33.2448215,lng:126.5512301,region:"도심",area:"서귀포시 남성중로153번길 15",ctype:"미술관",theme:"변시지 상설전시('폭풍의 화가'), 강용범 작품, 연 3~4회 주제전시",hours:"09:00~18:00(17:30 입장마감)",closed:"매주 월요일, 1/1, 설날·추석 당일",fee:"개인 어른 1,000·청소년 500·어린이 300원 / 단체 어른 700·청소년 300·어린이 200원 / 6세 이하·65세 이상·유공자 무료, 도민 50% 할인",duration:"미확인",env:"실내 (전국 최초 시립미술관)",parking:"미확인",bf:"무장애 편의정보 등록",note:"비 오는 날 실내 방문지로 적합. 서귀포 구도심 위치",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"민속자연사박물관",lat:33.5065067,lng:126.5316239,region:"도심",area:"제주시 삼성로",ctype:"박물관",theme:"제주 문화·역사·예술 및 테마여행 연계 (자연사·민속 종합)",hours:"09:00~18:00",closed:"매주 월요일",fee:"미확인",duration:"약 1시간",env:"실내외 결합",parking:"미확인",bf:"미확인",note:"운영시간·휴무는 실측 보완값(조사 원문은 미확인). 디지털관광증 나우다 연계. 방문 전 확인 권장",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼성혈",lat:33.5047027,lng:126.529358,region:"도심",area:"제주시 삼성로 22",ctype:"공원",theme:"탐라 시조 삼신인 발상 역사 유적지 관람 및 산책",hours:"09:00~18:00 (1/1·설·추석 당일 10:00 개장)",closed:"연중무휴",fee:"성인 4,000·청소년 3,000·기타 2,500원 이하 / 도민 50% 할인, 장애인·유공자 단체 1,000원",duration:"약 90분(주차 1시간 30분 무료 기준 추정)",env:"야외 정비 공원 형태",parking:"관람객 1시간 30분 무료 주차",bf:"미확인",note:"명절 당일 10시 지연 개장 — 개장시간 변동 주의",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"삼양동 선사유적지",lat:33.523123,lng:126.5878316,region:"도심",area:"제주시 삼양동",ctype:"전시장·공원",theme:"선사 유적 관람 및 야외 역사 공원",hours:"09:00~18:00",closed:"연중무휴",fee:"무료",duration:"미확인",env:"야외 역사 공원+실내 전시",parking:"미확인",bf:"미확인",note:"연중무휴·무료. 권역1 도심 동쪽 경계",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주별빛누리공원",lat:33.4445307,lng:126.5492916,region:"도심",area:"제주시 선돌목동길 60(오등동)",ctype:"공원·전시장",theme:"야간 천문 관측·별빛·식물 관람 (천문대·플라네타리움)",hours:"하절기(4~9월) 15:00~23:00 / 동절기(10~3월) 14:00~22:00 (입장 마감 1.5시간 전)",closed:"1/1, 설·추석 당일, 매주 월요일(월요일 공휴일 시 익일 휴무)",fee:"무료",duration:"미확인",env:"실내 전시관+야외 식물 공원 복합",parking:"소형 100대·대형 10대",bf:"유모차 대여 불가, 애완동물 동반 불가",note:"야간 특화. 영유아 유모차·반려동물 동반 제약 주의",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"김만덕기념관",lat:33.5159804,lng:126.5304208,region:"도심",area:"제주시 산지로 7",ctype:"전시장",theme:"의인 김만덕 생애 및 나눔 정신 전시",hours:"09:00~18:00",closed:"매주 월요일(공휴일 시 다음 평일 휴관), 1/1, 설날·추석 당일",fee:"무료",duration:"미확인",env:"실내 전시 시설",parking:"미확인",bf:"미확인",note:"월요일이 공휴일이면 대체 휴무 적용 — 방문 전 확인 권장. 원도심·항만 인근",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"노형수퍼마켙",lat:33.4649309,lng:126.4553144,region:"도심",area:"제주시 노형동",ctype:"전시장",theme:"몰입형 미디어아트 전시 및 복합문화 체험",hours:"09:00~19:00(입장마감 18:00)",closed:"연중무휴",fee:"미확인",duration:"미확인",env:"실내 미디어아트 전시장",parking:"미확인",bf:"미확인",note:"이름과 달리 미디어아트 전시장. 계절별 운영시간 변동 가능성. 입장마감(18:00)과 폐장(19:00) 사이 신규 입장 제한",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역2 동부 (7곳) =====
+ {name:"해녀박물관",lat:33.5236474,lng:126.8634357,region:"동부",area:"구좌읍 해녀박물관길 26",ctype:"박물관",theme:"해녀 생활상·역사·해양 문화 전시 보존",hours:"09:00~18:00",closed:"매주 월요일",fee:"미확인",duration:"미확인",env:"실내 전시관+야외",parking:"장애인 전용 주차구역 확보",bf:"장애인 엘리베이터, 유효공간 확보 장애인 화장실, 휠체어 안내소 진입 가능(고도 배리어프리)",note:"운영시간·휴무는 실측 보완값(조사 원문은 미확인). 무장애 인프라 우수. 방문 전 확인 권장",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"빛의 벙커",lat:33.4399386,lng:126.8990193,region:"동부",area:"성산읍 서성일로1168번길 89-17",ctype:"전시장",theme:"대형 통신 벙커 재생 몰입형 미디어아트 전시",hours:"10:00~18:20",closed:"미확인",fee:"유료(예매 베이스, 사전 예매 시 할인)",duration:"약 1시간(전시 1회)",env:"지하 벙커 대규모 실내",parking:"대형 주차 가능(단체 핫라인 운영)",bf:"단체 문의 별도 전화 운영",note:"운영시간은 실측 보완값(조사 원문 미확인). 사전 예매 권장, 전시 내 화장실 없음. 방문 전 확인 권장",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주민속촌",lat:33.322511,lng:126.841868,region:"동부",area:"표선면 민속해안로 631-34",ctype:"박물관·공원",theme:"제주 전통 가옥 및 민속 생활상 보존 단지",hours:"09:00 개장 (매표 마감: 동절기 11/1~2/28 17:00, 하절기 3/1~10/31 18:00)",closed:"미확인",fee:"성인 15,000(단체 12,000)·경로 13,000·청소년 12,000·어린이 11,000원 / 국가유공자·도민 차등 할인",duration:"미확인",env:"광활한 야외 촌락 중심 전시 단지",parking:"미확인",bf:"대학생 성인 적용, 군 하사관 이하 청소년 적용, 어린이 만 4세부터",note:"계절별 매표 마감 편차 큼. 요금 구간 복잡 — 방문 전 확인 권장",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"김영갑갤러리두모악",lat:33.372,lng:126.8542528,region:"동부",area:"성산읍 삼달로 137(삼달리)",ctype:"미술관",theme:"고 김영갑 사진작가 제주 풍경 상설전시·유품 전시('제주, 나를 남기다')",hours:"09:30~18:00 (기간별 편차 존재, 확인 필수)",closed:"매주 월요일",fee:"유료(정확한 금액 미확인)",duration:"미확인",env:"폐교 개조 실내 전시+부속 정원",parking:"미확인",bf:"미확인",note:"기간별 개폐시간 미세 변동. 산굼부리에서 차량 약 20분. 방문 전 확인 권장",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"혼인지",lat:33.4160056,lng:126.8938445,region:"동부",area:"성산읍 온평리 1693",ctype:"공원",theme:"탐라국 삼신인 혼례 유적지, 포토스팟, 올레 2코스 도보",hours:"부지 산책 연중 상시 / 관리시설 08:00~17:00 (원천 08~17·09~18 혼재)",closed:"미확인",fee:"무료",duration:"1시간 미만",env:"올레 2코스 관통 야외 역사 공원",parking:"인근 주차 가능",bf:"장애인 화장실(유효공간 있음), 안내소 휠체어 진입 불가, 경사도 상",note:"운영시간 원천 충돌(부지 개방 vs 관리시설 시간 분리). 휠체어 접근 제약",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"비자림",lat:33.484272,lng:126.8064793,region:"동부",area:"구좌읍 비자숲길 55",ctype:"공원",theme:"천년 비자나무 군락 및 정비된 생태 숲길 산책",hours:"09:00~18:00(입장 마감 17:00)",closed:"매월 첫 번째 화요일 정기 휴무",fee:"어른 3,000·청소년 2,500원 등 세분 / 미취학 어린이·도민 무료",duration:"1~1.5시간(약 3.2㎞)",env:"정비된 생태테마공원(평탄·일부 자갈)",parking:"있음",bf:"미확인",note:"매월 첫째 화요일 휴무 주의. 평탄해 산책 용이",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"북촌 너븐숭이 4.3기념관",lat:33.5459875,lng:126.6887641,region:"동부",area:"조천읍 일주동로 3(북촌리)",ctype:"전시장·공원",theme:"제주 4.3 사건 역사 기록 및 야외 추모 유적지 해설",hours:"09:00~18:00(입장 마감 17:00)",closed:"2·4번째 월요일, 1/1, 설 연휴 전체, 추석 연휴 전체",fee:"무료",duration:"미확인",env:"실내 기념관+야외 추모 유적지",parking:"미확인",bf:"유적지 전문 도슨트 해설 투어 가동",note:"명절은 당일이 아닌 연휴 전체 셧다운 주의. 다크투어리즘 기점",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역3 서부 (4곳) =====
+ {name:"한림공원",lat:33.3895279,lng:126.2392884,region:"서부",area:"한림읍 한림로 300",ctype:"공원·박물관",theme:"10만 평 복합 테마파크, 이국적 식생·조류 생태 테마",hours:"09:00 개장 (마감: 3~5월·9~10월 17:30, 6~8월 18:00, 11~2월 16:30)",closed:"미확인",fee:"유료(금액 미확인)",duration:"1.5~4시간",env:"야외 정원+대규모 부지(용암동굴·민속마을 포함)",parking:"가능",bf:"미확인",note:"분기별 마감시간 상이 — 방문 전 확인 권장. 인근 해변·카페",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주현대미술관",lat:33.33968,lng:126.2656583,region:"서부",area:"제주시 한경면 저지14길 35",ctype:"미술관",theme:"야외 공연장 연계 복합 전시, 김창열미술관 스탬프 투어 연계",hours:"09:00~18:00(예약제 1일 8차수, 매시 30~50분 입장, 회당 최대 50명)",closed:"매주 월요일(공휴일 시 대체 무휴), 1/1, 설날·추석 당일",fee:"6세 이하·65세 이상·유공자 무료, 매월 마지막 수요일(문화의 날) 무료 / 일반 금액 등락(확인 필요)",duration:"회차당 약 1시간",env:"전시실+아트샵+야외 조각 휴게실",parking:"미확인",bf:"엘리베이터(로비·복도 각 1대), 수동휠체어·유아차 각 2대 대여, 장애인 화장실, 휠체어 급속충전기, 심장충격기",note:"저지문화예술인마을 중심. 시간대별 예약·수용 제한, 우천 시 제약 없음",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주도립김창열미술관",lat:33.3391085,lng:126.2687552,region:"서부",area:"제주시 한림읍 용금로 883-5",ctype:"미술관",theme:"물방울 화가 김창열 단일 테마 전시 및 스탬프 연계",hours:"화~토 09:00~18:00",closed:"매주 월요일",fee:"성인 2,000·청소년 1,000·어린이 500원",duration:"1시간 미만",env:"실내 전시(현대미술관과 인접 클러스터)",parking:"미확인",bf:"미확인",note:"인접 제주현대미술관과 공간 상관 매우 높음(저지리 미술관 클러스터). 가성비 관람료",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"제주추사관",lat:33.2499082,lng:126.2783243,region:"서부",area:"서귀포시 대정읍 추사로 44",ctype:"전시장",theme:"추사 김정희 적거지·유배 역사, 사색 중심 테마",hours:"09:00~17:30",closed:"매주 월요일, 추석, 설날",fee:"무료",duration:"미확인",env:"외부 산책 공간+지하 전시관 결합",parking:"여유로운 주차장 확보",bf:"미확인",note:"평일 오전 한적한 힐링 공간. 매주 수요일 서예 재능기부 진행",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역4 남부 (2곳) =====
+ {name:"서귀포 감귤박물관",lat:33.2715236,lng:126.6076604,region:"남부",area:"서귀포시 효돈",ctype:"박물관",theme:"감귤 테마 역사 보존, 생태 온실·가공 산업 역사 전시",hours:"09:00~18:00",closed:"1월 1일",fee:"어른 1,500·청소년/군인 1,000·어린이 800원 / 별도 할인 1,000~500원",duration:"미확인",env:"실내 전시+생태 온실, 부속 감귤 테마 카페",parking:"미확인",bf:"미확인",note:"초저가 공공형 요금. 감귤밭·온실 볼거리",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+ {name:"생약누리",lat:33.3059049,lng:126.571522,region:"남부",area:"서귀포시 상효동 260",ctype:"전시장",theme:"제주 자생 약용 식물 생태 및 생약 테마 관람",hours:"10:00~17:00",closed:"매주 월요일, 1/1, 설날·추석 연휴 전체",fee:"무료",duration:"미확인",env:"실내 전시 체험 공간(한라산 조망 포토존)",parking:"미확인",bf:"미확인",note:"20명 이상 단체 사전 예약 필수. 실측 좌표는 서귀포 동부 산간(상효동) — PDF 남부 가편입 표기",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"},
+
+ // ===== 권역5 중산간 (1곳) =====
+ {name:"노루생태관찰원",lat:33.4443414,lng:126.6267536,region:"중산간",area:"제주시 명림로 520",ctype:"공원",theme:"제주 자생 노루 생태 관찰, 생태 테마정원, 만들기·먹이주기 체험",hours:"09:00~17:00 (요일별 교차 표기 존재)",closed:"매주 화요일",fee:"입장 일반 1,000원, 65세 이상·12세 이하 무료 / 노루 만들기 3,000원, 먹이주기 1,000원",duration:"미확인",env:"야외 방목·관찰 데크+실내 공작 체험 부스",parking:"미확인",bf:"미확인",note:"공원은 화요일 휴무이나 '만들기 체험'은 토·일·공휴일 휴무 — 가동일 불일치 주의",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"}
+];
+
 // ============ 공통 상수 ============
 const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
 const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
@@ -631,34 +686,46 @@ function wellColor(p){
   for(const k of ['yoga','outdoor','forest','heal']){ if(p.wtype.includes(WTYPE_KEY[k]))return WTYPE[k][1]; }
   return '#2e7d57';
 }
+// 문화·공원 유형별 색상/필터 (ctype 문자열에 키워드 포함 여부로 판정 — 복수 유형 허용)
+const CULTT={museum:['박물관','#5a6dbf'],art:['미술관','#9b6fb0'],expo:['전시장','#4aa3b3'],stage:['공연장','#c77da8'],park:['공원','#5e9e6a']};
+const CULTT_KEY={museum:'박물관',art:'미술관',expo:'전시장',stage:'공연장',park:'공원'};
+const CULTT_LABEL={museum:'박물관',art:'미술관',expo:'전시장',stage:'공연장',park:'공원'};
+function cultColor(p){
+  for(const k of ['museum','art','expo','stage','park']){ if(p.ctype.includes(CULTT_KEY[k]))return CULTT[k][1]; }
+  return '#7b6fb0';
+}
 
 let map,markers={},mode=null,selName=null;
 let meActive={1:true,2:true,3:true};
 let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
 let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
 let wellType={yoga:true,outdoor:true,forest:true,heal:true};
+let cultType={museum:true,art:true,expo:true,stage:true,park:true};
 
 function enter(m){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':'theme-well')));app.classList.remove('hidden');
+  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':'theme-cult'))));app.classList.remove('hidden');
   document.getElementById('swMe').classList.toggle('active',m==='me');
   document.getElementById('swAll').classList.toggle('active',m==='all');
   document.getElementById('swCafe').classList.toggle('active',m==='cafe');
   document.getElementById('swWell').classList.toggle('active',m==='well');
+  document.getElementById('swCult').classList.toggle('active',m==='cult');
   buildFilters();initMap();render();
-  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':'제주 웰니스 — 요가·숲해설·마음치유'));
-  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':'권역·유형별 웰니스'));
-  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.');
+  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':(m==='well'?'제주 웰니스 — 요가·숲해설·마음치유':'제주 문화·공원 — 박물관·미술관·전시장·공원')));
+  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':'권역·유형별 문화·공원')));
+  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.'));
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v12 (2026.05.24)'
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v13 (2026.05.25)'
     : (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v12 (2026.05.24)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v13 (2026.05.25)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v12 (2026.05.24)'
-    : '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v12 (2026.05.24)')));
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 (2026.05.25)'
+    : (m==='well'
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v13 (2026.05.25)'
+    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 (2026.05.25)'))));
 }
 function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
 
@@ -675,9 +742,12 @@ function buildFilters(){
   }else if(mode==='cafe'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(CTYPE).map(k=>`<div class="chip ${cafeType[k]?'on':'off'}" onclick="tCAFE('${k}')"><span class="dot" style="background:${CTYPE[k][1]}"></span>${CTYPE_LABEL[k]}</div>`).join('');
-  }else{
+  }else if(mode==='well'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(WTYPE).map(k=>`<div class="chip ${wellType[k]?'on':'off'}" onclick="tWELL('${k}')"><span class="dot" style="background:${WTYPE[k][1]}"></span>${WTYPE_LABEL[k]}</div>`).join('');
+  }else{
+    f.innerHTML='<span class="flabel">유형</span>'+
+      Object.keys(CULTT).map(k=>`<div class="chip ${cultType[k]?'on':'off'}" onclick="tCULT('${k}')"><span class="dot" style="background:${CULTT[k][1]}"></span>${CULTT_LABEL[k]}</div>`).join('');
   }
 }
 function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
@@ -685,6 +755,7 @@ function tSP(s){allSp[s]=!allSp[s];buildFilters();render();}
 function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
 function tCAFE(k){cafeType[k]=!cafeType[k];buildFilters();render();}
 function tWELL(k){wellType[k]=!wellType[k];buildFilters();render();}
+function tCULT(k){cultType[k]=!cultType[k];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
@@ -707,20 +778,23 @@ function render(){
   if(mode==='me') data = ME.filter(p=>meActive[p.lv]);
   else if(mode==='all') data = ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
   else if(mode==='cafe') data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
-  else data = WELL.filter(p=>Object.keys(WTYPE).some(k=>wellType[k]&&p.wtype.includes(WTYPE_KEY[k])) || Object.keys(WTYPE).every(k=>!wellType[k]));
+  else if(mode==='well') data = WELL.filter(p=>Object.keys(WTYPE).some(k=>wellType[k]&&p.wtype.includes(WTYPE_KEY[k])) || Object.keys(WTYPE).every(k=>!wellType[k]));
+  else data = CULT.filter(p=>Object.keys(CULTT).some(k=>cultType[k]&&p.ctype.includes(CULTT_KEY[k])) || Object.keys(CULTT).every(k=>!cultType[k]));
   if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
   data.forEach(p=>{
     let color,ring;
     if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}
     else if(mode==='all'){color=SPC[p.sp];ring='#fff';}
     else if(mode==='cafe'){color=cafeColor(p);ring='#fff';}
-    else{color=wellColor(p);ring='#fff';}
+    else if(mode==='well'){color=wellColor(p);ring='#fff';}
+    else{color=cultColor(p);ring='#fff';}
     const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
     let sub;
     if(mode==='me') sub=`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`;
     else if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
     else if(mode==='cafe') sub=`${p.type}<br>${p.area}`;
-    else sub=`${p.wtype}<br>${p.area}`;
+    else if(mode==='well') sub=`${p.wtype}<br>${p.area}`;
+    else sub=`${p.ctype}<br>${p.area}`;
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
@@ -738,10 +812,14 @@ function render(){
       head=`<span class="badge" style="background:${cafeColor(p)};color:#fff">${p.type.split('·')[0]}</span>`;
       meta=`${p.region} · ${p.area} · ${p.hours}`;
       if(selName===p.name) detail=detailCAFE(p);
-    }else{
+    }else if(mode==='well'){
       head=`<span class="badge" style="background:${wellColor(p)};color:#fff">${p.wtype.split(/[·\/]/)[0]}</span>`;
       meta=`${p.region} · ${p.area}`;
       if(selName===p.name) detail=detailWELL(p);
+    }else{
+      head=`<span class="badge" style="background:${cultColor(p)};color:#fff">${p.ctype.split(/[·\/]/)[0]}</span>`;
+      meta=`${p.region} · ${p.area} · ${p.hours}`;
+      if(selName===p.name) detail=detailCULT(p);
     }
     card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
@@ -774,6 +852,14 @@ function detailWELL(p){return `<div class="detail">
   <dt>요금</dt><dd>${p.fee}</dd><dt>소요시간</dt><dd>${p.duration}</dd>
   <dt>환경</dt><dd>${p.env}</dd><dt>준비물·복장</dt><dd>${p.prep}</dd>
   <dt>주의사항·접근성</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+function detailCULT(p){return `<div class="detail">
+  <div class="infobox" style="background:#ece9f5;border-left:4px solid #7b6fb0;color:#534a8a"><b>주제·소장/프로그램</b><br>${p.theme}</div>
+  <dt>유형</dt><dd>${p.ctype}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
+  <dt>운영시간</dt><dd>${p.hours}</dd><dt>정기휴무</dt><dd>${p.closed}</dd>
+  <dt>입장·관람료</dt><dd>${p.fee}</dd><dt>소요시간</dt><dd>${p.duration}</dd>
+  <dt>실내외·규모</dt><dd>${p.env}</dd><dt>주차</dt><dd>${p.parking}</dd>
+  <dt>무장애·편의</dt><dd>${p.bf}</dd><dt>주의사항·접근성</dt><dd>${p.note}</dd>
+  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 
 function select(nm){selName=(selName===nm?null:nm);render();
   if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
