@@ -1,13 +1,14 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v16
-  작성일: 2026.05.25 (v16)
-  변경: 모바일 랜딩 스크롤 수정 — 카드 5개가 세로로 쌓이며 화면을 넘쳐 아래 카드(웰니스·문화공원) 선택 불가했던 문제 해결. #landing에 overflow-y:auto 추가, 모바일에서 세로 중앙정렬→상단정렬(flex-start)로 변경해 모든 카드 스크롤 접근 가능. 카드 여백·제목 크기 모바일 최적화. 데이터·기능 변경 없음.
+  버전: v17
+  작성일: 2026.05.25 (v17)
+  변경: '촬영후보' 지도 모드 신설(랜딩 6번째 카드 + 상단 스위치). 독립 SHOT[] 배열(38곳: ★★★ 10 + ★★ 28) — 드론 항공촬영·3D LiDAR·Gaussian Splatting 시연 후보. 등급(★★★/★★) 필터 + 적색 테마. 드론 적합성·3D스캔·추천촬영방식·허가주체·접근정보 표시. 모든 드론 정보에 "비행 전 별도 승인 확인 필요" 명시. 좌표는 기존 지도 장소 재사용(추가 실측 없음).
+  이력(v16): 모바일 랜딩 스크롤 수정(overflow-y:auto + 상단정렬).
   이력(v15): '내 위치' 기능 추가 — 상단바 "📍 내 위치" 버튼(전 모드 공통, 브라우저 GPS, HTTPS 전용, 서버 전송 없음).
   이력(v14): 문화·공원 2차 전수 조사 반영 — CULT 22곳→65곳(+43). 공연장 유형 추가(하늘극장·제주아트센터·제주문예회관·서귀포예술의전당). 좌표 전수 Google Places 실측.
-  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v14 문화·공원 2차 전수 +43(65곳) → v15 내 위치 기능 → v16 모바일 랜딩 스크롤 수정
-  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 65곳 (총 431).
+  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v15 내 위치 기능 → v16 모바일 랜딩 스크롤 수정 → v17 촬영후보 모드 신설(38곳)
+  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 65곳 / SHOT 38곳 (총 469).
   PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가 / (문화·공원) 미디어아트 전시관(가칭, 정체·좌표 불명확). 좌표 날조 금지로 제외.
   베이스: jeju_map_20260524_v8.html (모바일 수정본)
   좌표계: EPSG:4326 / 좌표: Google Places 실측
@@ -47,6 +48,7 @@
   .who.cafe{background:#efe6d6;color:#8a6a2a;border:1px solid #c8a063;}
   .who.well{background:#e3eee6;color:#2e7d57;border:1px solid #5ca57e;}
   .who.cult{background:#e6e3f0;color:#534a8a;border:1px solid #7b6fb0;}
+  .who.shot{background:#fbe0db;color:#a5341f;border:1px solid #d9543a;}
   .choice p{color:#5a6b6b;font-size:13px;margin-top:12px;line-height:1.55;}
   .choice .go{margin-top:16px;font-family:sans-serif;font-weight:700;font-size:13px;color:var(--sea);}
   #landing .foot{margin-top:34px;font-size:11px;color:#8a8270;text-align:center;line-height:1.6;max-width:620px;}
@@ -159,6 +161,18 @@
   .theme-cult .card .nm{color:#2a2540;} .theme-cult .card .meta{color:#5a5378;} .theme-cult .detail dt{color:#534a8a;} .theme-cult .detail dd{color:#2a2540;}
   .theme-cult .vfoot{color:#6a6488;border-color:#ded9ec;} .theme-cult .src{color:#6a6488;} .theme-cult .mapbox{background:#dedbe8;}
 
+  /* 촬영후보 테마 (적색/시네마틱) */
+  .theme-shot{background:#f8f1ef;color:#3a201a;}
+  .theme-shot .topbar,.theme-shot .filters{background:#f0ddd7;border-color:#dba99b;}
+  .theme-shot .home,.theme-shot .switch{color:#a5341f;border-color:#d9543a;}
+  .theme-shot .switch button{color:#a5341f;} .theme-shot .switch button.active{background:#d9543a;color:#fff;}
+  .theme-shot .vtitle{color:#8a4a3a;} .theme-shot .chip{background:#fff;color:#3a201a;border-color:#dba99b;}
+  .theme-shot .panel{background:#fdf6f4;border-color:#d9543a;} .theme-shot .panel-head{background:#fdf6f4;border-color:#ecd0c8;}
+  .theme-shot .panel-head h2{color:#a5341f;} .theme-shot .panel-head p{color:#8a4a3a;}
+  .theme-shot .card{border-color:#eed7d0;} .theme-shot .card:hover{background:#f6e7e2;} .theme-shot .card.sel{background:#f3e0da;border-left:5px solid #d9543a;}
+  .theme-shot .card .nm{color:#3a201a;} .theme-shot .card .meta{color:#8a4a3a;} .theme-shot .detail dt{color:#a5341f;} .theme-shot .detail dd{color:#3a201a;}
+  .theme-shot .vfoot{color:#8a5a4a;border-color:#ecd0c8;} .theme-shot .src{color:#8a5a4a;} .theme-shot .mapbox{background:#e8dad5;}
+
   @media(max-width:760px){
     .wrap{flex-direction:column;overflow-y:auto;}
     .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
@@ -219,6 +233,13 @@
       <p>박물관·미술관·전시장·공연장·공원을 한 지도에. 권역별 + 유형별. 운영시간·휴무·요금·소요시간·실내외·주차·무장애 표시.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enter('shot')">
+      <div class="ico">🚁</div>
+      <h2>3D 촬영후보 지도</h2>
+      <span class="who shot">드론·3D 스캔·시연 후보</span>
+      <p>드론 항공촬영·3D LiDAR·Gaussian Splatting 시연 적합지. 등급(★★★/★★)별. 드론 적합성·3D스캔·추천 촬영방식·허가주체 표시. 비행은 사전 승인 확인 필수.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
   </div>
   <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
 </div>
@@ -233,6 +254,7 @@
       <button id="swCafe" onclick="enter('cafe')">카페</button>
       <button id="swWell" onclick="enter('well')">웰니스</button>
       <button id="swCult" onclick="enter('cult')">문화·공원</button>
+      <button id="swShot" onclick="enter('shot')">촬영후보</button>
     </div>
     <button class="locbtn" id="locBtn" onclick="locateMe()">📍 내 위치</button>
     <span class="vtitle" id="vtitle"></span>
@@ -741,6 +763,50 @@ const CULT=[
  {name:"서귀포치유의숲",lat:33.2988369,lng:126.5222283,region:"중산간",area:"서귀포시 산록남로 2271(호근동)",ctype:"공원",theme:"편백·삼나무 숲 산책, 해먹·족욕, 산림해설탐방·치유 스트레칭(정비된 휴양림/숲길)",hours:"하절기(4~10월) 08:00~17:00, 동절기(11~3월) 09:00~17:00(입장마감 16:00)",closed:"연중무휴",fee:"어른 1,000·청소년 600원(유아·장애인 면제, 치유프로그램 별도). 주차 경차 1,000·소형 2,000·대형 3,000원",duration:"2~3시간 이상",env:"야외(4㎞ 무장애 보드워크 포함)",parking:"유료 공용주차장",bf:"장애인 화장실·엘리베이터·주차, 안내소 진입 원활, 무장애 보드워크 우수",note:"모든 입장·프로그램 '서귀포 e티켓' 사전예약 필수, 당일 현장 입장 불가",src:"공간정보·문화·스포츠레저 조사 / Google Places 실측"}
 ];
 
+const SHOT=[
+ // ===== ★★★ 최우선 시연 (10곳) =====
+ {name:"섭지코지",lat:33.4242095,lng:126.931111,region:"동부",grade:3,drone:"가능",scan:"상",port:"상",method:"드론+지상 복합",env:"야외",why:"바다로 돌출된 독립 반도 지형, 기암괴석·등대 360° 접근 수월. 현무암 거친 질감이 특징점 다량 파생.",permit:"휘닉스제주·서귀포시 관광지관리소(미확인)",access:"대규모 주차 완비. 주간 혼잡 → 이른 아침이 데이터 취득 적기",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"사계해변",lat:33.2311963,lng:126.3104542,region:"남부",grade:3,drone:"가능",scan:"상",port:"상",method:"드론+지상 복합",env:"야외",why:"하모리층·마린포트홀(구멍 뚫린 바위) 지형이 풍부한 표면 디테일 제공. 저고도 정밀 촬영 적합.",permit:"지자체 해양수산과(미확인)",access:"해안도로 인근 주차. 간조 시간대 확인 필수(조수간만 차로 지형 침수)",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"용머리해안",lat:33.2316155,lng:126.3148321,region:"남부",grade:3,drone:"제한(조건부)",scan:"상",port:"상",method:"드론+지상 복합",env:"야외",why:"수만 년 응회암 층리 구조 수직 절벽 → 지층 경계선이 우수한 3D 토폴로지로 치환. 수면 반사 노이즈 후처리 일부 필요.",permit:"천연기념물·지질공원 — 지자체·문화재청 사전 승인 필요(서귀포시 산림휴양과 등, 미확인)",access:"기상 악화·만조 시 관람로 전면 통제 → 해수면·기상 확인 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"제주돌문화공원",lat:33.4485653,lng:126.6586582,region:"동부",grade:3,drone:"제한(조건부)",scan:"상",port:"상",method:"드론+지상 복합",env:"실내외 복합",why:"거대 현무암 조형물·돌하르방 군락이 빛 반사 없는 무광 재질 → SfM 정합 실패율 제로. 식생 간섭 피해 석조물 집중 시 최상.",permit:"제주돌문화공원 관리소 / 064-710-7731",access:"광활한 주차로 장비 전개 용이. 휴관일(월) 협조 시 방문객 통제 가능",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"신창 풍차해안도로",lat:33.3412384,lng:126.1668087,region:"서부",grade:3,drone:"가능",scan:"상",port:"상",method:"드론 항공",env:"야외",why:"해상 풍력발전기+해상 교량+갯바위. 기하학 인공 구조물과 불규칙 자연물 동시 복원 테스트에 유용. 풍차 날개 움직임은 셔터 조절 필요.",permit:"지자체(미확인)",access:"도로변 접근 쉬움. 일몰 전 서측 사광 활용 시 입체감 극대화",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"대포 주상절리대",lat:33.237994,lng:126.426017,region:"남부",grade:3,drone:"제한(조건부)",scan:"상",port:"상",method:"드론+지상 복합",env:"야외",why:"육각·다각형 돌기둥 단면이 규칙적이면서 복잡한 형상 → 3D 메쉬·가우시안 볼륨 렌더링 시 압도적 입체감.",permit:"천연기념물 — 문화재청 현상변경허가 등 사전 절차. 서귀포 직영 관광지 관리소(천제연 기준 064-760-6331)",access:"대형 주차장. 절벽 위 데크 비좁아 관람객 없는 이른 오전 이착륙 포인트 확보 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"성읍민속마을",lat:33.3856736,lng:126.8014635,region:"동부",grade:3,drone:"제한(조건부)",scan:"상",port:"중",method:"드론+지상 복합",env:"야외",why:"수백 채 초가집 군락+미로형 돌담길 → 지상·항공 융합 시 극도로 조밀한 텍스처 네트워크. 마을 단위 광역 복원 시연에 우수.",permit:"국가민속문화재 구역, 정석비행장 관제권 일부 중첩 가능. 성읍민속마을 보존회(미확인)",access:"개방 마을로 접근 용이. 조도 일관된 맑은 날 정오 전후 유리",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"삼양동 선사유적지",lat:33.523123,lng:126.5878316,region:"도심",grade:3,drone:"불가",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"야외",why:"공항 관제권 내 드론 불가이나, 복원 움집·발굴터가 흙·초가 등 반사율 제로 자연물 → 지상 스캔만으로 노이즈 없는 고품질 모델. 비행불가 한계를 지상 스캔으로 상쇄.",permit:"관리사무소(미확인)",access:"제주시 도심 — 접근성·주차 편의 우수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"용눈이오름",lat:33.4599676,lng:126.831477,region:"동부",grade:3,drone:"가능",scan:"중",port:"상",method:"드론 항공",env:"야외",why:"부드러운 능선 곡선미 우수하나 표면 대부분 균일 억새밭 → 픽셀 오매칭 우려. 고해상도 촬영으로 보완. 동부 오름 대표 랜드마크.",permit:"마을회·사유지 소유주(미확인)",access:"진입로 주차장. 일출/일몰 직전 측면광으로 표면 굴곡 부각 시간대 촬영 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"항파두리 항몽유적지",lat:33.4520718,lng:126.4077366,region:"서부",grade:3,drone:"미확인",scan:"상",port:"중",method:"드론+지상 복합",env:"야외",why:"흙으로 쌓은 토성 지형·발굴터 → 토공량 산출·단면 지도 제작 공간정보 시연에 최상. 공항 관제권 외곽 경계라 위치별 비행 가부 급변 → 사전 확인 최우선.",permit:"문화공간 항파두리 / 010-8663-2875",access:"부지 넓고 쾌적해 드론·지상 장비 전개 수월",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+
+ // ===== ★★ 우선 시연 (27곳) =====
+ {name:"비자림",lat:33.484272,lng:126.8064793,region:"동부",grade:2,drone:"미확인",scan:"중",port:"상",method:"지상 LiDAR 단독",env:"야외",why:"천연기념물 원시림 — 드론 승인 까다롭고 수목 흔들림이 사진 정합 파괴. 지상 이동형 SLAM LiDAR로 산림 포인트클라우드 생성 가능. 세계 최대 단일수종 비자나무 숲.",permit:"비자림 관리사무소(미확인)",access:"주간 관람객 많아 동트기 전 이른 아침 섭외 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"성산일출봉",lat:33.462147,lng:126.936427,region:"동부",grade:2,drone:"제한(조건부)",scan:"상",port:"상",method:"드론 항공",env:"야외",why:"거대 분화구 침식 단면·수직 기암절벽이 극적 기하학 형태. 제주 제1 랜드마크이나 유네스코 세계자연유산으로 문화재청·세계유산본부 촘촘한 다중 허가 → 허가 난이도가 최상급 허들이라 2순위.",permit:"제주세계유산본부(미확인)",access:"허가만 득하면 시간 무관, 허가 자체가 난관",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"천제연폭포",lat:33.2506678,lng:126.4167726,region:"남부",grade:2,drone:"미확인",scan:"중",port:"상",method:"지상 LiDAR 단독",env:"야외",why:"협곡 지형 GPS 수신 저하·문화재 보호구역. 폭포수·수면 반사가 치명 노이즈이나 주변 주상절리 암벽·난대림 질감 우수 → 수면 마스킹 R&D 접근 요망.",permit:"천제연폭포 관리소 / 064-760-6331",access:"관람로·목교 좁아 인파 통제 필요",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"정방폭포",lat:33.2448567,lng:126.5715794,region:"도심",grade:2,drone:"미확인",scan:"중",port:"상",method:"드론+지상 복합",env:"야외",why:"바다로 직접 떨어지는 동양 유일 해안 폭포. 해수면·폭포수 반사 리스크 있으나 해안 암벽 텍스처 우수. 주변 군사/문화재 레이더망 중첩 점검 필요.",permit:"정방폭포 관리소 / 064-733-1530",access:"파도 높은 날 해수 비말로 장비 손상 주의",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"휴애리 자연생활공원",lat:33.3087565,lng:126.6337938,region:"남부",grade:2,drone:"가능",scan:"중",port:"중",method:"드론+지상 복합",env:"야외",why:"사유지 외 공항·군사 제약에서 자유. 광활한 꽃밭 군락 → 단일 피사체보다 정원 전체 광역 3D 스캔·조감도에 유리. 관리주체 섭외 시 자유로운 광대역 매핑 실증.",permit:"㈜휴애리(미확인)",access:"사유지 — 관리주체 사전 섭외 없으면 장비 반입 불가",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"김영갑갤러리두모악",lat:33.372,lng:126.8542528,region:"동부",grade:2,drone:"가능",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"실내외 복합",why:"단층 폐교 건축+현무암 정원을 지상형 광대역 스캐너로 내외부 한 번에 스캔 시 텍스처·형태 기하급수 풍부. 중소규모 건축 실내외 매끄러운 연계 시연 최적.",permit:"갤러리 사무국(미확인)",access:"실내 갤러리 스캔은 관람객 간섭 막기 위해 휴관일 이용 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"제주민속촌",lat:33.322511,lng:126.841868,region:"동부",grade:2,drone:"가능",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"야외",why:"초가집·토벽·옛 농기구 등 무광 자연 재질 밀집 → 지상 LiDAR 연속 스캐닝 오류율 거의 없음. 정석비행장 관제권 한계선 인접하나 내부 고도통제 시 양호.",permit:"㈜제주민속촌(미확인)",access:"부지 넓어 개장 전 이른 시간 카트 이용 이동형 스캐닝 권장",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"생각하는 정원",lat:33.3257082,lng:126.2552516,region:"서부",grade:2,drone:"미확인",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"야외",why:"수천 점 분재·기암수석 등 작은 스케일·극도 디테일 피사체 밀집 → 정밀 오브젝트 스캐닝+근접 Splatting 혼합 기술 시험에 고품질. 인근 서부 군사/통신 시설 확인 필요.",permit:"사유지 관리사무소(미확인)",access:"사유지 — 섭외 관건",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"빛의 벙커",lat:33.4399386,lng:126.8990193,region:"동부",grade:2,drone:"미확인",scan:"상",port:"상",method:"지상 LiDAR 단독",env:"실내",why:"구 국가통신 벙커 거친 노출 콘크리트가 특징점 풍부. 단 빔 프로젝터 극단 조도 변화는 치명적 → 투사기 소등 후 별도 작업조명 설치 스캔 필수.",permit:"㈜티모넷(미확인)",access:"칠흑 어둠 속 스캔 → 운영시간 외 조명·장비 세팅 섭외 요망",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"유민 아르누보 뮤지엄",lat:33.4291682,lng:126.9322911,region:"동부",grade:2,drone:"미확인",scan:"상",port:"상",method:"지상 LiDAR 단독",env:"실내외 복합",why:"안도 다다오 건축 기하학 형태+무광 노출 콘크리트가 사진 측량 이상적 캔버스. 단 대형 유리 통창 많아 반사체 제거 필터링 필요.",permit:"휘닉스제주(미확인)",access:"공간 협소·복잡 → 휴관일 단독 스캔 필수. 섭지코지 내 위치",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"방림원",lat:33.3370712,lng:126.2687794,region:"서부",grade:2,drone:"미확인",scan:"중",port:"중",method:"지상 LiDAR 단독",env:"야외",why:"야생화·소규모 조경 — 특징점 추출 양호하나 스케일감 다소 부족. 소형 사륜 로봇 등 지상 자율주행 매핑 장비 투입 실험 시연에 유효.",permit:"방림원(미확인)",access:"내부 협의에 따른 야외 섭외",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"아라리오뮤지엄 탑동시네마",lat:33.5174219,lng:126.5234393,region:"도심",grade:2,drone:"불가",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"실내",why:"공항 관제권 내 구도심 — 드론 불가. 폐 영화관 원형 보존 붉은 벽돌·노출 콘크리트·벗겨진 페인트가 압도적 실내 텍스처. 도심 내 지상 장비만으로 세계 수준 실내 폐공간 재생 모델.",permit:"아라리오뮤지엄(미확인)",access:"복잡한 다층 구조 → 휴관일 전면 개방 협의",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"노형수퍼마켙",lat:33.4649309,lng:126.4553144,region:"도심",grade:2,drone:"불가",scan:"중",port:"중",method:"지상 LiDAR 단독",env:"실내",why:"공항 인접 도심 최중심 — 드론 완전 금지. 입구 흑백 인테리어는 대비 뚜렷해 캡처 쉬우나 메인홀은 미디어아트 투사 의존 → 조명 변수 노이즈 위험. 투사 영상 꺼진 보수 시간대 활용.",permit:"㈜노형수퍼마켙(미확인)",access:"실내 — 투사 소등 시설 보수 시간대 활용",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"제주항공우주박물관",lat:33.3043901,lng:126.2997019,region:"남부",grade:2,drone:"미확인",scan:"중",port:"상",method:"지상 LiDAR 단독",env:"실내외",why:"층고 거대한 대규모 실내 우수하나 전시 대형 금속 항공기체 표면 반사가 렌더링 노이즈 폭증 주범 → 반사체 처리 알고리즘 없이 Splatting 불가. 매끄러운 금속 반사면 공간정보화 한계 테스트 과제.",permit:"JDC 제주국제자유도시개발센터(미확인)",access:"광활한 주차장, 기체 배치 빽빽해 동선 꼼꼼 계획 요망",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"본태박물관",lat:33.3038302,lng:126.3925024,region:"남부",grade:2,drone:"미확인",scan:"중",port:"상",method:"지상 LiDAR 단독",env:"실내외 복합",why:"건축미 최상이나 인공 수면+거대 유리창 비율 높아 사진측량·Splatting 시 레이 트레이싱 붕괴 위험. 기술 실패 위험 높음에도 건축 에셋 심미적 상징성 뛰어나 시도 가치.",permit:"본태박물관(미확인)",access:"사유지 섭외",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"천지연폭포",lat:33.246944,lng:126.554417,region:"도심",grade:2,drone:"미확인",scan:"중",port:"상",method:"지상 LiDAR 단독",env:"야외",why:"도심 인접 천연기념물 — 지자체 엄격 통제·드론 규제. 긴 진입로·수목 간섭으로 다각도 캡처 제한, 수면 반사 리스크. 지상 이동형 LiDAR 산책로 워크스루 매핑에 무난.",permit:"천지연폭포 관리소 / 064-733-1528",access:"주야 인파 많아 심야/새벽 인원 통제 가능 시기",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"따라비오름",lat:33.3870582,lng:126.7534582,region:"중산간",grade:2,drone:"미확인",scan:"중",port:"상",method:"드론 항공",env:"야외",why:"거대 오름 스케일 커버 위해 고고도 비행 필수. 표면 균일 억새·목초지로 텍스처 패턴 반복 오류 가능 → 바람 없는 날 엄선. 광역 지형 고도모델(DEM/DSM) 매핑 훈련장.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"정석비행장 관제권 회피 필요, 대체로 외곽이라 사전 승인 시 비행 유력. 억새 안 눕는 무풍일 엄선",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"다랑쉬오름",lat:33.4762433,lng:126.8229497,region:"동부",grade:2,drone:"미확인",scan:"중",port:"상",method:"드론 항공",env:"야외",why:"거대 오름 스케일 → 고고도 비행 필수. 균일 억새·목초지 텍스처 반복 오류 우려. 광역 지형 고도모델 매핑 훈련장. 사전 승인 시 비행 유력.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"무풍일 엄선 필수",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"백약이오름",lat:33.4377473,lng:126.7917034,region:"동부",grade:2,drone:"미확인",scan:"중",port:"중",method:"드론 항공",env:"야외",why:"오름 광역 지형 매핑 후보. 균일 억새 표면 반복 오류 보완 필요. 정석비행장 관제권 회피·사전 승인 전제.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"무풍일 엄선",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"아부오름",lat:33.447607,lng:126.7772601,region:"동부",grade:2,drone:"미확인",scan:"중",port:"중",method:"드론 항공",env:"야외",why:"분화구 형태 오름 광역 매핑 후보. 균일 식생 표면 반복 오류 보완 필요. 사전 승인 전제.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"무풍일 엄선",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"금오름",lat:33.355577,lng:126.3056877,region:"서부",grade:2,drone:"미확인",scan:"중",port:"중",method:"드론 항공",env:"야외",why:"분화구 호수 보유 오름 광역 매핑 후보. 균일 식생 표면 보완 필요. 사전 승인 전제.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"무풍일 엄선",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"새별오름",lat:33.3659432,lng:126.35644,region:"서부",grade:2,drone:"미확인",scan:"중",port:"상",method:"드론 항공",env:"야외",why:"억새·들불축제로 상징성 각별한 대표 오름. 광역 지형 매핑 후보. 균일 표면 반복 오류 보완 필요. 사전 승인 전제.",permit:"공동목장 조합·사유지·마을회(미확인)",access:"무풍일 엄선",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"우도 서빈백사",lat:33.5027452,lng:126.9432497,region:"동부",grade:2,drone:"가능",scan:"중",port:"상",method:"드론+지상 복합",env:"야외",why:"해상 방향 공항 통제권 외곽으로 제약 낮음. 에메랄드 바다 아름다우나 균일 모래·물결파는 포인트클라우드 형성 못함 → 갯바위·등대 위주로 범위 축소 필요.",permit:"마을 어촌계·지자체(미확인)",access:"여름 성수기·주간 해수욕객 간섭 → 비수기 활용",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"월정리해변",lat:33.5559739,lng:126.7961709,region:"동부",grade:2,drone:"가능",scan:"중",port:"상",method:"드론+지상 복합",env:"야외",why:"해상 방향 제약 낮음. 균일 모래·물결파는 복원 어려워 방파제·현무암 갯바위 타겟 국소 시연 전략. 카페거리 인접 인기 해변.",permit:"마을 어촌계·지자체(미확인)",access:"성수기·주간 간섭 → 비수기 활용",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"김녕 해변",lat:33.558795,lng:126.754282,region:"동부",grade:2,drone:"가능",scan:"중",port:"상",method:"드론+지상 복합",env:"야외",why:"해상 방향 제약 낮음. 균일 모래·물결파 복원 난항 → 방파제·갯바위 국소 타겟. 에메랄드 해변.",permit:"마을 어촌계·지자체(미확인)",access:"성수기·주간 간섭 → 비수기 활용",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"함덕서우봉 해변",lat:33.5434417,lng:126.6694472,region:"동부",grade:2,drone:"미확인",scan:"중",port:"상",method:"드론+지상 복합",env:"야외",why:"해변+서우봉 결합. 균일 모래는 복원 어려워 서우봉·갯바위 국소 타겟. 일부 함덕 내륙 비행 미확인.",permit:"마을 어촌계·지자체(미확인)",access:"성수기·주간 간섭 → 비수기 활용",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"남원 큰엉 해안산책로",lat:33.2733146,lng:126.7048177,region:"남부",grade:2,drone:"미확인",scan:"중",port:"중",method:"드론+지상 복합",env:"야외",why:"한반도 모양 숲 터널+깎아지른 해안 절벽 대비 훌륭. 숲길 나뭇잎 흔들림 대비 지상 LiDAR 보강 필수. 해상서 절벽면 드론+산책로 지상 결합 시연.",permit:"지자체(미확인)",access:"강한 해안풍이 드론 제어 방해 → 풍속 확인",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
+ {name:"수월봉 지질트레일",lat:33.2944141,lng:126.1628076,region:"서부",grade:2,drone:"미확인",scan:"상",port:"중",method:"지상 LiDAR 단독",env:"야외",why:"화산재 수평 지층 무늬가 바코드처럼 선명 → 사진측량이 깊이감 완벽 매칭. 세계지질공원 핵심. 단 인근 고산 기상레이더 등 통신 보안시설 비행제한 확인 우선.",permit:"지자체(미확인)",access:"트레일 진입로 협소 → 장비 이동 주의",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"}
+];
+
 // ============ 공통 상수 ============
 const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
 const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
@@ -771,6 +837,10 @@ function cultColor(p){
   for(const k of ['museum','art','expo','stage','park']){ if(p.ctype.includes(CULTT_KEY[k]))return CULTT[k][1]; }
   return '#7b6fb0';
 }
+// 촬영후보 등급별 색상/필터
+const SHOTG={3:['★★★ 최우선','#c0392b'],2:['★★ 우선','#e0772c']};
+const SHOTG_LABEL={3:'★★★ 최우선',2:'★★ 우선'};
+function shotColor(p){ return SHOTG[p.grade]?SHOTG[p.grade][1]:'#d9543a'; }
 
 let map,markers={},mode=null,selName=null;
 let meLocMarker=null,meLocCircle=null,meWatchId=null;
@@ -779,22 +849,24 @@ let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:tru
 let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
 let wellType={yoga:true,outdoor:true,forest:true,heal:true};
 let cultType={museum:true,art:true,expo:true,stage:true,park:true};
+let shotGrade={3:true,2:true};
 
 function enter(m){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':'theme-cult'))));app.classList.remove('hidden');
+  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':(m==='cult'?'theme-cult':'theme-shot')))));app.classList.remove('hidden');
   document.getElementById('swMe').classList.toggle('active',m==='me');
   document.getElementById('swAll').classList.toggle('active',m==='all');
   document.getElementById('swCafe').classList.toggle('active',m==='cafe');
   document.getElementById('swWell').classList.toggle('active',m==='well');
   document.getElementById('swCult').classList.toggle('active',m==='cult');
+  document.getElementById('swShot').classList.toggle('active',m==='shot');
   buildFilters();initMap();render();
-  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':(m==='well'?'제주 웰니스 — 요가·숲해설·마음치유':'제주 문화·공원 — 박물관·미술관·전시장·공원')));
-  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':'권역·유형별 문화·공원')));
-  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.'));
+  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':(m==='well'?'제주 웰니스 — 요가·숲해설·마음치유':(m==='cult'?'제주 문화·공원 — 박물관·미술관·전시장·공원':'제주 3D 촬영후보 — 드론·LiDAR·Gaussian Splatting'))));
+  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':(m==='cult'?'권역·유형별 문화·공원':'등급별 3D 촬영후보'))));
+  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':(m==='shot'?'핀 또는 카드를 누르면 드론 적합성·3D스캔·추천 촬영방식·허가주체가 펼쳐집니다. 드론 비행은 실제 촬영 전 별도 승인 확인 필수.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.')));
   document.getElementById('vfoot').innerHTML = (m==='me'
     ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v16 (2026.05.25)'
     : (m==='all'
@@ -823,9 +895,12 @@ function buildFilters(){
   }else if(mode==='well'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(WTYPE).map(k=>`<div class="chip ${wellType[k]?'on':'off'}" onclick="tWELL('${k}')"><span class="dot" style="background:${WTYPE[k][1]}"></span>${WTYPE_LABEL[k]}</div>`).join('');
-  }else{
+  }else if(mode==='cult'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(CULTT).map(k=>`<div class="chip ${cultType[k]?'on':'off'}" onclick="tCULT('${k}')"><span class="dot" style="background:${CULTT[k][1]}"></span>${CULTT_LABEL[k]}</div>`).join('');
+  }else{
+    f.innerHTML='<span class="flabel">등급</span>'+
+      [3,2].map(g=>`<div class="chip ${shotGrade[g]?'on':'off'}" onclick="tSHOT(${g})"><span class="dot" style="background:${SHOTG[g][1]}"></span>${SHOTG_LABEL[g]}</div>`).join('');
   }
 }
 function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
@@ -834,6 +909,7 @@ function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
 function tCAFE(k){cafeType[k]=!cafeType[k];buildFilters();render();}
 function tWELL(k){wellType[k]=!wellType[k];buildFilters();render();}
 function tCULT(k){cultType[k]=!cultType[k];buildFilters();render();}
+function tSHOT(g){shotGrade[g]=!shotGrade[g];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
@@ -902,7 +978,8 @@ function render(){
   else if(mode==='all') data = ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
   else if(mode==='cafe') data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
   else if(mode==='well') data = WELL.filter(p=>Object.keys(WTYPE).some(k=>wellType[k]&&p.wtype.includes(WTYPE_KEY[k])) || Object.keys(WTYPE).every(k=>!wellType[k]));
-  else data = CULT.filter(p=>Object.keys(CULTT).some(k=>cultType[k]&&p.ctype.includes(CULTT_KEY[k])) || Object.keys(CULTT).every(k=>!cultType[k]));
+  else if(mode==='cult') data = CULT.filter(p=>Object.keys(CULTT).some(k=>cultType[k]&&p.ctype.includes(CULTT_KEY[k])) || Object.keys(CULTT).every(k=>!cultType[k]));
+  else data = SHOT.filter(p=>shotGrade[p.grade] || (!shotGrade[3]&&!shotGrade[2]));
   if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
   data.forEach(p=>{
     let color,ring;
@@ -910,14 +987,16 @@ function render(){
     else if(mode==='all'){color=SPC[p.sp];ring='#fff';}
     else if(mode==='cafe'){color=cafeColor(p);ring='#fff';}
     else if(mode==='well'){color=wellColor(p);ring='#fff';}
-    else{color=cultColor(p);ring='#fff';}
+    else if(mode==='cult'){color=cultColor(p);ring='#fff';}
+    else{color=shotColor(p);ring='#fff';}
     const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
     let sub;
     if(mode==='me') sub=`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`;
     else if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
     else if(mode==='cafe') sub=`${p.type}<br>${p.area}`;
     else if(mode==='well') sub=`${p.wtype}<br>${p.area}`;
-    else sub=`${p.ctype}<br>${p.area}`;
+    else if(mode==='cult') sub=`${p.ctype}<br>${p.area}`;
+    else sub=`${SHOTG_LABEL[p.grade]} · 드론 ${p.drone}<br>${p.region} · ${p.method}`;
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
@@ -939,10 +1018,14 @@ function render(){
       head=`<span class="badge" style="background:${wellColor(p)};color:#fff">${p.wtype.split(/[·\/]/)[0]}</span>`;
       meta=`${p.region} · ${p.area}`;
       if(selName===p.name) detail=detailWELL(p);
-    }else{
+    }else if(mode==='cult'){
       head=`<span class="badge" style="background:${cultColor(p)};color:#fff">${p.ctype.split(/[·\/]/)[0]}</span>`;
       meta=`${p.region} · ${p.area} · ${p.hours}`;
       if(selName===p.name) detail=detailCULT(p);
+    }else{
+      head=`<span class="badge" style="background:${shotColor(p)};color:#fff">${SHOTG_LABEL[p.grade]}</span> <span class="lvb" style="border:1px solid #d9543a;color:#a5341f">드론 ${p.drone}</span>`;
+      meta=`${p.region} · ${p.method}`;
+      if(selName===p.name) detail=detailSHOT(p);
     }
     card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
@@ -983,6 +1066,14 @@ function detailCULT(p){return `<div class="detail">
   <dt>실내외·규모</dt><dd>${p.env}</dd><dt>주차</dt><dd>${p.parking}</dd>
   <dt>무장애·편의</dt><dd>${p.bf}</dd><dt>주의사항·접근성</dt><dd>${p.note}</dd>
   <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+
+function detailSHOT(p){return `<div class="detail">
+  <div class="infobox" style="background:#fbe5e0;border-left:4px solid #d9543a;color:#a5341f"><b>${SHOTG_LABEL[p.grade]}</b> · 추천 촬영방식: <b>${p.method}</b><br>${p.why}</div>
+  <dt>드론 비행</dt><dd><b>${p.drone}</b> <span style="color:#a5341f">⚠ 실제 비행·촬영 전 드론원스톱 등 공식 채널로 별도 승인 확인 필수(항공안전법)</span></dd>
+  <dt>3D 스캔·Splatting</dt><dd>${p.scan}</dd><dt>포트폴리오 가치</dt><dd>${p.port}</dd>
+  <dt>추천 촬영방식</dt><dd>${p.method}</dd><dt>실내외</dt><dd>${p.env}</dd>
+  <dt>허가 주체·연락처</dt><dd>${p.permit}</dd><dt>접근·주차·촬영적기</dt><dd>${p.access}</dd>
+  <dt>위치</dt><dd>${p.region}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 
 function select(nm){selName=(selName===nm?null:nm);render();
   if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
