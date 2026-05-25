@@ -1,12 +1,12 @@
 <!DOCTYPE html>
 <!--
   제주 운동 지도 | JEJUGRAPHER
-  버전: v11
-  작성일: 2026.05.24 (v11)
-  변경: 카페 2차 대망라 41곳 추가(권역 전역, Google Places 실측 좌표). PDF 권역 추정 오류 3건 교정(클랭블루·플로웨이브·줄라이앤어거스트→실측 권역).
-  이력: ... → v9 카페 모드 신설(45곳) → v10 단골 3곳(48곳) → v11 카페 2차 대망라 +41곳(89곳)
-  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 (총 350).
-  PENDING(좌표 미확보·식별불가, 좌표 날조 금지로 제외): 르아이레·다랑쉬카페·오운제주·회춘 애월점·새물·동백정원·서울앵무새 제주점·카페뮈르·카페즈물·카페901·베이커리카페벨라·카페디캠책 등.
+  버전: v12
+  작성일: 2026.05.24 (v12)
+  변경: 웰니스 지도 모드 신설(랜딩 4번째 카드 "웰니스" + 상단 "웰니스" 스위치). 독립 WELL[] 배열(16곳) + 웰니스 전용 그린 테마 + 유형별 필터(요가원/야외요가/숲해설/마음치유). 의료행위 아닌 일반 웰니스 정보로 한정, 효능 단정 표현 배제.
+  이력: ... → v9 카페 모드(45) → v10 단골 3곳(48) → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳)
+  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 (총 366).
+  PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가(특정 업체 미상). 좌표 날조 금지로 제외.
   베이스: jeju_map_20260524_v8.html (모바일 수정본)
   좌표계: EPSG:4326 / 좌표: Google Places 실측
 -->
@@ -42,6 +42,7 @@
   .who.me{background:#d8f0e8;color:#1a6b6b;border:1px solid var(--sea);}
   .who.all{background:#ffe3d6;color:#c4502a;border:1px solid var(--coral);}
   .who.cafe{background:#efe6d6;color:#8a6a2a;border:1px solid #c8a063;}
+  .who.well{background:#e3eee6;color:#2e7d57;border:1px solid #5ca57e;}
   .choice p{color:#5a6b6b;font-size:13px;margin-top:12px;line-height:1.55;}
   .choice .go{margin-top:16px;font-family:sans-serif;font-weight:700;font-size:13px;color:var(--sea);}
   #landing .foot{margin-top:34px;font-size:11px;color:#8a8270;text-align:center;line-height:1.6;max-width:620px;}
@@ -117,6 +118,18 @@
   .theme-cafe .card .nm{color:#3a2e1e;} .theme-cafe .card .meta{color:#7a6a4a;} .theme-cafe .detail dt{color:#8a6a2a;} .theme-cafe .detail dd{color:#3a2e1e;}
   .theme-cafe .vfoot{color:#8a7a5a;border-color:#e0d3b8;} .theme-cafe .src{color:#8a7a5a;} .theme-cafe .mapbox{background:#e6ddc9;}
 
+  /* 웰니스 테마 (차분한 그린) */
+  .theme-well{background:#f1f7f3;color:#23362b;}
+  .theme-well .topbar,.theme-well .filters{background:#e3eee7;border-color:#bcd8c8;}
+  .theme-well .home,.theme-well .switch{color:#2e7d57;border-color:#5ca57e;}
+  .theme-well .switch button{color:#2e7d57;} .theme-well .switch button.active{background:#5ca57e;color:#fff;}
+  .theme-well .vtitle{color:#3f6b54;} .theme-well .chip{background:#fff;color:#23362b;border-color:#bcd8c8;}
+  .theme-well .panel{background:#f6fbf8;border-color:#5ca57e;} .theme-well .panel-head{background:#f6fbf8;border-color:#d2e6da;}
+  .theme-well .panel-head h2{color:#2e7d57;} .theme-well .panel-head p{color:#3f6b54;}
+  .theme-well .card{border-color:#d8e8de;} .theme-well .card:hover{background:#e9f3ed;} .theme-well .card.sel{background:#e3f0e8;border-left:5px solid #5ca57e;}
+  .theme-well .card .nm{color:#23362b;} .theme-well .card .meta{color:#3f6b54;} .theme-well .detail dt{color:#2e7d57;} .theme-well .detail dd{color:#23362b;}
+  .theme-well .vfoot{color:#5a7a68;border-color:#d2e6da;} .theme-well .src{color:#5a7a68;} .theme-well .mapbox{background:#d9e8df;}
+
   @media(max-width:760px){
     .wrap{flex-direction:column;overflow-y:auto;}
     .mapbox{flex:none;height:48vh;min-height:300px;width:100%;}
@@ -156,6 +169,13 @@
       <p>오션뷰·베이커리·로스터리·디저트·감성정원·숲속 카페. 권역별 + 유형별. 영업시간·대표메뉴·뷰·주차·주의사항 표시.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enter('well')">
+      <div class="ico">🧘</div>
+      <h2>웰니스 지도</h2>
+      <span class="who well">요가·숲해설·마음치유</span>
+      <p>요가원·야외 요가·숲해설·마음치유 프로그램. 권역별 + 유형별. 프로그램·운영시간·예약·요금·소요시간·환경 표시.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
   </div>
   <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
 </div>
@@ -168,6 +188,7 @@
       <button id="swMe" onclick="enter('me')">건강관리용</button>
       <button id="swAll" onclick="enter('all')">일반인용</button>
       <button id="swCafe" onclick="enter('cafe')">카페</button>
+      <button id="swWell" onclick="enter('well')">웰니스</button>
     </div>
     <span class="vtitle" id="vtitle"></span>
   </div>
@@ -564,6 +585,30 @@ const CAFE=[
  {name:"담소요",lat:33.2995994,lng:126.6249200,region:"중산간",area:"남원읍 신례리",type:"숲속·중산간·감성·정원",hours:"09:00~17:30",closed:"화요일",menu:"커피·디저트",view:"프랑스 정원 연상 고즈넉한 프라이빗 수목, 한라산 뷰",parking:"있음",bf:"미확인",kid:"아이동반 가능",note:"정원 풀멍 명소, 1인 1음료. 앞 문구점 인기",src:"공간정보·스포츠레저 조사 / Google Places 실측"}
 ];
 
+const WELL=[
+ // -- 도심 --
+ {name:"제주901",lat:33.4529974,lng:126.4864001,region:"도심",area:"제주시 노형동",wtype:"요가·마음치유",program:"901 힐링타임(명상·요가·맨발걷기+카페), 마인드풀니스, 901 요가 클래스",hours:"수·금·일 마인드풀니스 09:30~, 목·토 901요가 09:30~ (일·월 휴무)",booking:"네이버 예약 및 전화",fee:"마인드풀니스/901요가 각 35,000원, 힐링타임(단체) 30,000~45,000원",duration:"클래스 70분(힐링타임은 웰니스 60분+카페 30~60분)",env:"실내 스튜디오 + 한라산 자락 숲속 야외(맨발걷기) 연계",prep:"편안한 복장(수련복·매트타월 현장 유료 대여)",note:"중학생 이상. 비건 식사 결합. 전날 18시 기준 2명 미만 시 취소·환불",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"제주절물자연휴양림",lat:33.4393622,lng:126.6299100,region:"도심",area:"제주시 봉개동(명림로584)",wtype:"숲해설",program:"자연휴양림 산림 휴양·탐방(숲길 산책)",hours:"3~10월 07:00~18:00 / 11~2월 07:00~17:00 (연중무휴)",booking:"전화 문의",fee:"주차료(경형 1,500/중소형 3,000/대형 5,000원), 입장·해설료 미확인",duration:"미확인",env:"야외 자연휴양림 숲길",prep:"미확인",note:"주차 200대. 반려동물 동반 불가, 유모차 대여 없음. 도심권 최대 숲길",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ // -- 동부 --
+ {name:"취다선리조트",lat:33.4718786,lng:126.9130109,region:"동부",area:"성산읍 해맞이해안로2688",wtype:"요가·마음치유",program:"명상/요가 원데이클래스, 아침 명상, 다도·명상",hours:"정기 클래스 07:00·08:10·19:00 등",booking:"마이리얼트립 등 온라인 사전 예약(최대 24시간 내 확정)",fee:"아침명상 25,500~30,000원, 요가 원데이 38,500원",duration:"1회 60분",env:"실내(리조트 지하1층 명상실 오디토리움)",prep:"수련에 제한 없는 복장",note:"숙박형 웰니스. 주차장 완비. 도착 후 예약자 성함 확인, 당일 취소·환불 불가",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"선흘동백동산",lat:33.5097000,lng:126.7150807,region:"동부",area:"조천읍 선흘리(동백로77)",wtype:"숲해설·마음치유",program:"동백동산 자연해설 프로그램(람사르 습지)",hours:"09:00~16:00",booking:"하루 전 사전 예약 필수",fee:"미확인(인근 순환버스 1,200원)",duration:"미확인",env:"야외 곶자왈 습지 및 동백나무 숲길",prep:"미확인",note:"람사르 습지. 정해진 통행로 이탈 주의(특수 습지 지대)",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"다라요가",lat:33.5401244,lng:126.6593415,region:"동부",area:"조천읍 함덕리(함대로37-24)",wtype:"요가원·야외요가",program:"한라산·오름 뷰 요가체험, 요가 원데이 클래스",hours:"미확인",booking:"마이리얼트립 등 온라인 사전 예약",fee:"미확인",duration:"미확인",env:"실내 스튜디오 + 한라산·오름 조망 야외 연계",prep:"허리가 편안한 복장",note:"함덕 인접. 수업 15분 전 입장",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ // -- 서부 --
+ {name:"환상숲곶자왈공원",lat:33.3225764,lng:126.2633048,region:"서부",area:"한경면 저지리(녹차분재로594-1)",wtype:"숲해설",program:"곶자왈 숲해설 프로그램(해설가 동반)",hours:"월~토 09:00~18:00(동절기 17:00), 해설 하절기 1시간 간격 9회·동절기 8회",booking:"온라인/전화 예약(현장 합류도 가능, 단체는 사전 예약)",fee:"성인 5,000·청소년/어린이 4,000·도민 3,000원",duration:"해설 50분(자율산책 20분)",env:"야외 곶자왈(연중 12~21도 유지)",prep:"미확인",note:"나무뿌리 보행 주의, 유모차 진입 코스 별도",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"제주곶자왈도립공원",lat:33.2863085,lng:126.2707695,region:"서부",area:"대정읍 보성리",wtype:"숲해설",program:"제주곶자왈 숲해설 프로그램",hours:"09:00~15:00(해설 일요일 13시 등)",booking:"공식 홈페이지 사전 예약",fee:"입장료 있음(해설 세부요금 미확인)",duration:"60분",env:"야외 곶자왈 생태숲",prep:"미확인",note:"해설 모집 회당 15명 제한. 기상 영향, 1일 전 취소 시 전액 환불",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"한림공원 야외요가",lat:33.3895279,lng:126.2392884,region:"서부",area:"한림읍 한림로300",wtype:"야외요가",program:"한림공원 야외 요가 원데이클래스",hours:"오후 5시(만나는 시간 기준), 토요일 오전 11시 진행",booking:"플랫폼 사전 예약(1~14명 모집)",fee:"77,000원",duration:"60분",env:"야외 공원 내 개방된 넓은 들판",prep:"마스크·개인 물 지참",note:"한림공원 재암수석관 옆 들판 집결",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"요가베르데",lat:33.4843751,lng:126.7866575,region:"중산간",area:"구좌읍 송당(비자림로1999-6)",wtype:"야외요가·마음치유",program:"요가 & 사운드힐링 워크샵(영어 진행·리트릿)",hours:"미확인(개별 조율)",booking:"에어비앤비/플랫폼 예약",fee:"미확인",duration:"미확인",env:"야외 숲(이끼숲)",prep:"미확인",note:"영어 요가·소규모 클래스. (PDF 애월 추정→실측 구좌 송당 교정)",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ // -- 남부 --
+ {name:"오설록 티스톤",lat:33.3061764,lng:126.2893569,region:"남부",area:"안덕면 신화역사로(오설록 티뮤지엄)",wtype:"마음치유(다도)",program:"다도체험, 전문 티클래스 및 뮤지엄 투어 연계",hours:"평일 09:00~18:00 / 주말 09:00~15:00(클래스별 상이)",booking:"플랫폼 결제 후 제주모바일 고객센터 사전 예약",fee:"28,000~132,000원(옵션별)",duration:"미확인",env:"실내 다도 전문 체험공간(야외 녹차밭 조망)",prep:"미확인",note:"중식·카페 식음 비용 별도",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"신흥2리 동백마을",lat:33.3194390,lng:126.7446961,region:"남부",area:"남원읍 신흥리",wtype:"숲해설·마음치유",program:"주민 주도 마을 여행 및 웰니스 융복합(동백나무 군락 해설)",hours:"미확인",booking:"미확인",fee:"미확인",duration:"미확인",env:"야외 동백나무 군락 및 커뮤니티 공간",prep:"미확인",note:"마을 주민 주도 상생형, 제주 웰니스 관광지 지정",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"휴애리 자연생활공원",lat:33.3087565,lng:126.6337938,region:"남부",area:"남원읍 신례동로",wtype:"숲해설",program:"자연·숲 치유 및 언택트 힐링 탐방, 계절 꽃·동물 체험",hours:"09:00~18:00",booking:"미확인",fee:"입장료 있음",duration:"미확인",env:"야외 계절별 숲·정원 환경",prep:"미확인",note:"동백·수국·핑크뮬리 계절꽃, 흑돼지 등 동물. 가족 단위 적합",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"WE호텔 웰니스센터",lat:33.2861399,lng:126.4442086,region:"남부",area:"서귀포시 1100로(중문 인근)",wtype:"마음치유",program:"천연 화산 암반수 활용 수(水) 체험, 스파·웰니스 프로그램",hours:"미확인",booking:"미확인",fee:"미확인",duration:"미확인",env:"실내 웰니스센터 및 수중 인프라(실내외 풀·명상풀)",prep:"미확인",note:"숲에 둘러싸인 휴양형. 셔틀버스 운행(회수·중문우체국·공항, 제한적)",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ // -- 중산간 --
+ {name:"서귀포치유의숲",lat:33.2988369,lng:126.5222283,region:"중산간",area:"서귀포시 호근동(산록남로2271)",wtype:"숲해설·마음치유",program:"맞춤형 산림 프로그램, 숲해설, 숲속요가교실, 차롱치유밥상",hours:"하절기(4~10월) 08:00~16:00 / 동절기(11~3월) 09:00~16:00",booking:"서귀포 e-티켓 온라인 예약/결제, 또는 전화",fee:"입장료 1,000원, 프로그램 성인 12,000~20,000원(감면 대상 6,000~8,400원)",duration:"프로그램별 2~3시간",env:"야외 편백나무 숲길, 힐링센터, 숲속요가교실",prep:"미확인",note:"개별 탐방 사전예약 불필요(단체버스 제한). 프로그램 참여는 예약 필수. 주차 2,000원, 무장애 고려",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"머체왓숲길",lat:33.3305697,lng:126.6740675,region:"중산간",area:"남원읍 한남리(산록 중산간)",wtype:"숲해설",program:"산림지도사·마을 주민 동반 자연·숲 탐방",hours:"미확인",booking:"미확인",fee:"미확인",duration:"3~4시간 코스",env:"야외 중산간 자연 생태 숲길",prep:"미확인",note:"제주 웰니스 관광지 지정. 코스 길어 동행 권장·이정표 확인 필요",src:"공간정보·웰니스 조사 / Google Places 실측"},
+ {name:"파파빌레",lat:33.4607223,lng:126.6610258,region:"중산간",area:"조천읍 와흘리",wtype:"숲해설",program:"자연 자원 활용 자연·숲 힐링 탐방(곶자왈 정원), 카페 병설",hours:"11:00~16:00",booking:"미확인",fee:"미확인",duration:"미확인",env:"화산암반과 숲이 어우러진 야외 힐링 공간(한반도 모양 빌레)",prep:"미확인",note:"댕유자 카페 병설. 계절별 다른 풍경, 산림 힐링 체험",src:"공간정보·웰니스 조사 / Google Places 실측"}
+];
+
 // ============ 공통 상수 ============
 const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
 const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
@@ -578,30 +623,42 @@ function cafeColor(p){ // 대표색: 유형 문자열 첫 매칭 키워드 색
   for(const k of ['ocean','bakery','roastery','dessert','garden','forest']){ if(p.type.includes(CTYPE_KEY[k]))return CTYPE[k][1]; }
   return '#8a6a2a';
 }
+// 웰니스 유형별 색상/필터
+const WTYPE={yoga:['요가원','#7b5ea7'],outdoor:['야외요가','#2e9e8f'],forest:['숲해설','#3a8c4a'],heal:['마음치유','#c77da8']};
+const WTYPE_KEY={yoga:'요가원',outdoor:'야외요가',forest:'숲해설',heal:'마음치유'};
+const WTYPE_LABEL={yoga:'요가원',outdoor:'야외요가',forest:'숲해설',heal:'마음치유'};
+function wellColor(p){
+  for(const k of ['yoga','outdoor','forest','heal']){ if(p.wtype.includes(WTYPE_KEY[k]))return WTYPE[k][1]; }
+  return '#2e7d57';
+}
 
 let map,markers={},mode=null,selName=null;
 let meActive={1:true,2:true,3:true};
 let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
 let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
+let wellType={yoga:true,outdoor:true,forest:true,heal:true};
 
 function enter(m){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':'theme-cafe'));app.classList.remove('hidden');
+  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':'theme-well')));app.classList.remove('hidden');
   document.getElementById('swMe').classList.toggle('active',m==='me');
   document.getElementById('swAll').classList.toggle('active',m==='all');
   document.getElementById('swCafe').classList.toggle('active',m==='cafe');
+  document.getElementById('swWell').classList.toggle('active',m==='well');
   buildFilters();initMap();render();
-  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':'제주 전역 카페 — 권역·유형별');
-  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':'권역·유형별 카페');
-  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.';
+  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':'제주 웰니스 — 요가·숲해설·마음치유'));
+  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':'권역·유형별 웰니스'));
+  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.');
   document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v11 (2026.05.24)'
+    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v12 (2026.05.24)'
     : (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v11 (2026.05.24)'
-    : '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v11 (2026.05.24)'));
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v12 (2026.05.24)'
+    : (m==='cafe'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v12 (2026.05.24)'
+    : '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v12 (2026.05.24)')));
 }
 function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');if(map){map.remove();map=null;}}
 
@@ -615,15 +672,19 @@ function buildFilters(){
       Object.keys(SPN).map(s=>`<div class="chip ${allSp[s]?'on':'off'}" onclick="tSP('${s}')"><span class="dot" style="background:${SPC[s]}"></span>${SPN[s]}</div>`).join('')+
       '<span class="flabel" style="margin-left:8px">난이도</span>'+
       Object.keys(LVN2).map(l=>`<div class="chip ${allLv[l]?'on':'off'}" onclick="tLV('${l}')">${LVN2[l]}</div>`).join('');
-  }else{
+  }else if(mode==='cafe'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(CTYPE).map(k=>`<div class="chip ${cafeType[k]?'on':'off'}" onclick="tCAFE('${k}')"><span class="dot" style="background:${CTYPE[k][1]}"></span>${CTYPE_LABEL[k]}</div>`).join('');
+  }else{
+    f.innerHTML='<span class="flabel">유형</span>'+
+      Object.keys(WTYPE).map(k=>`<div class="chip ${wellType[k]?'on':'off'}" onclick="tWELL('${k}')"><span class="dot" style="background:${WTYPE[k][1]}"></span>${WTYPE_LABEL[k]}</div>`).join('');
   }
 }
 function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
 function tSP(s){allSp[s]=!allSp[s];buildFilters();render();}
 function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
 function tCAFE(k){cafeType[k]=!cafeType[k];buildFilters();render();}
+function tWELL(k){wellType[k]=!wellType[k];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
@@ -645,18 +706,21 @@ function render(){
   let data;
   if(mode==='me') data = ME.filter(p=>meActive[p.lv]);
   else if(mode==='all') data = ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
-  else data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
+  else if(mode==='cafe') data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
+  else data = WELL.filter(p=>Object.keys(WTYPE).some(k=>wellType[k]&&p.wtype.includes(WTYPE_KEY[k])) || Object.keys(WTYPE).every(k=>!wellType[k]));
   if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
   data.forEach(p=>{
     let color,ring;
     if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}
     else if(mode==='all'){color=SPC[p.sp];ring='#fff';}
-    else{color=cafeColor(p);ring='#fff';}
+    else if(mode==='cafe'){color=cafeColor(p);ring='#fff';}
+    else{color=wellColor(p);ring='#fff';}
     const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
     let sub;
     if(mode==='me') sub=`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`;
     else if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
-    else sub=`${p.type}<br>${p.area}`;
+    else if(mode==='cafe') sub=`${p.type}<br>${p.area}`;
+    else sub=`${p.wtype}<br>${p.area}`;
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
@@ -670,10 +734,14 @@ function render(){
       head=`<span class="badge" style="background:${SPC[p.sp]};color:#fff">${SPN[p.sp]}</span> <span class="lvb" style="border:1px solid #b9c6c3">${LVN2[p.lv]}</span>`;
       meta=`${p.region} · ${p.dist} · ${p.time}`;
       if(selName===p.name) detail=detailALL(p);
-    }else{
+    }else if(mode==='cafe'){
       head=`<span class="badge" style="background:${cafeColor(p)};color:#fff">${p.type.split('·')[0]}</span>`;
       meta=`${p.region} · ${p.area} · ${p.hours}`;
       if(selName===p.name) detail=detailCAFE(p);
+    }else{
+      head=`<span class="badge" style="background:${wellColor(p)};color:#fff">${p.wtype.split(/[·\/]/)[0]}</span>`;
+      meta=`${p.region} · ${p.area}`;
+      if(selName===p.name) detail=detailWELL(p);
     }
     card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
@@ -699,6 +767,13 @@ function detailCAFE(p){return `<div class="detail">
   <dt>대표 메뉴</dt><dd>${p.menu}</dd><dt>주차</dt><dd>${p.parking}</dd>
   <dt>무장애</dt><dd>${p.bf}</dd><dt>아이동반</dt><dd>${p.kid}</dd>
   <dt>주의사항</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+function detailWELL(p){return `<div class="detail">
+  <div class="infobox" style="background:#e7f2ea;border-left:4px solid #5ca57e;color:#2e7d57"><b>프로그램</b><br>${p.program}</div>
+  <dt>유형</dt><dd>${p.wtype}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
+  <dt>운영시간·일정</dt><dd>${p.hours}</dd><dt>예약</dt><dd>${p.booking}</dd>
+  <dt>요금</dt><dd>${p.fee}</dd><dt>소요시간</dt><dd>${p.duration}</dd>
+  <dt>환경</dt><dd>${p.env}</dd><dt>준비물·복장</dt><dd>${p.prep}</dd>
+  <dt>주의사항·접근성</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 
 function select(nm){selName=(selName===nm?null:nm);render();
   if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
