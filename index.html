@@ -1,24 +1,32 @@
 <!DOCTYPE html>
 <!--
-  제주 운동 지도 | JEJUGRAPHER
-  버전: v18
-  작성일: 2026.05.25 (v18)
-  변경(v18): 촬영후보(SHOT) 절벽·지질 형태 보강 — 신규 9곳 추가(★★★ 산방산·박수기정·외돌개·우도 동안 해식애·범섬문섬섶섬·수월봉 엉알해안 / ★★ 갯깍 주상절리대·송악산 해안단애·차귀도당산봉). 좌표 Google Places 실측, 산방산 등 출입통제지는 드론 항공/지상 통제 분리 표기. 기존 4곳 형태 재평가 갱신: 성산일출봉 등급 2→3 상향(형태 임팩트 기준, 허가 난이도는 단서 유지), 천제연·천지연·정방폭포 3D 기술 제약 단서 추가. SHOT 38→47곳(★★★ 17 + ★★ 30).
-  변경(v17): '촬영후보' 지도 모드 신설(랜딩 6번째 카드 + 상단 스위치). 독립 SHOT[] 배열 — 드론 항공촬영·3D LiDAR·Gaussian Splatting 시연 후보. 등급(★★★/★★) 필터 + 적색 테마. 드론 적합성·3D스캔·추천촬영방식·허가주체·접근정보 표시. 모든 드론 정보에 "비행 전 별도 승인 확인 필요" 명시.
-  이력(v16): 모바일 랜딩 스크롤 수정(overflow-y:auto + 상단정렬).
-  이력(v15): '내 위치' 기능 추가 — 상단바 "📍 내 위치" 버튼(전 모드 공통, 브라우저 GPS, HTTPS 전용, 서버 전송 없음).
-  이력(v14): 문화·공원 2차 전수 조사 반영 — CULT 22곳→65곳(+43). 공연장 유형 추가(하늘극장·제주아트센터·제주문예회관·서귀포예술의전당). 좌표 전수 Google Places 실측.
-  이력: ... → v11 카페 2차 +41(89) → v12 웰니스 모드 신설(16곳) → v13 문화·공원(22) → v15 내 위치 기능 → v16 모바일 랜딩 스크롤 수정 → v17 촬영후보 모드 신설(38곳) → v18 촬영후보 절벽·지질 형태 보강(+9, 47곳)
-  데이터: ME 85곳 / ALL 176곳 / CAFE 89곳 / WELL 16곳 / CULT 65곳 / SHOT 47곳 (총 478).
-  PENDING: (카페) 르아이레·다랑쉬·오운제주·회춘·새물·동백정원·서울앵무새·카페뮈르·즈물·901·벨라·디캠책 / (웰니스) 애월 바당·마당요가 / (문화·공원) 미디어아트 전시관(가칭, 정체·좌표 불명확). 좌표 날조 금지로 제외.
-  베이스: jeju_map_20260524_v8.html (모바일 수정본)
-  좌표계: EPSG:4326 / 좌표: Google Places 실측
+  제주 여행자 지도 | JEJUGRAPHER
+  버전: v2 (traveler)
+  작성일: 2026.07.02
+  베이스: Jeju_Traveler_Map v1 (2026.07.02) — GDR 조사 반영·확장
+  변경(v2 traveler):
+    ① GDR(Gemini Deep Research) 조사 반영 — 신규 30곳 추가 (기존 393 + 신규 30 = 총 423곳)
+       · A 자연·경관 강화: 아끈다랑쉬·거문오름·사라오름·노꼬메·바리메·이승이·저지오름 등 오름 7곳 + 함덕·곽지·이호테우·월정리·김녕 등 해변 5곳 + 광치기해변 1곳 = 13곳 (SHOT 모드에 합류)
+       · D 테마파크·박물관: 아쿠아플라넷·에코랜드 2곳 (CULT 모드에 합류)
+       · E 체험·공방: 제주송정농원·귤향기·제주오름승마랜드 3곳 (ALL 모드에 합류)
+       · G 드라이브·해안도로: 신창풍차·비자림로 삼나무길·애월해안도로 3곳 (SHOT 모드에 합류)
+       · B 맛집(흑돼지·갈치·고기국수) 5곳 + C 시장(동문·서귀포매일올레·세화·대정 오일장) 4곳 = 9곳 (신규 FOOD 모드)
+    ② 신규 FOOD(미식·시장) 모드 신설 — 흑돼지·갈치·전복·국수·전통시장·오일장. 따뜻한 톤(오렌지) 테마.
+    ③ 취향·스타일 태그 시스템 도입 — 각 장소에 MOOD(힐링/액티브/감성/미식/문화/가족) × SEASON(봄/여름/가을/겨울) 태그 자동 부여.
+       기본 필터(종목·유형) 아래 "취향" 태그 행과 "계절" 태그 행을 추가. 어떤 모드에서든 여행자 스타일로 재필터링 가능.
+    ④ 랜딩 리디자인 — 6개 카테고리 카드 + "여행 스타일로 시작하기" 6개 스타일 바로가기 (힐링·액티브·감성·미식·문화·가족) 섹션.
+    ⑤ 실시간 날씨 + 내 위치 기능 유지 (v1 기능 그대로).
+    ⑥ 등록 제외: 추자도(위도 33.95, 제주 바운딩 이탈), 화이팅공원·상하이보풀뜨락(GDR 환각 판정).
+  카테고리별 개수: ALL 179 · CAFE 89 · WELL 16 · CULT 67 · SHOT 63 · FOOD 9 = 423곳
+  좌표계: EPSG:4326 / 좌표: Google Places 실측 + GDR 조사
+  날씨: Open-Meteo (CC BY 4.0, https://open-meteo.com, 한국기상청 포함 30+ 모델)
+  GDR: Gemini Deep Research 2026.07 조사보고서 반영
 -->
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>제주 운동 지도 | JEJUGRAPHER</title>
+<title>제주 여행자 지도 | JEJUGRAPHER</title>
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
@@ -44,7 +52,6 @@
   .choice .ico{font-size:34px;}
   .choice h2{font-family:'Black Han Sans',sans-serif;font-size:21px;margin-top:12px;color:#1a2e2a;}
   .choice .who{display:inline-block;font-size:11px;font-weight:700;font-family:sans-serif;padding:3px 10px;border-radius:12px;margin-top:9px;}
-  .who.me{background:#d8f0e8;color:#1a6b6b;border:1px solid var(--sea);}
   .who.all{background:#ffe3d6;color:#c4502a;border:1px solid var(--coral);}
   .who.cafe{background:#efe6d6;color:#8a6a2a;border:1px solid #c8a063;}
   .who.well{background:#e3eee6;color:#2e7d57;border:1px solid #5ca57e;}
@@ -66,6 +73,7 @@
   .theme-cafe .locbtn{border-color:#c8a063;color:#8a6a2a;} .theme-cafe .locbtn:hover{background:#c8a063;color:#fff;}
   .theme-well .locbtn{border-color:#5ca57e;color:#2e7d57;} .theme-well .locbtn:hover{background:#5ca57e;color:#fff;}
   .theme-cult .locbtn{border-color:#7b6fb0;color:#534a8a;} .theme-cult .locbtn:hover{background:#7b6fb0;color:#fff;}
+  .theme-shot .locbtn{border-color:#d9543a;color:#a5341f;} .theme-shot .locbtn:hover{background:#d9543a;color:#fff;}
   /* 현재 위치 펄스 마커 */
   .me-dot{width:18px;height:18px;border-radius:50%;background:#2b8fd6;border:3px solid #fff;box-shadow:0 0 0 rgba(43,143,214,.6);animation:mepulse 1.8s infinite;}
   @keyframes mepulse{0%{box-shadow:0 0 0 0 rgba(43,143,214,.55);}70%{box-shadow:0 0 0 16px rgba(43,143,214,0);}100%{box-shadow:0 0 0 0 rgba(43,143,214,0);}}
@@ -103,16 +111,7 @@
   .leaflet-popup-content{font-family:'Gowun Batang',serif;}.pop-nm{font-weight:700;font-size:14px;}.pop-meta{font-size:12px;color:#555;margin-top:3px;line-height:1.45;}
   .vfoot{padding:10px 22px;font-size:10.5px;border-top:1px solid var(--line);line-height:1.6;}
 
-  /* 테마: 건강(밝은) / 일반(어두운) */
-  .theme-me{background:var(--paper);color:#1a2e2a;}
-  .theme-me .topbar,.theme-me .filters{background:#efeadd;}
-  .theme-me .chip{background:var(--paper);}
-  .theme-me .panel{background:var(--paper);}
-  .theme-me .panel-head{background:var(--paper);} .theme-me .panel-head h2{color:var(--sea);} .theme-me .panel-head p{color:#6a6354;}
-  .theme-me .card:hover{background:#efeadd;} .theme-me .card.sel{background:#eaf5ef;border-left:5px solid var(--sea);}
-  .theme-me .card .meta{color:#6a6354;} .theme-me .detail dt{color:var(--sea);} .theme-me .detail dd{color:#1a2e2a;}
-  .theme-me .vfoot{background:#efeadd;color:#8a8270;} .theme-me .src{color:#8a8270;}
-  .theme-me .mapbox{background:#dfe6e6;}
+  /* 테마: 여행자용 */
 
   .theme-all{background:#eef3f2;color:#1a2e2a;}
   .theme-all .topbar,.theme-all .filters{background:#e3ece9;}
@@ -189,28 +188,107 @@
     .topbar{padding:9px 14px;} .filters{padding:8px 14px;} .vfoot{padding:9px 14px;}
     .topbar{flex-wrap:wrap;}
   }
+
+  /* ===== 실시간 날씨 (Open-Meteo) ===== */
+  .wxbox{margin-top:10px;padding:10px 12px;background:#eef7fb;border:1px solid #b8dbe8;border-left:4px solid #2b8fd6;border-radius:4px;font-family:'Gowun Batang',serif;}
+  .wxbox .wxhd{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px;}
+  .wxbox .wxhd .wxttl{font-weight:700;font-size:12px;color:#1a5b7a;display:flex;align-items:center;gap:6px;}
+  .wxbox .wxhd .wxrf{background:none;border:none;color:#2b8fd6;font-size:11px;cursor:pointer;font-family:inherit;padding:2px 6px;border-radius:4px;}
+  .wxbox .wxhd .wxrf:hover{background:#d5ecf5;}
+  .wxbox .wxrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;}
+  .wxbox .wxnow{display:flex;align-items:center;gap:8px;}
+  .wxbox .wxico{font-size:26px;line-height:1;}
+  .wxbox .wxtmp{font-family:'Black Han Sans',sans-serif;font-size:22px;color:#1a5b7a;line-height:1;}
+  .wxbox .wxdsc{font-size:12px;color:#2a5a6a;}
+  .wxbox .wxdet{font-size:11px;color:#5a7080;margin-top:4px;line-height:1.5;}
+  .wxbox .wxfc{display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;}
+  .wxbox .wxday{background:#fff;border:1px solid #cfe4ee;border-radius:4px;padding:4px 8px;font-size:11px;color:#2a5a6a;}
+  .wxbox .wxday .wxdylbl{font-weight:700;color:#1a5b7a;}
+  .wxbox .wxerr{font-size:11.5px;color:#a5341f;}
+  .wxbox .wxload{font-size:11.5px;color:#5a7080;font-style:italic;}
+  /* 전문가용 접힘 섹션 (SHOT 상세) */
+  .detail .expert{margin-top:12px;padding:6px 0;border-top:1px dashed #d9543a44;}
+  .detail .expert summary{font-family:'Black Han Sans',sans-serif;font-size:12px;color:#a5341f;cursor:pointer;padding:4px 0;list-style:none;}
+  .detail .expert summary::-webkit-details-marker{display:none;}
+  .detail .expert summary:before{content:'▸ ';display:inline-block;transition:transform .15s;}
+  .detail .expert[open] summary:before{content:'▾ ';}
+  .detail .expert dt{color:#a5341f;}
+
+  /* ===== FOOD 모드 (미식·시장) — 따뜻한 오렌지 톤 ===== */
+  .who.food{background:#fde3cd;color:#8a4a20;border:1px solid #d97a3c;}
+  .theme-food{background:#fbf4ee;color:#3a2618;}
+  .theme-food .topbar,.theme-food .filters{background:#f5e5d0;border-color:#d9b58c;}
+  .theme-food .home,.theme-food .switch{color:#8a4a20;border-color:#d9843a;}
+  .theme-food .switch button{color:#8a4a20;} .theme-food .switch button.active{background:#d9843a;color:#fff;}
+  .theme-food .vtitle{color:#8a5a3a;} .theme-food .chip{background:#fff;color:#3a2618;border-color:#d9b58c;}
+  .theme-food .panel{background:#fdf9f2;border-color:#d9843a;} .theme-food .panel-head{background:#fdf9f2;border-color:#ecd5b8;}
+  .theme-food .panel-head h2{color:#8a4a20;} .theme-food .panel-head p{color:#8a5a3a;}
+  .theme-food .card{border-color:#ecd5b8;} .theme-food .card:hover{background:#f5e7d3;} .theme-food .card.sel{background:#f2ddc4;border-left:5px solid #d9843a;}
+  .theme-food .card .nm{color:#3a2618;} .theme-food .card .meta{color:#8a5a3a;} .theme-food .detail dt{color:#8a4a20;} .theme-food .detail dd{color:#3a2618;}
+  .theme-food .vfoot{color:#8a5a3a;border-color:#ecd5b8;} .theme-food .src{color:#8a5a3a;} .theme-food .mapbox{background:#e8d9c4;}
+  .theme-food .locbtn{border-color:#d9843a;color:#8a4a20;} .theme-food .locbtn:hover{background:#d9843a;color:#fff;}
+
+  /* ===== 취향·스타일 태그 행 (모든 모드 공통) ===== */
+  .stagbar{display:flex;gap:7px;flex-wrap:wrap;align-items:center;padding:8px 22px;border-bottom:1px solid var(--line);background:rgba(255,255,255,.4);}
+  .stagbar .slabel{font-size:10.5px;color:#7f969d;font-family:sans-serif;font-weight:700;letter-spacing:.5px;}
+  .stag{font-size:12px;font-weight:700;padding:5px 11px;border:1.5px solid var(--line);border-radius:14px;background:#fff;cursor:pointer;transition:.15s;font-family:'Gowun Batang',serif;display:flex;align-items:center;gap:5px;}
+  .stag:hover{border-color:#666;}
+  .stag.on{background:#1a2e2a;color:#fff;border-color:#1a2e2a;}
+  /* 모드별 활성 태그 색 */
+  .theme-all .stag.on{background:var(--sea);border-color:var(--sea);}
+  .theme-cafe .stag.on{background:#c8a063;border-color:#c8a063;}
+  .theme-well .stag.on{background:#5ca57e;border-color:#5ca57e;}
+  .theme-cult .stag.on{background:#7b6fb0;border-color:#7b6fb0;}
+  .theme-shot .stag.on{background:#d9543a;border-color:#d9543a;}
+  .theme-food .stag.on{background:#d9843a;border-color:#d9843a;}
+  .stagclear{background:none;border:none;font-size:11.5px;color:#7a7a7a;cursor:pointer;font-family:'Gowun Batang',serif;text-decoration:underline;padding:5px 6px;}
+  .stagclear:hover{color:#333;}
+
+  /* ===== 랜딩: 여행 스타일 바로가기 ===== */
+  .stylebar{margin-top:44px;padding:24px 24px 20px;background:rgba(255,255,255,.55);border:1px solid #d9d2c2;border-radius:14px;max-width:960px;width:100%;}
+  .stylebar h3{font-family:'Black Han Sans',sans-serif;font-size:17px;color:#1a2e2a;text-align:center;letter-spacing:1px;}
+  .stylebar .sub{text-align:center;color:#5a6b6b;font-size:12.5px;margin-top:6px;margin-bottom:16px;}
+  .stylegrid{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;}
+  .stylebtn{background:#fff;border:1.5px solid #d9d2c2;border-radius:10px;padding:12px 8px;text-align:center;cursor:pointer;transition:.18s;}
+  .stylebtn:hover{transform:translateY(-3px);border-color:var(--sea);box-shadow:0 4px 14px rgba(26,107,107,.13);}
+  .stylebtn .sico{font-size:22px;line-height:1;}
+  .stylebtn .snm{font-family:'Black Han Sans',sans-serif;font-size:13px;color:#1a2e2a;margin-top:6px;letter-spacing:.5px;}
+  .stylebtn .sdesc{font-size:10.5px;color:#6a7b7b;margin-top:3px;line-height:1.35;}
+  @media(max-width:760px){
+    .stylegrid{grid-template-columns:repeat(3,1fr);}
+    .stylebar{margin-top:24px;padding:18px 14px 14px;}
+    .stylebar h3{font-size:15px;}
+    .stagbar{padding:7px 14px;}
+  }
+
+  /* 태그 뱃지 (카드 안, 시각적 힌트) */
+  .stagbadge{font-size:10px;font-weight:700;padding:2px 6px;border-radius:9px;background:#efeadd;color:#5a5a5a;font-family:sans-serif;display:inline-block;margin-right:4px;margin-top:4px;}
+  .stagbadge.spring{background:#fce4ec;color:#a33c6b;}
+  .stagbadge.summer{background:#d0f0f5;color:#186b7a;}
+  .stagbadge.fall{background:#f7e4c4;color:#8a5a1a;}
+  .stagbadge.winter{background:#e0e6ef;color:#3a5a8a;}
+  .stagbadge.healing{background:#e3eee6;color:#2e7d57;}
+  .stagbadge.active{background:#ffe3d6;color:#c4502a;}
+  .stagbadge.sense{background:#f7e6ef;color:#a03d76;}
+  .stagbadge.food{background:#fde3cd;color:#8a4a20;}
+  .stagbadge.culture{background:#e6e3f0;color:#534a8a;}
+  .stagbadge.family{background:#e3f0eb;color:#2e7d67;}
+
 </style>
 </head>
 <body>
 
 <!-- ===== 랜딩 ===== -->
 <div id="landing">
-  <div class="brand">JEJUGRAPHER</div>
-  <h1>제주 운동 지도</h1>
-  <p class="tag">제주 전역의 운동·여행 장소를 강도·종목별로. 두 가지 지도 중 선택하세요.</p>
+  <div class="brand">JEJUGRAPHER · TRAVELER v2</div>
+  <h1>제주 여행자 지도</h1>
+  <p class="tag">제주 전역 423곳 · 실시간 날씨 · 취향별 필터. 원하는 방식으로 시작하세요.</p>
   <div class="choose">
-    <div class="choice" onclick="enter('me')">
-      <div class="ico">🌿</div>
-      <h2>건강관리용 지도</h2>
-      <span class="who me">회복기·저강도 맞춤</span>
-      <p>회복기 저강도 운동 맞춤. 무장애·노면 안전·인프라·우천 위험·접근성 중심으로 안전한 산책 장소를 안내합니다.</p>
-      <div class="go">→ 들어가기</div>
-    </div>
     <div class="choice" onclick="enter('all')">
       <div class="ico">🏃</div>
-      <h2>일반인용 운동 지도</h2>
-      <span class="who all">운동 즐기는 모두</span>
-      <p>러닝·자전거·스쿠버/프리다이빙·등산·트레킹. 종목별 + 난이도별 코스. 거리·소요시간·자격요건 표시.</p>
+      <h2>액티비티 지도</h2>
+      <span class="who all">러닝·자전거·다이빙·등산·트레킹</span>
+      <p>제주에서 즐기는 야외 액티비티. 종목별 + 난이도별 코스. 거리·소요시간·자격요건·경관 표시.</p>
       <div class="go">→ 들어가기</div>
     </div>
     <div class="choice" onclick="enter('cafe')">
@@ -235,32 +313,52 @@
       <div class="go">→ 들어가기</div>
     </div>
     <div class="choice" onclick="enter('shot')">
-      <div class="ico">🚁</div>
-      <h2>3D 촬영후보 지도</h2>
-      <span class="who shot">드론·3D 스캔·시연 후보</span>
-      <p>드론 항공촬영·3D LiDAR·Gaussian Splatting 시연 적합지. 등급(★★★/★★)별. 드론 적합성·3D스캔·추천 촬영방식·허가주체 표시. 비행은 사전 승인 확인 필수.</p>
+      <div class="ico">🏞</div>
+      <h2>명소·자연·경관</h2>
+      <span class="who shot">오름·해변·폭포·드라이브</span>
+      <p>산방산·성산일출봉·우도·외돌개·갯깍 주상절리 + 신규 오름 7곳·해변 5곳·드라이브 코스 3곳. 등급별(★★★/★★). 촬영 명당·접근·주차·계절 팁 표시. 63곳.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
+    <div class="choice" onclick="enter('food')">
+      <div class="ico">🍽</div>
+      <h2>미식·시장 지도</h2>
+      <span class="who food">흑돼지·갈치·시장·오일장</span>
+      <p>흑돼지·통갈치·고기국수 맛집 + 동문시장·서귀포매일올레시장·세화·대정 오일장. 대표 메뉴·운영시간·주차·특징 표시. 9곳.</p>
       <div class="go">→ 들어가기</div>
     </div>
   </div>
-  <p class="foot">출처: 제주 공간정보·스포츠레저 조사(2026) + Google Places 실측 좌표 + 제주 공간정보포털·올레 GPX·공공데이터포털(공공누리 1유형) · 좌표계 EPSG:4326 · 정보 제공용이며 운동·안전 판단은 본인·전문가가 합니다.</p>
+  <div class="stylebar">
+    <h3>여행 스타일로 시작하기</h3>
+    <p class="sub">원하는 여행 방식을 선택하면 관련 장소만 자동 필터링됩니다</p>
+    <div class="stylegrid">
+      <div class="stylebtn" onclick="startStyle('healing')"><div class="sico">🌿</div><div class="snm">힐링</div><div class="sdesc">숲·산책·명상</div></div>
+      <div class="stylebtn" onclick="startStyle('active')"><div class="sico">🏃</div><div class="snm">액티브</div><div class="sdesc">스포츠·모험·등산</div></div>
+      <div class="stylebtn" onclick="startStyle('sense')"><div class="sico">📸</div><div class="snm">감성·인생샷</div><div class="sdesc">포토·카페·경관</div></div>
+      <div class="stylebtn" onclick="startStyle('food')"><div class="sico">🍽</div><div class="snm">미식</div><div class="sdesc">맛집·시장·특산품</div></div>
+      <div class="stylebtn" onclick="startStyle('culture')"><div class="sico">🏛</div><div class="snm">문화·역사</div><div class="sdesc">박물관·유적·전시</div></div>
+      <div class="stylebtn" onclick="startStyle('family')"><div class="sico">👨‍👩‍👧</div><div class="snm">가족·아이</div><div class="sdesc">테마파크·체험·놀이</div></div>
+    </div>
+  </div>
+  <p class="foot">출처: 제주 공간정보·스포츠레저·문화·경관·미식·시장 조사(2026) + Google Places 실측 + GDR(Gemini Deep Research) 조사 30곳 · 좌표계 EPSG:4326 · 날씨: Open-Meteo (CC BY 4.0) · 정보 제공용이며 방문 전 현장 확인 권장. 취향·계절 태그는 명시 정보 기반 자동 부여이므로 개별 케이스 참고용.</p>
 </div>
 
 <!-- ===== 지도 앱 ===== -->
 <div id="app" class="hidden">
   <div class="topbar">
-    <button class="home" onclick="goHome()">◂ JEJUGRAPHER</button>
+    <button class="home" onclick="goHome()">◂ 제주 여행자 지도</button>
     <div class="switch">
-      <button id="swMe" onclick="enter('me')">건강관리용</button>
-      <button id="swAll" onclick="enter('all')">일반인용</button>
+      <button id="swAll" onclick="enter('all')">액티비티</button>
       <button id="swCafe" onclick="enter('cafe')">카페</button>
       <button id="swWell" onclick="enter('well')">웰니스</button>
       <button id="swCult" onclick="enter('cult')">문화·공원</button>
-      <button id="swShot" onclick="enter('shot')">촬영후보</button>
+      <button id="swShot" onclick="enter('shot')">명소·자연</button>
+      <button id="swFood" onclick="enter('food')">미식·시장</button>
     </div>
     <button class="locbtn" id="locBtn" onclick="locateMe()">📍 내 위치</button>
     <span class="vtitle" id="vtitle"></span>
   </div>
   <div class="filters" id="filters"></div>
+  <div class="stagbar" id="stagbar"></div>
   <div class="wrap">
     <div class="mapbox" id="map"></div>
     <aside class="panel">
@@ -274,95 +372,6 @@
 <script>
 // ================= 데이터 =================
 // splatUrl은 3D 가우시안 스플래팅 뷰가 제작된 지점에만 추가. 없으면 3D 버튼 미표시.
-const ARA=[33.4566,126.5619];
-
-const ME=[
- {name:"사려니숲 무장애나눔길",lat:33.3949678,lng:126.6839679,region:"중산간(동부)",lv:1,safe:"ok",araTime:"차량 약 30분",length:"약 1.3km(무장애 구간)",slope:"입구 약 6도, 완만",surface:"목재 데크",bf:"무장애(노폭 1.7m, 휠체어 교행)",infra:"장애인주차 5면·남녀분리 장애인화장실·쉼터 다수",shade:"삼나무 수관 깊은 그늘",rain:"중 — 우천·폭설 시 데크 수막, 통행제한 가능",time:"무장애 구간 약 31분",health:"평탄 데크라 저강도 산책에 안전. 약 31분 스케일로 가볍게 다녀오기 좋음. ★우천 시 데크 미끄럼 주의.",src:"공간정보 조사 / tour.jejudsi.kr"},
- {name:"서귀포 치유의숲 노고록길",lat:33.2988369,lng:126.5222283,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"남부(원거리)",length:"무장애 3.8km(특화 0.87km)",slope:"5~8% 이내, 유니버설 디자인",surface:"목재 데크 + 일부 흙길",bf:"무장애(전구간 휠체어·유모차)",infra:"장애인전용주차·장애인화장실·야외족욕장·산림욕베드",shade:"수령 60년+ 편백·삼나무",rain:"중 — 삼나무 방부목 우천 시 마찰 급감",time:"2~3시간(치유 프로그램)",health:"평균경사 5% 전후의 완만한 코스. 단차·턱 완전제거. ★데크 800m 후 흙길 전환→휠체어는 입구로 회귀. 흙길 단차 32cm 주의. 사전예약제.",src:"공간정보 조사 / headlinejeju"},
- {name:"절물자연휴양림 너나들이길",lat:33.4393622,lng:126.6299100,region:"제주시 도심/중산간",lv:1,safe:"care",araTime:"제주시 도심권(근거리)",length:"약 3.0km",slope:"계단 없음 / ★일부 자료 경사 5도=8.75% 보고",surface:"목재 데크",bf:"무장애(임산부·노약자 특화)",infra:"휴양림 인프라(상세 데이터 없음)",shade:"빽빽한 삼나무 숲 그늘",rain:"중 — 데크 낙엽·수막",time:"데이터 없음(오름 연계 시 3시간+)",health:"계단 없어 부담 적은 코스. ★단 일부 무장애 구간 경사 8.75% 보고 = 저강도 기준 초과 가능 → 경사 구간 확인. 근거리라 접근성 최상.",src:"공간정보 조사 / mediajeju"},
- {name:"한라수목원 광이오름",lat:33.468104,lng:126.4952574,region:"제주시 도심",lv:2,safe:"care",araTime:"차량/도보 약 20분(연동)",length:"탐방로 1.2km(전체 1.7km)",slope:"표고 266.8m·비고 77m, 분화구 경사 다소 높음",surface:"나무 데크 + 흙길 혼재",bf:"무장애 아님",infra:"주차장(유료)·생태체험관·쉼터·매점·화장실",shade:"수목원 수관 그늘",rain:"하",time:"약 45분(분화구 30+정상 15)",health:"분화구 경사 구간은 호흡이 가빠지는 편 → 저강도 위주면 평탄 둘레길만 권장. 근거리 접근성 좋음.",src:"공간정보 조사 / ihalla"},
- {name:"수월봉 엉알해안산책로",lat:33.2944141,lng:126.1628076,region:"서부",lv:2,safe:"care",araTime:"서부(원거리)",length:"엉알길 일부(올레12 전체 13.8km)",slope:"정상 해발 77m, 초반 평탄",surface:"흙·바위·화산재 지층 혼재",bf:"데이터 없음(일부 평탄 보행 가능)",infra:"데이터 없음",shade:"해안가라 그늘 미흡",rain:"중 — 절벽 낙석으로 통제 빈번",time:"엉알길만 약 1시간",health:"평지 구간은 가볍게 가능하나 ★절벽 인접·낙석 통제 잦음. 그늘 없어 더운 시간대 회피, 동반 권장.",src:"공간정보 조사 / visitkorea"},
- {name:"제주올레 7코스",lat:33.2413514,lng:126.5479980,region:"남부(서귀포)",lv:2,safe:"no",araTime:"데이터 없음",length:"약 17.7km",slope:"올레 난이도 '중'(바위·구릉)",surface:"자갈·험한 현무암 바위",bf:"무장애 아님",infra:"칠십리공원(화장실/전망대)·주차",shade:"일부만",rain:"중 — 현무암 수막 미끄럼",time:"약 5~6시간",health:"★불규칙·험한 현무암 바윗길 + 17km 장거리 → 저강도 목적엔 부적합. 충분한 체력 전제.",src:"공간정보 조사 / visitjeju"},
- {name:"거문오름",lat:33.4546419,lng:126.7179249,region:"동부/중산간",lv:3,safe:"no",araTime:"데이터 없음",length:"분화구 5.0km / 전체 6.7km",slope:"해발 456m, 9개 봉우리 오르내림",surface:"자연 산림 지형",bf:"무장애 아님(예약 필수, 유료)",infra:"탐방지원센터(진입 후 화장실 이용 불가)",shade:"곶자왈 숲 수관",rain:"데이터 없음",time:"2시간30분~3시간30분",health:"★수시간 산악 보행 + 도중 화장실 없음 + 고강도. 저강도 목적엔 부적합. 충분한 체력·예약 전제.",src:"공간정보 조사 / visitjeju"},
- {name:"다랑쉬오름",lat:33.4762433,lng:126.8229497,region:"동부",lv:3,safe:"no",araTime:"데이터 없음",length:"약 4.0km",slope:"해발 382m, 화구 깊이 115m, 급경사",surface:"비탈진 급경사",bf:"무장애 아님",infra:"탐방안내소·초소·쉼터",shade:"그늘 미흡",rain:"상 — 빗길 하산 낙상 매우 치명적",time:"약 1시간 20분",health:"★가파른 사면 급경사 → 저강도 목적엔 부적합. 빗길 하산 낙상 위험 큼.",src:"공간정보 조사 / visitjeju"},
- {name:"새별오름",lat:33.3659432,lng:126.3564400,region:"서부",lv:3,safe:"no",araTime:"데이터 없음",length:"편도(데이터 없음)",slope:"해발 519m, 공식난이도 '상'",surface:"억새 사면",bf:"무장애 아님",infra:"대형 주차장·푸드트럭",shade:"억새뿐, 해가림 부재",rain:"데이터 없음",time:"편도 약 20분",health:"★짧지만 가팔라 단시간에 강도가 급격히 올라감 → 저강도 목적엔 부적합.",src:"공간정보 조사 / visitjeju"},
- {name:"이호테우 해변 산책길",lat:33.4979571,lng:126.4531502,region:"제주시 도심(이호동)",lv:1,safe:"care",araTime:"공항 서북측, 도심서 근거리",length:"해안도로 연계 시 수 km 연장 가능",slope:"0m / 완전 평지",surface:"보도블록·해변 모래·피아노건반길",bf:"가능(해변 모래사장 제외)",infra:"조명·말등대·어린이 풀장(여름)",shade:"거의 없음(꽃밭길 일부 제외)",rain:"중 — 해풍·월파 주의",time:"데이터 없음(연장 가변)",health:"표고 0m 완전 평지라 부담이 적은 코스. ★그늘이 거의 없어 더운 시간대 회피, 해풍·월파 시 주의. 야간 조명 확보됨.",src:"공간정보 조사 / Google Places 실측"},
- {name:"도두 무지개 해안도로",lat:33.509258,lng:126.4719749,region:"제주시 도심(도두동)",lv:1,safe:"ok",araTime:"공항 북측 해안",length:"약 1~2km 내외",slope:"0m / 완만한 포장도로",surface:"아스팔트·인도 포장",bf:"가능",infra:"벤치·카페거리·무지개 방호벽",shade:"없음",rain:"중 — 차량 통행 인접 주의",time:"데이터 없음",health:"완만한 포장 평지로 가볍게 걷기 좋음. ★그늘 없음, 도로 인접이라 교통 안전 유의. 무지개 방호벽 경관.",src:"공간정보 조사 / Google Places 실측"},
- {name:"도두봉 둘레길",lat:33.508095,lng:126.468593,region:"제주시 도심(도두동)",lv:2,safe:"care",araTime:"공항 바로 북쪽 해안",length:"2.25km / 약 1시간 7분~2시간",slope:"표고 61.8m / 완만한 오름",surface:"나무 데크·포장로·흙길",bf:"일부 가능(둘레길 하단부)",infra:"사찰(장안사)·전망대·벤치",shade:"숲길 구간 그늘 형성",rain:"낮음(정비 우수)",time:"약 1시간 7분~2시간",health:"표고 61.8m의 낮은 오름. 둘레길 하단부는 평탄해 일부 가능하나 정상부는 완만한 오르막. 저강도 위주면 하단부 위주 권장. 공항 인접 소음 큼.",src:"공간정보 조사 / Google Places 실측"},
- {name:"용두암 해안 산책로",lat:33.5157583,lng:126.5116346,region:"제주시 도심(용담동)",lv:1,safe:"care",araTime:"용담동 해안도로 연결부",length:"도두봉에서 도보 약 1시간 거리",slope:"0m / 해안 암반지대 평탄화",surface:"보도블록·현무암 판석 포장",bf:"대부분 가능",infra:"공영주차장·야간 조명·화장실",shade:"없음",rain:"높음 — 현무암 젖을 시 미끄러움",time:"데이터 없음",health:"해안 암반지대를 평탄화한 산책로로 대부분 무장애 가능. ★현무암이 젖으면 미끄럽고, 강풍 시 물보라(염무) 노출. 야간 조명·화장실 있음.",src:"공간정보 조사 / Google Places 실측"},
- {name:"탑동광장 해안 산책로",lat:33.5180392,lng:126.5265318,region:"제주시 도심(삼도동)",lv:1,safe:"care",araTime:"구제주 앞바다, 도심 중심",length:"광장 중심 왕복 수 km",slope:"0m / 평지",surface:"우레탄·콘크리트·보도블록",bf:"최적(모든 구역 단차 최소화)",infra:"해변공연장·농구장·야자수·방파제",shade:"없음",rain:"매우 높음 — 풍랑 시 파도 월파",time:"데이터 없음",health:"단차 최소화로 무장애 최적. 도심 중심이라 접근성 좋음. ★악천후 시 월파 위험으로 출입 통제. 인라인·자전거·보행자 동선 겹침 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"삼양 검은모래 해안도로",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",lv:1,safe:"care",araTime:"삼양동 북측 해안",length:"연계 코스 1~3km 내외",slope:"0m / 평지",surface:"아스팔트·콘크리트",bf:"가능",infra:"정자 구조물·주차장",shade:"정자 제외 시 없음",rain:"중 — 월파 주의",time:"데이터 없음",health:"평지 해안도로로 가볍게 걷기 좋음. ★그늘은 정자뿐, 차량 통행로 인접. 동부 해안 일몰 경관.",src:"공간정보 조사 / Google Places 실측"},
- {name:"삼양 해수욕장 어싱 산책로",lat:33.5260277,lng:126.5869144,region:"제주시 도심(삼양동)",lv:2,safe:"care",araTime:"삼양동 해변",length:"백사장 왕복",slope:"0m / 평탄한 모래 지형",surface:"검은 모래(현무암 풍화토)",bf:"불가(휠체어 진입 어려움)",infra:"공영 화장실·세족 시설",shade:"없음",rain:"중 — 파도 주의",time:"데이터 없음",health:"맨발 걷기(어싱)에 적합한 검은 모래 노면. 평지지만 모래 저항으로 하체 부하가 있어 강도는 중(中). ★휠체어 진입 불가, 모래찜질 객과 동선 충돌 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"삼무공원(배두리오름)",lat:33.4918224,lng:126.4917277,region:"제주시 도심(연동)",lv:1,safe:"care",araTime:"신제주 연동 도심 한가운데",length:"둘레 617m / 1회전 약 10분",slope:"표고 85m, 비고 10m",surface:"우레탄 포설·야자매트·돌계단",bf:"부분 가능(계단 제외 우레탄 길)",infra:"팔각정·체육시설·벤치·화장실·상권",shade:"벚나무·소나무 숲 우거짐",rain:"낮음(야자매트 배수 우수)",time:"약 10분(1회전)",health:"비고 10m의 나지막한 언덕으로 둘레 617m 콤팩트 코스. 우레탄·야자매트로 무릎 관절 약한 분께 적합. 계단 구간만 제외하면 부담 적음. 도심 한가운데라 접근성 최상.",src:"공간정보 조사 / Google Places 실측"},
- {name:"신산근린공원 산책로",lat:33.5059296,lng:126.532976,region:"제주시 도심(일도동)",lv:1,safe:"ok",araTime:"구제주 일도동 주거지 인근",length:"총 코스 약 1.2km",slope:"완전 평지",surface:"포장도로·흙길 혼재",bf:"최적(휠체어 가능)",infra:"벤치·화장실·증기기관차 전시",shade:"20~100년 왕벚나무 터널",rain:"낮음",time:"데이터 없음",health:"완전 평지에 왕벚나무 그늘 터널이 덮인 1.2km 코스. 휠체어 가능한 무장애 최적 환경. 도심 주거지 인근이라 접근성 좋음. 봄철 벚꽃 축제 시 인파.",src:"공간정보 조사 / Google Places 실측"},
- {name:"전농로 왕벚나무 거리",lat:33.5043987,lng:126.5193278,region:"제주시 도심(삼도동)",lv:1,safe:"care",araTime:"삼도동 원도심 상권",length:"연계 코스에 따라 가변",slope:"평지",surface:"아스팔트·인도 포장",bf:"가능(인도 연석 단차 주의)",infra:"50년 전통 노포 상점·벚꽃길",shade:"왕벚나무 터널이 덮음",rain:"낮음",time:"데이터 없음",health:"평지 가로수길로 벚나무 터널 그늘이 좋음. 원도심 상권과 결합된 도시 보행로. ★인도 연석 단차 주의, 벚꽃 시즌 차량 통행 혼잡.",src:"공간정보 조사 / Google Places 실측"},
- {name:"제주향교 산책길",lat:33.5111112,lng:126.5156105,region:"제주시 도심(용담동)",lv:1,safe:"ok",araTime:"용담1동 향교 일대",length:"경내 관람 포함 수십 분",slope:"평지",surface:"보도블록·흙길·포장 혼재",bf:"일부 진입 제한",infra:"유형문화재 건축물·야간 경관 조명",shade:"나무 및 처마 그늘",rain:"낮음",time:"수십 분",health:"평지 역사 탐방 산책로. 조선 건축(대성전 등) 관람과 결합. ★교육·종교시설이라 정숙 요망, 일부 구역 진입 제한.",src:"공간정보 조사 / Google Places 실측"},
- {name:"노형근린공원",lat:33.4802652,lng:126.4826757,region:"제주시 도심(노형동)",lv:1,safe:"ok",araTime:"신제주 노형동 주거지",length:"단거리 순환",slope:"평지",surface:"우레탄·블록 포장",bf:"가능",infra:"운동기구·농구장·축구장·테니스장·화장실·야간 조명",shade:"조경수 그늘",rain:"낮음",time:"데이터 없음",health:"평지 도심 근린공원으로 산책·가벼운 운동에 적합. 야간 조명·CCTV로 야간 산책 비교적 안전. 운동기구·체육시설 잘 갖춰짐.",src:"공간정보 조사 / Google Places 실측"},
- {name:"사라봉 공원 산책로",lat:33.5177405,lng:126.5449135,region:"제주시 도심(사라봉동)",lv:2,safe:"care",araTime:"구제주 동문로터리 동쪽 2km",length:"개별 산책로 30분~",slope:"해발 143m / 지속적 경사로",surface:"포장 흙길·야자매트·우레탄",bf:"제한적(일부 평탄 구간만)",infra:"팔각정·운동기구 다수·사찰·등대",shade:"숲 지대 많아 충분한 그늘",rain:"보통",time:"30분~",health:"해발 143m 오름으로 경사가 있으나 체력단련기구가 있는 평탄부만 순환하면 저강도로 가능. 숲 그늘 충분. 영주십경 '사봉낙조' 일몰 경관. 도민 핵심 체력단련장이라 혼잡.",src:"공간정보 조사 / Google Places 실측"},
- {name:"한라수목원 수생식물원 둘레길",lat:33.4699272,lng:126.4932445,region:"제주시 도심(노형동)",lv:1,safe:"care",araTime:"신제주 노형동, 도심 근거리",length:"전체 관람 시 1.5~2시간",slope:"완만한 구릉, 비고 48m",surface:"목재 데크·블록 포장",bf:"다수 구간 가능",infra:"생태학습관·매표소·주차장",shade:"등나무 쉼터 등 다수",rain:"비교적 안전(단차 주의)",time:"1.5~2시간",health:"수생식물원 데크길은 수평적 산책로로 다수 구간 무장애 가능. 식물 군락·연못 수련 경관. ★자전거 출입 등 제한 규정, 데크 단차 주의. 입장 무료.",src:"공간정보 조사 / Google Places 실측"},
- {name:"비자림 숲길",lat:33.484272,lng:126.8064793,region:"동부(구좌읍)",lv:1,safe:"care",araTime:"구좌읍 비자숲길, 도심서 차량 30분+",length:"약 3.2km / 1~2시간",slope:"평탄함",surface:"화산송이·흙길",bf:"가능(유모차 진입 가능 구간)",infra:"화장실·주차장",shade:"울창한 숲 그늘 형성",rain:"배수 양호",time:"1~2시간",health:"화산송이가 두껍게 깔려 충격 흡수가 좋고 누적 표고차가 거의 없는 평탄 노면. 천년 비자나무 숲 그늘이 짙음. 일부 자갈 구간 있어 편한 신발 권장. 입장료 있음.",src:"공간정보 조사 / Google Places 실측"},
- {name:"김녕 지질트레일 A코스",lat:33.5582327,lng:126.759787,region:"동부(구좌읍)",lv:1,safe:"ok",araTime:"구좌읍 김녕",length:"2.2km / 약 40분~1시간",slope:"거의 없음",surface:"화산송이 깔린 평지",bf:"가능(유모차·평탄 보행)",infra:"안내판 등",shade:"숲 안쪽 그늘 분포",rain:"데이터 없음",time:"약 40분~1시간",health:"화산송이 평지로 유모차·평탄 보행 가능한 무장애형 코스. 비자나무 숲과 독특한 지질 특성. 표고차 거의 없어 부담 적음.",src:"공간정보 조사 / Google Places 실측"},
- {name:"월정리해변 해안산책로",lat:33.5559739,lng:126.7961709,region:"동부(구좌읍)",lv:1,safe:"care",araTime:"구좌읍 월정리",length:"데이터 없음",slope:"해수면 기준(0m)",surface:"포장(보도블럭 구간 한정)",bf:"가능(보도블럭 구간 한정)",infra:"인근 카페거리 다수",shade:"없음",rain:"중 — 해풍·파도 노출",time:"데이터 없음",health:"해수면 평지 해안 산책로. 보도블럭 구간은 보행 가능. ★보행자와 차량 혼재 동선 주의, 그늘 없음. 한적한 바다 조망과 카페뷰.",src:"공간정보 조사 / Google Places 실측"},
- {name:"동백동산(곶자왈)",lat:33.4776624,lng:126.7135079,region:"동부(조천읍)",lv:2,safe:"care",araTime:"조천읍 선흘리",length:"데이터 없음",slope:"완만한 구릉",surface:"자연 흙길·돌길 일부",bf:"불가",infra:"데이터 없음",shade:"숲 그늘 매우 우수",rain:"습지 환경상 이끼 미끄럼 주의",time:"데이터 없음",health:"완만한 구릉의 곶자왈 원시 생태·습지 숲길. 그늘이 매우 우수하나 ★이끼·습지로 미끄러워 발목 안정성 확보 필요. 러닝 코스로도 제안되나 노면 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"함덕 카페거리 산책로",lat:33.5437787,lng:126.6688353,region:"동부(조천읍)",lv:1,safe:"care",araTime:"조천읍 신북로 인근",length:"단거리",slope:"해수면 인근",surface:"보도 포장",bf:"가능",infra:"카페·상업 인프라 밀집",shade:"건축물 그늘 일부",rain:"데이터 없음",time:"단거리",health:"해수면 인근 보도 포장 단거리 산책로. 카페·상업 인프라 밀집해 접근성 좋음. ★차량 통행로 인접 주의. 레트로 감성·오션뷰.",src:"공간정보 조사 / Google Places 실측"},
- {name:"수월봉 지질트레일",lat:33.2944141,lng:126.1628076,region:"서부(한경면)",lv:1,safe:"care",araTime:"한경면 고산리",length:"데이터 없음",slope:"정상까지 차량 진입 가능한 완만한 경사",surface:"아스팔트 포장",bf:"가능(차량·휠체어 이용 가능)",infra:"주차장 완비",shade:"없음(탁 트임)",rain:"강풍 노출 위험",time:"데이터 없음",health:"정상까지 완만해 차량·휠체어 접근 가능한 무장애형. 지질트레일 단면층과 차귀도 해상 조망. ★그늘 없고 강풍 노출, 자전거·차량 통행 혼재 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"신창 풍차해안도로",lat:33.3412384,lng:126.1668087,region:"서부(한경면)",lv:1,safe:"care",araTime:"한경면 신창",length:"도보·자전거용 단거리",slope:"해안 인접 평지 수준",surface:"콘크리트 포장",bf:"가능",infra:"상업시설 드묾",shade:"없음",rain:"높음 — 해풍·높은 파도 덮침 주의",time:"데이터 없음",health:"해안 평지 콘크리트 포장로. 거대한 풍력발전기와 이국적 해안선. ★해풍·파도 덮침 주의, 피난처 적어 한적함.",src:"공간정보 조사 / Google Places 실측"},
- {name:"금능으뜸원해수욕장",lat:33.3899107,lng:126.2353674,region:"서부(한림읍)",lv:1,safe:"care",araTime:"한림읍 금능",length:"단거리 산책",slope:"평지(해발 0m 수렴)",surface:"젖은 모래·데크",bf:"접근 용이",infra:"야영장·화장실",shade:"없음",rain:"중 — 풍랑 조심",time:"단거리",health:"평지 해변으로 수심이 얕고 투명한 바닷물. 협재와 인접. 단단히 젖은 모래 지형은 관절 부하가 적음. ★밀물 시 백사장 축소, 그늘 없음.",src:"공간정보 조사 / Google Places 실측"},
- {name:"협재해수욕장",lat:33.394261,lng:126.2399011,region:"서부(한림읍)",lv:1,safe:"care",araTime:"한림읍 협재리",length:"단거리 산책",slope:"평지",surface:"모래·블럭 포장",bf:"인접로 가능",infra:"대형 주차장·편의점·상가 밀집",shade:"없음",rain:"데이터 없음",time:"단거리",health:"평지 모래·블럭 포장 해변. 고운 모래와 비양도 조망. 누적 표고차 0에 수렴해 저강도 보행에 적합. ★성수기 유동인구 과도해 러닝 시 충돌 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"곽지해수욕장",lat:33.450902,lng:126.3057298,region:"서부(애월읍)",lv:1,safe:"care",araTime:"애월읍 곽지리",length:"야영장 순환 보행",slope:"평지",surface:"모래·야영지 포장",bf:"포장 구역 내 가능",infra:"공영주차장·글램핑/카라반",shade:"없음",rain:"중 — 텐트 등 야영장비 침수 주의",time:"데이터 없음",health:"평지 해변·야영장 순환 보행. 넓은 해변과 용천수 노천탕. 포장 구역은 무장애 가능. ★그늘 없음.",src:"공간정보 조사 / Google Places 실측"},
- {name:"금산공원(납읍 난대림)",lat:33.4337682,lng:126.3309964,region:"서부(애월읍)",lv:2,safe:"care",araTime:"애월읍 납읍리",length:"순환 소요",slope:"국지적 단차 존재",surface:"흙길·목재 데크 혼합",bf:"진입로 외 일부 구간 제약",infra:"인접 납읍리 마을 인프라",shade:"난대림 상록수 짙은 그늘",rain:"숲 내부 습도로 목재 데크 미끄러움",time:"데이터 없음",health:"상록수 난대림의 짙은 그늘. 천연기념물 원시 희귀 난대식생 군락지. 국지적 단차 있어 일부 구간 제약. ★목재 데크 미끄럼, 법적 보호구역이라 식물 채취·산림 훼손 금지.",src:"공간정보 조사 / Google Places 실측"},
- {name:"한림복지문화체육시설",lat:33.4055445,lng:126.2664193,region:"서부(한림읍)",lv:1,safe:"ok",araTime:"한림읍 대림리",length:"시설 내 트랙 활용(반복 러닝)",slope:"평탄(단차 없는 체육시설 규격)",surface:"우레탄 트랙·실내 마루",bf:"가능(공공시설 규정 무장애 설계)",infra:"100명 수용·전용 주차장·실내외 체육",shade:"실내 구역·실외 관중석 차광막",rain:"우천 시 야외 우레탄 마찰계수 하락 주의",time:"데이터 없음",health:"단차 없는 규격화된 공공 체육시설. 우레탄 트랙으로 반복 러닝에 적합하고 무장애 설계. 실내 구역은 전천후. ★행사 대관 시 개인 이용 제한 가능.",src:"공간정보 조사 / Google Places 실측"},
- {name:"표선 성읍리 소형 오름",lat:33.3820000,lng:126.7990000,region:"남부(표선면 성읍리)",lv:1,safe:"care",araTime:"표선면 성읍리 산1",length:"정상까지 약 15~20분",slope:"표고차 매우 낮고 경사 극히 완만",surface:"포장·흙길",bf:"일부",infra:"정비된 전용 주차장 완비",shade:"수목 그늘",rain:"데이터 없음",time:"약 15~20분",health:"표고차 매우 낮고 경사가 극히 완만해 노약자도 동행 가능. 정상서 한라산 백록담·성산일출봉·풍차까지 파노라마 조망. 체력 소모 대비 경관 보상이 큼. (PDF상 명칭 미상)",src:"공간정보 조사 / Google Places 실측(개오름 인근 추정)"},
- {name:"남원 큰엉 해안산책로",lat:33.2733146,lng:126.7048177,region:"남부(남원읍)",lv:1,safe:"care",araTime:"남원읍 남원관광지구 내",length:"1~2시간 소요 수준",slope:"평탄한 해안 절벽 윗면 보행",surface:"포장도로·흙길 혼합",bf:"가능(무장애 33%~100% 구간 혼재)",infra:"주차장·화장실 완비",shade:"식생 덮인 수림 터널 그늘 우수",rain:"높음 — 태풍·고파랑 시 절벽 파도 덮침",time:"1~2시간",health:"평탄한 해안 절벽 윗면 보행로로 수림 터널 그늘이 우수. 무장애 적용 구간이 넓음. 한반도 지형 빼닮은 수림 터널 포토존. ★무장애 33% 구간과 100% 구간 경계 사전 확인, 태풍·고파랑 시 위험.",src:"공간정보 조사 / Google Places 실측"},
- {name:"혼인지",lat:33.4160056,lng:126.8938445,region:"남부(성산읍)",lv:1,safe:"ok",araTime:"성산읍 온평리",length:"단거리 산책",slope:"완전한 평지",surface:"정비된 평탄 보행블록·잔디",bf:"가능(무장애 40%~100% 혼재)",infra:"공공화장실·관리소",shade:"전통 수목 산발적 그늘",rain:"평탄지형 국지적 물고임",time:"단거리",health:"완전 평지의 정비된 보행블록·잔디 산책로. 무장애 적용률 높음. 탐라국 개국신화(삼성혈 설화) 연못과 정통 조경. ★유적지 보호 위해 정해진 관람로 이탈 금지.",src:"공간정보 조사 / Google Places 실측"},
- {name:"성산국민체육센터 운동장",lat:33.4669124,lng:126.90497,region:"남부(성산읍)",lv:1,safe:"ok",araTime:"성산읍 오조리",length:"400m 규격×5레인 트랙 루프",slope:"인공 평지(트랙 내 표고차 완전 제로)",surface:"탄성 우레탄 트랙(표준 규격)",bf:"완벽히 가능(경계턱 없음)",infra:"관중석 488석·화장실·주차장",shade:"야외 노출로 그늘 없음",rain:"집중호우 시 우레탄 수막현상 미끄럼",time:"데이터 없음",health:"표고차 완전 제로의 400m 규격 우레탄 트랙. 경계턱 없어 완벽한 무장애. 탄성 포장으로 관절 부담 적고 야간·기상 무관하게 일정 심박 러닝 가능. ★대관 시 외부인 출입·운영시간 통제 확인.",src:"공간정보 조사 / Google Places 실측"},
- {name:"남원체육관",lat:33.2776473,lng:126.7053152,region:"남부(남원읍)",lv:1,safe:"ok",araTime:"남원읍 남원리, 태위로 551-28",length:"실내 공간 반복 운동",slope:"인공 평지",surface:"실내 목재 마루·실외 구역",bf:"가능(진입로 정비)",infra:"관중석 400석·주차장",shade:"실내 구역 전천후 차광·방우",rain:"기상 조건 무관(실내)",time:"데이터 없음",health:"실내 목재 마루의 전천후 체육 공간. 진입로 정비로 접근 가능. 기상 무관하게 운동에만 집중 가능. ★동호회 등 단체 우선 사용 시 개인 이용률 변동.",src:"공간정보 조사 / Google Places 실측"},
- {name:"대정읍성",lat:33.2518044,lng:126.276634,region:"남부(대정읍)",lv:1,safe:"care",araTime:"대정읍 도심지 인근",length:"성곽 둘레 보행",slope:"평지형 방어 읍성(단차 없음)",surface:"흙길·성곽 위 잔디밭",bf:"부분 가능",infra:"마을 내 주차 공간",shade:"성곽 주변 일부 그늘",rain:"성곽 위 우천 시 미끄럼",time:"데이터 없음",health:"평지형 방어 읍성 둘레 보행로로 단차가 없음. 조선시대 제주 3대 읍성. ★성벽 문화재 보호 규정상 지정 보행로·계단만 이용.",src:"공간정보 조사 / Google Places 실측"},
- {name:"가파도 둘레길",lat:33.1707573,lng:126.2726748,region:"남부(대정읍 도서)",lv:1,safe:"care",araTime:"대정읍 가파리(해상 도서)",length:"해안선 따라 종주",slope:"제주 부속섬 중 가장 평탄(최고 해발 20.5m)",surface:"시멘트 도로 포장·마을 흙길",bf:"일부 가능",infra:"정기여객선 선착장·자전거 대여소·카페",shade:"교목류 전무, 땡볕 노출",rain:"높음 — 강풍·비바람 시 피난처 절대 부족",time:"종주 수 시간",health:"제주 부속섬 중 가장 평탄한 구릉(최고 20.5m)으로 종주 부담 적음. 청보리밭과 한라산 동시 조망. ★그늘 전무·땡볕 노출, 모슬포항 정기여객선·막배 시간 엄수.",src:"공간정보 조사 / Google Places 실측"},
- {name:"마라도 둘레길",lat:33.1206371,lng:126.2671204,region:"남부(대정읍 도서)",lv:1,safe:"care",araTime:"대정읍 마라리(최남단 해상 도서)",length:"1~2시간 섬 전체 횡단",slope:"해안 절벽으로 솟아 있으나 섬 내부는 매우 완만",surface:"포장 통행로·천연 잔디길",bf:"진입부 외 내부 일부 가능",infra:"선착장·공중화장실·짜장면 상가",shade:"목본류 식생 부재로 그늘 없음",rain:"높음 — 폭풍우 시 피할 곳 적고 결항률 높음",time:"1~2시간",health:"섬 내부는 매우 완만해 1~2시간 횡단 가능. 대한민국 최남단 영토 기념비와 해안 기암절벽. ★그늘 절대 없음, 폭풍우 시 결항 잦아 출항 정보 수시 점검.",src:"공간정보 조사 / Google Places 실측"},
- {name:"한라산둘레길 산림휴양길",lat:33.4393622,lng:126.62990999,region:"중산간(휴양림 연계)",lv:1,safe:"care",araTime:"중산간 휴양림 연계지(절물 일대)",length:"2.3km / 초단거리",slope:"아주 완만한 산림 사면 경사",surface:"정비된 목재 데크·다져진 흙길",bf:"부분적 무장애 가능",infra:"휴양림 관리소",shade:"숲 그늘 풍부",rain:"데크 표면 물기 미끄럼",time:"초단거리",health:"한라산 둘레길 9개 코스 중 가장 짧은 2.3km 초단거리. 거칠지 않고 쾌적하게 다듬어진 산림 휴양 구간으로 초심자 입문에 적합. 부분 무장애 가능. ★데크 물기 미끄럼.",src:"공간정보 조사 / hallatrail.or.kr"},
- {name:"서귀포자연휴양림 무장애 산책로",lat:33.3114287,lng:126.4588606,region:"중산간(1100도로 일대)",lv:1,safe:"care",araTime:"서귀포 중산간 1100도로 고도역",length:"목적에 따른 순환형 산책로 다수",slope:"인공 구조물 통한 평탄 무장애 광범위 조성",surface:"목재 데크·매끄러운 휠체어용 무장애 포장",bf:"적극 가능(무장애 적용 80%~100%)",infra:"장애인 전용 주차·휠체어 리프트·공중화장실 완비",shade:"수십 년 수령 숲 터널",rain:"비온 뒤 목재 데크 젖음 미끄럼 우려",time:"코스별 가변",health:"험준한 산악 지형임에도 데크·무장애 포장을 80~100% 도입한 순환형 무장애 산책 구간. 휠체어 리프트·전용 주차 완비로 영유아·휠체어 이용자에 최적화. 고지대 천연 힐링 수림. ★데크 젖음 주의.",src:"공간정보 조사 / Google Places 실측"},
- {name:"서귀포 치유의숲",lat:33.2988369,lng:126.5222283,region:"중산간(산록남로 고지대)",lv:1,safe:"care",araTime:"서귀포 산록남로 일대 고지대",length:"프로그램 코스별 다양(가베롱·벤조롱숲길 등)",slope:"지형 자체 일부 자연 경사 존재",surface:"목재 데크·충격 완화 야자매트 보설",bf:"적극 가능(보행약자용 무장애 80%~100%)",infra:"종합 탐방안내소·치유 프로그램 휴게시설",shade:"짙푸른 상록수 숲 그늘",rain:"데이터 없음",time:"코스별 가변",health:"보행약자용 무장애 구간을 80~100% 확보한 산림치유 숲. 야자매트로 충격 완화. 산림치유지도사 동행 웰니스 공간. ★당일 현장 발권 불가, 인터넷 사전 예약 필수.",src:"공간정보 조사 / Google Places 실측"},
- {name:"한라산둘레길 절물 조릿대길",lat:33.4393622,lng:126.6299100,region:"중산간(절물 자연휴양림 방면)",lv:2,safe:"care",araTime:"사려니 종점~절물자연휴양림 방면",length:"데이터 없음",slope:"중산간 고도 내 파도형 흙길 굴곡",surface:"산죽(조릿대) 군락 덮인 흙길",bf:"불가",infra:"절물자연휴양림 측 공공 인프라 공유",shade:"대숲 그늘 다수 존재",rain:"빗물 맺혀 하반신 젖음 현상 극심",time:"데이터 없음",health:"허리까지 자란 조릿대가 바다처럼 펼쳐진 군락길. 대숲 그늘 다수. 중강도 흙길 굴곡. ★피부 긁힘·이슬 맺힘 방지 위해 긴바지·스패츠 착용 권장, 무장애 불가.",src:"공간정보 조사 / hallatrail.or.kr"},
-{name:"하도리 철새도래지",lat:33.5038245,lng:126.8919426,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"코스 연계",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약20~30분",health:"철새 서식지, 해안선 풍광. 조류 서식지이므로 과도한 소음 주의",src:"공간정보 조사"},
-{name:"석다원 해안로",lat:33.5270996,lng:126.8892479,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약20분",health:"해안선과 현무암 바위 경관. 월파·강풍 위험, 해안도로변 차량 주의",src:"공간정보 조사"},
-{name:"김녕미로공원 산책로",lat:33.5368768,lng:126.7725371,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약30분",health:"조경수 식생. 복잡한 미로형, 동선 이탈 주의. 유료 시설",src:"공간정보 조사"},
-{name:"만장굴 지상부 산책",lat:33.5282463,lng:126.7702874,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"약40분",health:"세계자연유산 용암동굴계 외부 숲. 동굴 내부는 별도 기준",src:"공간정보 조사"},
-{name:"아부오름",lat:33.447607,lng:126.7772601,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"전형적 원형 분화구와 삼나무 조림지. 표고 301.4m, 분화구 내부 수목",src:"공간정보 조사"},
-{name:"조천리 용천수탐방길",lat:33.540066,lng:126.63616,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"4.9~19.1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"40분~7시간30분",health:"23개의 용천수 연결망, 연북정, 돌담 풍경. 좁은 골목길 차량 교행 주의",src:"공간정보 조사"},
-{name:"김녕고장난길",lat:33.5578697,lng:126.74708,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"6.24km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"김녕 해안을 따라 걷는 지질·생태 경관. 자전거·보행자 혼용 주의",src:"공간정보 조사"},
-{name:"숨비소리길",lat:33.5236474,lng:126.8634357,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"5.7~19.4km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1.5~5시간",health:"해녀항일기념탑, 서문동 우물, 별방진 성벽. 강풍 시 체력 소모 심화",src:"공간정보 조사"},
-{name:"닭머르 해안길",lat:33.5474,lng:126.6444,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"왕복30분",health:"닭의 머리 닮은 기암괴석과 바다·억새. 주차 협소, 해안 낭떠러지 주의",src:"공간정보 조사"},
-{name:"청굴물",lat:33.5582697,lng:126.7512108,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"얼음장같이 차가운 해안 용천수 뷰. 만조·우천 시 접근 불가, 노면 미끄럼 주의",src:"공간정보 조사"},
-{name:"조천체육관",lat:33.5390118,lng:126.6427149,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"공공 체육시설, 실내 마루바닥. 우천 무관 최적 인프라",src:"공간정보 조사"},
-{name:"구좌체육공원",lat:33.5563059,lng:126.7624362,region:"동부(조천·구좌)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"넓은 공공 육상 체육 거점, 우레탄 트랙·인조잔디. 휠체어 진입 가능",src:"공간정보 조사"},
-{name:"한담해안산책로",lat:33.4591293,lng:126.3103796,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"900m~13.5km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"20분~4시간30분",health:"옥빛 바다와 검은 용암바위가 밀착한 절경. 상시 붐빔, 해안 낭떠러지 실족 주의",src:"공간정보 조사"},
-{name:"선운정사 주변길",lat:33.4293517,lng:126.3071931,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"애월 내륙의 한적한 사찰 주변 풍경. 올레 15코스 동선 이탈 주의",src:"공간정보 조사"},
-{name:"비양도 둘레길",lat:33.4093643,lng:126.2257213,region:"서부(애월·한림·한경)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"3.5~4.1km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1.5~2.5시간",health:"1002년 솟아난 기생화산의 신비, 한라산 원경 조망. 풍랑주의보 시 입도 통제, 도선 시간 확인",src:"공간정보 조사"},
-{name:"하영올레1코스",lat:33.2541141,lng:126.5589916,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"10.30km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"5~12시간",health:"걸매생태공원·천지연폭포·칠십리시공원 거쳐 새연교로. 도심 횡단보도·차량 교차로 보행 안전",src:"공간정보 조사"},
-{name:"하영올레3코스",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"7.3km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"솜반천 탐방로와 지장샘 잇는 도심 수변 생태계. 집중호우 시 솜반천 범람 치명적",src:"공간정보 조사"},
-{name:"서귀포 칠십리시공원",lat:33.2470894,lng:126.5532564,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"순환 자유",health:"섶섬·문섬·천지연폭포 조망 도심 전망대. 휠체어 진입 가능, 무장애 우수",src:"공간정보 조사"},
-{name:"엉또폭포 조망길",lat:33.2686052,lng:126.4999881,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"폭우 후 생성되는 거대한 기암폭포. 폭우 시 노면 붕괴·낙석 극도 유의",src:"공간정보 조사"},
-{name:"하논분화구",lat:33.2504724,lng:126.5447279,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"국내 유일 마르(Maar)형 분화구, 내부 벼농사 생태경관. 농기계 운행 경로, 보행 간격 유지",src:"공간정보 조사"},
-{name:"외돌개 및 돔베낭길",lat:33.2400718,lng:126.5333708,region:"남부(서귀포)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"올레7코스 구간",health:"바다 위 우뚝 솟은 외돌개 기암절경과 해송. 돌풍·추락 위험, 바위지대 실족 주의",src:"공간정보 조사"},
-{name:"걸매생태공원",lat:33.2499864,lng:126.5551498,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"순환 자유",health:"하천·봄철 매화 군락. 침수 외 위험 적음, 펜스 밖 진입 금지",src:"공간정보 조사"},
-{name:"천지연폭포 산책로",lat:33.246944,lng:126.554417,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"왕복30~40분",health:"기암절벽에서 쏟아지는 천지연·무태장어 서식지. 입장료·관광객 혼잡",src:"공간정보 조사"},
-{name:"새연교 및 새섬",lat:33.2374705,lng:126.5597705,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"정보 확인 필요",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"1시간 이내 순환",health:"서귀포항 가로지르는 랜드마크 교량과 난대림 생태. 강풍 시 통행 위험, 게이트 통제 확인",src:"공간정보 조사"},
-{name:"작가의 산책길",lat:33.2453211,lng:126.5638438,region:"남부(서귀포)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약8.6km",slope:"정보 확인 필요",surface:"정보 확인 필요",bf:"정보 확인 필요(현장 실측 전)",infra:"정보 확인 필요",shade:"정보 확인 필요",rain:"정보 확인 필요",time:"정보 확인 필요",health:"이중섭 화가 자취 서린 문화예술 거리. 올레시장 통과 시 보행 밀집도 최고조",src:"공간정보 조사"},
-{name:"섭지코지",lat:33.4242095,lng:126.931111,region:"동부(성산읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"왕복 약1시간",slope:"정보 확인 필요",surface:"평탄한 흙길/시멘트 포장",bf:"일부(등대 계단 외 해안 산책로 전반 진입 가능)",infra:"대형주차장·화장실",shade:"없음",rain:"중 — 바다로 돌출된 곶 지형, 강풍 시 보행 불안정·낙상 우려",time:"저강도 산책",health:"방풍림이 없어 기상 악화 시 풍랑특보에 각별한 주의",src:"공간정보·스포츠레저 조사 / 자체 분석"},
-{name:"대포 주상절리대",lat:33.237994,lng:126.426017,region:"남부(중문동)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"약30분",slope:"정보 확인 필요",surface:"목재 데크/아스팔트",bf:"진입 가능(휠체어 이동 가능한 목재 관람 데크 완비)",infra:"관리사무소·화장실·거대 주차장(21,764㎡)",shade:"없음",rain:"고 — 태풍·너울성 파도 시 해안절벽 데크 위로 월파 위험",time:"저강도 산책",health:"기상 악화·해상 풍랑특보 시 안전사고 예방 위해 해안 관람 데크 출입 전면 통제",src:"공간정보·스포츠레저 조사 / clubrichtour.co.kr"},
-{name:"이호테우 말등대",lat:33.496197,lng:126.455893,region:"도심(이호이동)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"왕복 20분",slope:"정보 확인 필요",surface:"아스팔트/평탄한 시멘트 방파제",bf:"진입 가능(방파제 끝까지 단차 없는 아스팔트)",infra:"인근 해안도로 주차 공간",shade:"없음",rain:"중 — 바다 한가운데 돌출 방파제, 강풍 시 돌풍·월파 추락 위험",time:"저강도 산책",health:"방파제 테트라포드(TTP) 위로 올라가는 행위 절대 금지. 야간·풍랑 시 유의",src:"공간정보·스포츠레저 조사 / data.go.kr"},
-{name:"표선해수욕장",lat:33.3272829,lng:126.8376558,region:"남부(표선면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"간조 시 편도 800m 횡단",slope:"정보 확인 필요",surface:"단단하고 고운 패사(조개껍데기 모래)",bf:"일부(배후 야영장·산책로 접근 가능, 넓은 백사장은 어려움)",infra:"공영주차장·화장실·종합샤워장·야영장",shade:"풍부(배후 소나무 숲)",rain:"저 — 수심 도내 최저·조간대 방대, 파도·이안류 위험 극히 낮음",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 엄격 적용",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
-{name:"중문색달해수욕장",lat:33.2451968,lng:126.4111861,region:"남부(색달동)",lv:2,safe:"care",araTime:"정보 확인 필요",length:"해변 길이 560m",slope:"정보 확인 필요",surface:"진모살(흑·백·적·회색 섞인 굵은 모래)",bf:"일부(절벽 내려가는 급경사로, 동반자 동행 시 제한적)",infra:"대형주차장·화장실·종합샤워장·탈의장",shade:"없음",rain:"고 — 수심 급격히 깊어지는 단애, 거친 연안 조류 이안류 도내 최고",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 이안류 휩쓸림 사고 위험 상존, 안전요원 지정 입수구역 통제 절대 엄수",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
-{name:"신양섭지해수욕장",lat:33.43514,lng:126.923452,region:"동부(성산읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해안선 약1km",slope:"정보 확인 필요",surface:"부드러운 일반 모래",bf:"진입 가능(배후지~백사장 고도 단차 적어 이동 용이)",infra:"주차장·화장실·샤워장·탈의실",shade:"없음",rain:"저 — 섭지코지 반도가 먼바다 파도 막아주는 내해형 만 구조, 수면 잔잔",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 파라솔 2만원·평상 3만원 정가제 적용",src:"공간정보·스포츠레저 조사 / data.go.kr"},
-{name:"화순금모래해수욕장",lat:33.2395922,lng:126.3357689,region:"남부(안덕면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해변 길이 약250m",slope:"정보 확인 필요",surface:"검고 짙은 금빛 쇄설물 굵은 모래",bf:"진입 가능",infra:"공영주차장·공중화장실·개수대·담수 노천탕",shade:"없음",rain:"중 — 강우 시 인접 한라산 하천·지하 용천수 유입량 급증, 해안 수온 변화 극심",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 용천수 인근은 바닷물보다 수온 현저히 낮으므로 입수 시 심장·체온 저하 주의",src:"공간정보·스포츠레저 조사 / jejukyeongje.com"},
-{name:"함덕 제2해변(펫비치)",lat:33.5433402,lng:126.6634618,region:"동부(조천읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"200m 내외",slope:"정보 확인 필요",surface:"부드러운 하얀 규사",bf:"일부(모래사장 진입 직전까지 포장도로)",infra:"전용 주차구역·배설물 수거함·화장실",shade:"없음",rain:"저 — 함덕 본구역과 마찬가지로 얕고 완만한 지형",time:"저강도 산책",health:"★개장기간: 2026.06.24~2026.09.06 · 비반려인 마찰 방지 위해 펫비치 경계선 준수, 반려견 배설물 수거 등 펫티켓 철저. [좌표=함덕 인근 거점, 동측 제2해변 위치 확인 필요]",src:"공간정보·스포츠레저 조사 / ihalla.com"},
-{name:"하모 해변",lat:33.2110709,lng:126.260619,region:"남부(대정읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"300m",slope:"정보 확인 필요",surface:"모래/유실된 해안 단층",bf:"불가(연안 모래 침식으로 단차 심함)",infra:"공중화장실(과거 해수욕장 시설 잔존)",shade:"없음",rain:"중 — 지속적 연안 침식 지역으로 파랑 에너지 강하게 미침",time:"저강도 산책",health:"★개장기간: 미확인(지정 해수욕장 해제 구역) · 비지정 구역으로 안전요원 상주 불투명, 무리한 깊은 물 입수 자제",src:"공간정보·스포츠레저 조사 / kmib.co.kr"},
-{name:"김녕 해변(성세기 외 구간)",lat:33.558795,lng:126.754282,region:"동부(구좌읍)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해안도로 따라 약2km",slope:"정보 확인 필요",surface:"날카로운 현무암 갯바위/일부 모래",bf:"불가(거친 화산암반·뾰족한 암초 투성이)",infra:"해안도로 갓길·인근 카페 시설 의존",shade:"없음",rain:"고 — 수심 알 수 없는 깊은 웅덩이와 뾰족한 암초, 파도 휩쓸림 시 생존 위험",time:"저강도 산책",health:"★개장기간: 미확인(해수욕 금지 구역) · 공식 해수욕장(성세기) 밖 암초 지대, 절대 수영 금지. 밀물 시 갯바위 고립 사고 빈번",src:"공간정보·스포츠레저 조사 / 자체 분석"},
-{name:"우도 서빈백사(산호해변)",lat:33.5027452,lng:126.9432497,region:"동부(우도면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해안 길이 약300m",slope:"정보 확인 필요",surface:"하얀 홍조단괴 자갈 형태",bf:"일부(해안도로 인접 관람 가능, 백사장 진입 시 바퀴 구름 불가)",infra:"해안가 주차장·화장실·인근 상가",shade:"없음",rain:"중 — 강풍·기상특보 시 본섬 귀환 여객선 결항에 따른 섬내 완전 고립 우려",time:"저강도 산책",health:"★개장기간: 미확인(비지정 구역) · 천연기념물 보호구역으로 모래(단괴) 무단 반출 시 형사처벌. 자갈 딱딱해 맨발 보행 시 통증",src:"공간정보·스포츠레저 조사 / journey.co.kr"},
-{name:"하고수동해수욕장",lat:33.514491,lng:126.9582418,region:"동부(우도면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"해안 길이 400m",slope:"정보 확인 필요",surface:"부드러운 고운 모래",bf:"일부(포장도로 인접, 넓은 백사장 내부 이동 제약)",infra:"소형주차장(50대)·남녀 화장실·샤워실",shade:"없음",rain:"중 — 섬 반대편 서빈백사와 동일, 기상 악화 시 도항선 운항 전면 중단",time:"저강도 산책",health:"★개장기간: 미확인(비지정 구역) · 숙박 안 할 경우 제주 본섬(성산항) 귀환 위해 오후 5시 30분 마지막 여객선 시간 확인 필수",src:"공간정보·스포츠레저 조사 / tripinfo.co.kr"},
-{name:"사계해변",lat:33.2311963,lng:126.3104542,region:"남부(안덕면)",lv:1,safe:"ok",araTime:"정보 확인 필요",length:"체류 시간 1시간 내",slope:"정보 확인 필요",surface:"암반/마린 포트홀",bf:"불가(화산 폭발로 응회암 지층이 울퉁불퉁 굳어진 요철 암반 지대)",infra:"사계리체육공원 인근 주차장·사계항 화장실",shade:"없음",rain:"고 — 물 차오르는 만조 시 지형 전체 바다에 잠기며 높은 파도 그대로 노출",time:"저강도 산책",health:"★개장기간: 미확인(해수욕 불가 구역) · 썰물 때 가야 하므로 기상청 간조(물때) 시간 사전 확인 필수",src:"공간정보·스포츠레저 조사 / tripinfo.co.kr"}
-];
 
 const ALL=[
  {name:"애향운동장",sp:"run",lv:"c",lat:33.4954029,lng:126.5178387,region:"제주시 도심",dist:"1회전 0.4km(약 500걸음)",time:"개인 훈련 역량에 따라",phys:"우레탄 인공 트랙, 누적표고차 0m(완전 평탄)",infra:"본관 화장실, 공공체육시설, 야간 조명(22시까지)·24시 개방",safety:"보행자/차량 통제됨, 야간 조명 확보 — 가장 안전",view:"통제된 도심 체육시설",req:"공공체육시설 예약통합관리시스템",ara:"제주시서 15분 내 도심",src:"공간정보·스포츠레저 조사 / psf.kr"},
@@ -819,9 +828,59 @@ const SHOT=[
  {name:"차귀도·당산봉",lat:33.3078998,lng:126.1727444,region:"서부",grade:2,drone:"제한(조건부)",scan:"상",port:"중",method:"외곽 원거리 드론 단독",env:"야외",why:"서쪽 끝 해상 부속 도서+해안 기생화산. 붉은 응회암 수평 층리가 수성화산 특성 드러내고 해식 기암절벽이 해안 따라 늘어서 측면 스캔에 우수. 단 수직 압도감이 완만한 섬 지형에 분산돼 우선도 하향.",permit:"차귀도 일대 천연보호구역 — 관할 당국 비행 승인 필요. 육지 이륙 왕복은 배터리·해풍 위험. 지정 탐방로 외 해안 절개지 지상 접근 차단 → 포구서 배로 나가 선상 이륙 후 절벽 측면 스캔 / 별도 비행 승인 확인 필수",access:"한경면 자구내 포구 유람선·이륙 지점. 좌표는 당산봉(육지 접근점) 기준",src:"공간정보·문화·스포츠레저 조사 / 촬영 타당성 평가"},
 ];
 
+// SHOT additions (16)
+const SHOT_NEW=[
+ {name:'아끈다랑쉬오름',lat:33.475208,lng:126.829,grade:3,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'다랑쉬오름 맞은편에 위치한 소형 화산체로 가을 억새 군락이 압권',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 제주시 구좌읍 세화리 산',access:'양호 · 소요 30분 · 요금 무료 · 주차 다랑쉬오름 주차장 이용',region:'제주시(구좌읍)',why:'다랑쉬오름 맞은편에 위치한 소형 화산체로 가을 억새 군락이 압권 · 방문 팁: 가을',src:'GDR 조사(2026.07) · 공공데이터포털',hours:'24시간·무휴',feat:'다랑쉬오름 맞은편에 위치한 소형 화산체로 가을 억새 군락이 압권',season:'가을',subtype:'오름'},
+ {name:'거문오름',lat:33.4547,lng:126.7153,grade:3,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'유네스코 세계자연유산으로 지정된 용암동굴계의 모체',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 제주시 조천읍 선흘리 산102-1',access:'탐방로 정비 양호하나 사전 예약 필수 · 소요 2~3시간 · 요금 성인 4,000원 · 주차 가능',region:'제주시(조천읍)',why:'유네스코 세계자연유산으로 지정된 용암동굴계의 모체 · 방문 팁: 사계절/오전 탐방',src:'GDR 조사(2026.07) · 위키백과',hours:'09:00~13:00 (화요일 휴무, 사전예약제)',feat:'유네스코 세계자연유산으로 지정된 용암동굴계의 모체',season:'사계절/오전 탐방',subtype:'오름(세계자연유산)'},
+ {name:'사라오름',lat:33.371927,lng:126.570833,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'한라산 국립공원 내 산정호수를 품고 있어 비 온 후 만수 시 환상적 비경',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 서귀포시 남원읍 신례리 산2-1',access:'등산 필요 · 소요 4~5시간(왕복) · 요금 한라산 탐방 무료 · 주차 성판악 주차장 이용',region:'서귀포시(남원읍)',why:'한라산 국립공원 내 산정호수를 품고 있어 비 온 후 만수 시 환상적 비경 · 방문 팁: 장마철/비 온 다음 날',src:'GDR 조사(2026.07) · 공공데이터포털',hours:'성판악 코스 통제 시간에 따름 (예약제)',feat:'한라산 국립공원 내 산정호수를 품고 있어 비 온 후 만수 시 환상적 비경',season:'장마철/비 온 다음 날',subtype:'오름'},
+ {name:'노꼬메오름',lat:33.3831,lng:126.3986,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'높고 웅장한 기세로 정상에 오르면 제주 서북부 전역이 시원하게 조망됨',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 제주시 애월읍 유수암리 산138',access:'가파른 편 · 소요 2시간 · 요금 무료 · 주차 가능',region:'제주시(애월읍)',why:'높고 웅장한 기세로 정상에 오르면 제주 서북부 전역이 시원하게 조망됨 · 방문 팁: 가을',src:'GDR 조사(2026.07) · 비짓제주',hours:'24시간·무휴',feat:'높고 웅장한 기세로 정상에 오르면 제주 서북부 전역이 시원하게 조망됨',season:'가을',subtype:'오름'},
+ {name:'바리메오름',lat:33.3906,lng:126.3542,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'둥근 바리때(그릇) 모양의 깊은 분화구를 가진 숲길 오름',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 제주시 애월읍 어음리 산',access:'보통 · 소요 1시간 30분 · 요금 무료 · 주차 가능',region:'제주시(애월읍)',why:'둥근 바리때(그릇) 모양의 깊은 분화구를 가진 숲길 오름 · 방문 팁: 가을',src:'GDR 조사(2026.07) · 비짓제주',hours:'24시간·무휴',feat:'둥근 바리때(그릇) 모양의 깊은 분화구를 가진 숲길 오름',season:'가을',subtype:'오름'},
+ {name:'이승이오름(이승악)',lat:33.340143,lng:126.622244,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'화산체 모양이 살쾡이를 닮았으며 삼나무 숲길과 계곡이 울창함',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 서귀포시 남원읍 신례리 산2-4',access:'보통 · 소요 1.5시간 · 요금 무료 · 주차 가능',region:'서귀포시(남원읍)',why:'화산체 모양이 살쾡이를 닮았으며 삼나무 숲길과 계곡이 울창함 · 방문 팁: 여름/계곡물',src:'GDR 조사(2026.07) · 공공데이터포털',hours:'24시간·무휴',feat:'화산체 모양이 살쾡이를 닮았으며 삼나무 숲길과 계곡이 울창함',season:'여름/계곡물',subtype:'오름'},
+ {name:'저지오름',lat:33.3339,lng:126.2553,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'대한민국 아름다운 숲길로 선정된 분화구 둘레길 보유',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (오름·산)',permit:'주소: 제주시 한경면 저지리 산',access:'쉬움 (산책로 정비 우수) · 소요 1시간 · 요금 무료 · 주차 가능',region:'제주시(한경면)',why:'대한민국 아름다운 숲길로 선정된 분화구 둘레길 보유 · 방문 팁: 봄~가을',src:'GDR 조사(2026.07) · 비짓제주',hours:'24시간·무휴',feat:'대한민국 아름다운 숲길로 선정된 분화구 둘레길 보유',season:'봄~가을',subtype:'오름'},
+ {name:'함덕해수욕장',lat:33.543,lng:126.669,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'에메랄드빛 바다와 야자수, 서우봉이 어우러진 이국적 풍경',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해변)',permit:'주소: 제주시 조천읍 조함해안로 519-10',access:'무장애 데크 설치, 대중교통 매우 양호 · 소요 1~2시간 · 요금 무료 · 주차 가능',region:'제주시(조천읍)',why:'에메랄드빛 바다와 야자수, 서우봉이 어우러진 이국적 풍경 · 방문 팁: 여름 피서 / 봄 서우봉 산책',src:'GDR 조사(2026.07) · 전주캐슬블로그',hours:'24시간·무휴 (야간 해수욕 제한)',feat:'에메랄드빛 바다와 야자수, 서우봉이 어우러진 이국적 풍경',season:'여름 피서 / 봄 서우봉 산책',subtype:'해변/해수욕장'},
+ {name:'곽지해수욕장',lat:33.451,lng:126.307,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'넓은 백사장과 차가운 용천수가 솟아오르는 과물노천탕',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해변)',permit:'주소: 제주시 애월읍 애월원당길',access:'양호 · 소요 1~2시간 · 요금 무료 · 주차 가능',region:'제주시(애월읍)',why:'넓은 백사장과 차가운 용천수가 솟아오르는 과물노천탕 · 방문 팁: 여름 노천탕',src:'GDR 조사(2026.07) · 전주캐슬블로그',hours:'24시간·무휴',feat:'넓은 백사장과 차가운 용천수가 솟아오르는 과물노천탕',season:'여름 노천탕',subtype:'해변/해수욕장'},
+ {name:'이호테우해수욕장',lat:33.496185,lng:126.455951,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'붉은색과 흰색 조랑말 등대가 유명한 제주시 인접 야경 명소',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해변)',permit:'주소: 제주시 도리로 20',access:'제주공항 인접, 매우 양호 · 소요 1시간 · 요금 무료 · 주차 가능',region:'제주시',why:'붉은색과 흰색 조랑말 등대가 유명한 제주시 인접 야경 명소 · 방문 팁: 저녁 일몰 및 야경',src:'GDR 조사(2026.07) · 비짓제주',hours:'24시간·무휴',feat:'붉은색과 흰색 조랑말 등대가 유명한 제주시 인접 야경 명소',season:'저녁 일몰 및 야경',subtype:'해변/해수욕장'},
+ {name:'월정리해수욕장',lat:33.556,lng:126.795,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'서정적인 풍경과 풍력발전기를 배경으로 한 에메랄드 해변, 카페거리 밀집',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해변)',permit:'주소: 제주시 구좌읍 해맞이해안로 480-1',access:'양호 · 소요 1~2시간 · 요금 무료 · 주차 도로변 및 공영주차장 (혼잡)',region:'제주시(구좌읍)',why:'서정적인 풍경과 풍력발전기를 배경으로 한 에메랄드 해변, 카페거리 밀집 · 방문 팁: 사계절/드라이브 연계',src:'GDR 조사(2026.07) · 전주캐슬블로그',hours:'24시간·무휴',feat:'서정적인 풍경과 풍력발전기를 배경으로 한 에메랄드 해변, 카페거리 밀집',season:'사계절/드라이브 연계',subtype:'해변/해수욕장'},
+ {name:'김녕해수욕장',lat:33.557,lng:126.76,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'고운 모래와 코발트빛 바다, 요트 투어 및 돌고래 관찰의 중심지',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해변)',permit:'주소: 제주시 구좌읍 구좌해안로 237',access:'양호 · 소요 1시간 · 요금 무료 · 주차 가능',region:'제주시(구좌읍)',why:'고운 모래와 코발트빛 바다, 요트 투어 및 돌고래 관찰의 중심지 · 방문 팁: 여름/요트 투어 시기',src:'GDR 조사(2026.07) · 전주캐슬블로그',hours:'24시간·무휴',feat:'고운 모래와 코발트빛 바다, 요트 투어 및 돌고래 관찰의 중심지',season:'여름/요트 투어 시기',subtype:'해변/해수욕장'},
+ {name:'광치기해변',lat:33.4621,lng:126.9248,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'간조 시 수면 위로 드러나는 이끼 낀 화산 암반과 성산일출봉의 비현실적 배경',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (해안 절경)',permit:'주소: 서귀포시 성산읍 고성리 224-33',access:'해변 모래밭 및 암반 지대 · 소요 30분 · 요금 무료 · 주차 노상 주차장',region:'서귀포시(성산읍)',why:'간조 시 수면 위로 드러나는 이끼 낀 화산 암반과 성산일출봉의 비현실적 배경 · 방문 팁: 간조 시간대 필수 확인 / 일출',src:'GDR 조사(2026.07) · 비짓제주',hours:'24시간·무휴',feat:'간조 시 수면 위로 드러나는 이끼 낀 화산 암반과 성산일출봉의 비현실적 배경',season:'간조 시간대 필수 확인 / 일출',subtype:'기암/해안 절경'},
+ {name:'신창풍차해안도로',lat:33.3458,lng:126.1751,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'거대한 해상풍력발전기들이 에메랄드 바다 위로 도열해 이국적인 풍광을 연출하는 서쪽 최고의 일몰 명소',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (드라이브 코스)',permit:'주소: 제주시 한경면 신창리 1322-1 (싱계물공원 부근)',access:'자차 필수 · 소요 30분 드라이브 · 요금 무료 · 주차 공원 주차장 및 갓길 정차 구역',region:'제주시(한경면)',why:'거대한 해상풍력발전기들이 에메랄드 바다 위로 도열해 이국적인 풍광을 연출하는 서쪽 최고의 일몰 명소 · 방문 팁: 일몰 시간대 노을',src:'GDR 조사(2026.07) · 여행톡톡 / 비짓제주',hours:'24시간',feat:'거대한 해상풍력발전기들이 에메랄드 바다 위로 도열해 이국적인 풍광을 연출하는 서쪽 최고의 일몰 명소',season:'일몰 시간대 노을',subtype:'해안도로/드라이브'},
+ {name:'비자림로 삼나무길 (1112도로)',lat:33.43926,lng:126.628326,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'도로 양옆으로 빽빽한 삼나무가 병풍처럼 펼쳐진 \'대한민국에서 가장 아름다운 도로\' 중 하나',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (드라이브 코스)',permit:'주소: 제주시 명림로 584 (사려니숲길 입구 인근)',access:'자차 필수 · 소요 20분 주행 · 요금 무료 · 주차 갓길 주차 금지, 사려니숲 주차장 이용',region:'제주시',why:'도로 양옆으로 빽빽한 삼나무가 병풍처럼 펼쳐진 \'대한민국에서 가장 아름다운 도로\' 중 하나 · 방문 팁: 맑은 날 낮 (햇빛 산란 시), 여름철 창문 개방 산림욕',src:'GDR 조사(2026.07) · 여행톡톡',hours:'24시간',feat:'도로 양옆으로 빽빽한 삼나무가 병풍처럼 펼쳐진 \'대한민국에서 가장 아름다운 도로\' 중 하나',season:'맑은 날 낮 (햇빛 산란 시), 여름철 창문 개방 산림욕',subtype:'산악도로/드라이브'},
+ {name:'애월해안도로 (하귀-애월)',lat:33.477169,lng:126.359282,grade:2,drone:'해당 지점은 여행자용 정보 (드론 촬영 시 별도 승인 확인)',scan:'GDR 조사 여행자 정보 (전문 3D 스캔 정보 별도 조사 필요)',port:'약 9km에 걸친 해안 절벽 뷰, 오션뷰 카페와 맛집이 끝없이 이어지는 제주 최고의 해안 드라이브 코스',method:'탐방·산책·차량 · 사진 촬영 등 여행 목적',env:'실외 (드라이브 코스)',permit:'주소: 제주시 애월읍 애월해안로',access:'자차 필수, 자전거/보행자 산책로 분리 · 소요 30분 드라이브 · 요금 무료 · 주차 곳곳에 전망 쉼터 있음',region:'제주시(애월읍)',why:'약 9km에 걸친 해안 절벽 뷰, 오션뷰 카페와 맛집이 끝없이 이어지는 제주 최고의 해안 드라이브 코스 · 방문 팁: 늦은 오후~석양 무렵',src:'GDR 조사(2026.07) · 여행톡톡 / 유튜브',hours:'24시간',feat:'약 9km에 걸친 해안 절벽 뷰, 오션뷰 카페와 맛집이 끝없이 이어지는 제주 최고의 해안 드라이브 코스',season:'늦은 오후~석양 무렵',subtype:'해안도로/드라이브'}
+];
+
+// CULT additions (2)
+const CULT_NEW=[
+ {name:'아쿠아플라넷 제주',lat:33.4328,lng:126.9278,ctype:'아쿠아리움',region:'서귀포시(성산읍)',area:'서귀포시 성산읍 섭지코지로 95',hours:'09:30~19:00 (연중무휴)',closed:'(운영시간 참고)',fee:'성인 42,400원',duration:'2~3시간',env:'실내·실외 복합 · 무장애 여행 매우 양호',parking:'가능(대규모)',bf:'무장애 여행 매우 양호 — 무장애·유모차 접근성 참고',note:'방문 팁: 우천/폭염 시 실내 관광',theme:'아시아 최대 규모의 수족관, 대형 메인 수조 및 제주 해녀 물질 시연 프로그램 \\[cite: 웹 검색\\]',src:'GDR 조사(2026.07) · 공식홈페이지',feat:'아시아 최대 규모의 수족관, 대형 메인 수조 및 제주 해녀 물질 시연 프로그램 \\[cite: 웹 검색\\]',season:'우천/폭염 시 실내 관광',subtype:'아쿠아리움'},
+ {name:'에코랜드 테마파크',lat:33.4565,lng:126.6681,ctype:'테마파크',region:'제주시(조천읍)',area:'제주시 조천읍 번영로 1278-169',hours:'08:30~17:30 (동/하절기 상이)',closed:'(운영시간 참고)',fee:'성인 14,000원',duration:'2~3시간',env:'실내·실외 복합 · 기차 탑승이 가능해 노약자 동반 관람 용이',parking:'가능',bf:'기차 탑승이 가능해 노약자 동반 관람 용이 — 무장애·유모차 접근성 참고',note:'방문 팁: 사계절 (봄, 가을 추천)',theme:'30만 평의 곶자왈 원시림을 클래식 증기기관차를 타고 도는 자연 친화 테마파크 \\[cite: 웹 검색\\]',src:'GDR 조사(2026.07) · 공식홈페이지',feat:'30만 평의 곶자왈 원시림을 클래식 증기기관차를 타고 도는 자연 친화 테마파크 \\[cite: 웹 검색\\]',season:'사계절 (봄, 가을 추천)',subtype:'테마파크'}
+];
+
+// ALL additions (3)
+const ALL_NEW=[
+ {name:'제주송정농원',lat:33.4691,lng:126.5742,sp:'walk',lv:'c',region:'제주시·중산간',dist:'감귤체험 체험 · 소요 1시간',time:'1시간',phys:'체험 소요: 1시간 · 주차: 가능',infra:'요금 10,000원 (2.5~3kg+무한시식) · 접근성 공항 15분 거리로 뚜벅이 접근도 양호',view:'노지 귤부터 레드향, 천혜향 등 다양한 만감류 체험 및 다수의 포토존 구비',req:'운영시간: 10:00~17:00 (우천 시 휴무)',ara:'공항 15분 거리로 뚜벅이 접근도 양호',safety:'체험형 액티비티 · 계절 팁: 10월~겨울 · 우천/기상 영향 있음',src:'GDR 조사(2026.07) · 트립인포',feat:'노지 귤부터 레드향, 천혜향 등 다양한 만감류 체험 및 다수의 포토존 구비',season:'10월~겨울',subtype:'감귤체험'},
+ {name:'귤향기영농조합법인 (귤향기 감귤체험농장)',lat:33.4682,lng:126.4713,sp:'walk',lv:'c',region:'제주시',dist:'감귤체험 체험 · 소요 1시간',time:'1시간',phys:'체험 소요: 1시간 · 주차: 가능',infra:'요금 7,000원 (시즌별 상이) · 접근성 양호',view:'귤 수확 외에도 수제 귤잼 만들기, 청 만들기 체험 등 다양한 프로그램 운영',req:'운영시간: 09:00~17:00 (연중무휴)',ara:'양호',safety:'체험형 액티비티 · 계절 팁: 8월(풋귤)~가을/겨울 · 우천/기상 영향 있음',src:'GDR 조사(2026.07) · 트립인포',feat:'귤 수확 외에도 수제 귤잼 만들기, 청 만들기 체험 등 다양한 프로그램 운영',season:'8월(풋귤)~가을/겨울',subtype:'감귤체험'},
+ {name:'제주오름승마랜드',lat:33.4578,lng:126.7123,sp:'hike',lv:'c',region:'제주시(조천읍)',dist:'승마장 체험 · 소요 30분~1시간',time:'30분~1시간',phys:'체험 소요: 30분~1시간 · 주차: 가능',infra:'요금 목장둘레길코스 18,000원~ · 접근성 렌터카 권장',view:'40만 평 규모로 부대악, 부소악 등 2개의 오름을 끼고 자연을 즐기며 안전하게 외승 체험 가능',req:'운영시간: 09:00~17:00 (연중무휴)',ara:'렌터카 권장',safety:'체험형 액티비티 · 계절 팁: 봄, 가을 · 우천/기상 영향 있음',src:'GDR 조사(2026.07) · 클룩/야놀자',feat:'40만 평 규모로 부대악, 부소악 등 2개의 오름을 끼고 자연을 즐기며 안전하게 외승 체험 가능',season:'봄, 가을',subtype:'승마장'}
+];
+
+// FOOD data (new mode, 9)
+const FOOD=[
+ {name:'돈사돈 본점',lat:33.4789,lng:126.4678,ftype:'pork',ftypeLabel:'흑돼지',region:'제주시',area:'제주시 우평로 19',hours:'12:00~22:00 (화요일 휴무)',fee:'60,000원대 (2인 기준)',duration:'1.5시간',parking:'가능',access:'양호',feat:'연탄불에 직접 구워주는 두툼한 흑돼지 근고기의 대명사적 식당',season:'저녁 피크시간 웨이팅 극심',src:'GDR 조사(2026.07) · 웹 교차검증',subtype:'흑돼지'},
+ {name:'지지지제주흑돼지',lat:33.4912,lng:126.4967,ftype:'pork',ftypeLabel:'흑돼지',region:'제주시',area:'제주시 신대로 104 1층',hours:'11:50~22:30 (브레이크타임 14:30~16:30)',fee:'숙성흑돼지오겹살 22,000원',duration:'1.5시간',parking:'가능(60대 규모 주차장)',access:'양호',feat:'공항과 가깝고 매장 전체 폴딩도어로 쾌적하며 보리김치 제공',season:'출도착 전후 식사',src:'GDR 조사(2026.07) · 여행톡톡',subtype:'흑돼지'},
+ {name:'돌담애 성산',lat:33.4475,lng:126.915,ftype:'pork',ftypeLabel:'흑돼지',region:'서귀포시(성산읍)',area:'서귀포시 성산읍 일출로 14-1',hours:'12:00~22:00',fee:'50,000원대~',duration:'1.5시간',parking:'가능',access:'양호',feat:'저온 숙성으로 풍미와 고소함이 가득한 흑돼지, 깔끔한 인테리어',season:'성산일출봉 하산 후 저녁 식사',src:'GDR 조사(2026.07) · 트리플',subtype:'흑돼지'},
+ {name:'영목이네 표선점',lat:33.3156,lng:126.8123,ftype:'fish',ftypeLabel:'갈치/통갈치',region:'서귀포시(표선면)',area:'서귀포시 표선면 일주동로6455번길 21',hours:'10:00~21:00 (브레이크타임 15:00~16:00)',fee:'세트 70,000원대~',duration:'1.5시간',parking:'가능',access:'양호',feat:'오션뷰를 즐기며 먹는 화려한 비주얼의 통갈치 구이 및 조림',season:'점심/저녁 무관',src:'GDR 조사(2026.07) · 트립닷컴',subtype:'갈치/통갈치'},
+ {name:'먹돌',lat:33.4855,lng:126.4761,ftype:'noodle',ftypeLabel:'고기국수',region:'제주시',area:'제주시 다랑곶길 22',hours:'09:00~21:00',fee:'10,000원대',duration:'45분',parking:'협소 (인근 공영 이용)',access:'보통',feat:'제주공항 근처에 위치해 진한 육수의 돔베고기국수를 제공하는 현지인 맛집',season:'점심시간 웨이팅 주의',src:'GDR 조사(2026.07) · 트립닷컴 모먼트',subtype:'고기국수'},
+ {name:'동문재래시장 (동문야시장)',lat:33.5123,lng:126.5264,ftype:'market',ftypeLabel:'전통시장/야시장',region:'제주시',area:'제주시 관덕로14길 20',hours:'주간 상시, 야시장 18:00~24:00',fee:'품목별 다양',duration:'1.5시간',parking:'공영주차장 (매우 혼잡)',access:'대중교통 양호',feat:'제주시 최대 상권으로 수산물, 감귤부터 딱새우회, 전복김밥 등 야시장 먹거리 성지',season:'저녁 야간 투어 시 추천',src:'GDR 조사(2026.07) · 비짓제주',subtype:'전통시장/야시장'},
+ {name:'서귀포매일올레시장',lat:33.2496,lng:126.5626,ftype:'market',ftypeLabel:'전통시장',region:'서귀포시',area:'서귀포시 중앙로62번길 18',hours:'07:00~21:00 (연중무휴)',fee:'품목별 다양',duration:'1~2시간',parking:'공영주차장 이용',access:'중앙 수로 및 아케이드 정비로 쾌적',feat:'마늘통닭, 모닥치기, 흑돼지 꼬치 등 서귀포 먹거리 투어의 중심 \\[cite: 비짓제주\\]',season:'저녁 시간 간식 구매',src:'GDR 조사(2026.07) · 비짓제주',subtype:'전통시장'},
+ {name:'세화민속오일시장',lat:33.5255,lng:126.858,ftype:'market',ftypeLabel:'오일장',region:'제주시(구좌읍)',area:'제주시 구좌읍 해맞이해안로 1412',hours:'매월 5, 10, 15, 20, 25, 30일',fee:'품목별 다양',duration:'1시간',parking:'가능',access:'해안도로 인접',feat:'바다와 맞닿아 있는 가장 제주다운 분위기의 해변 오일장',season:'장이 서는 날 오전 방문 필수',src:'GDR 조사(2026.07) · 비짓제주',subtype:'오일장'},
+ {name:'대정오일시장',lat:33.2201,lng:126.2523,ftype:'market',ftypeLabel:'오일장',region:'서귀포시(대정읍)',area:'서귀포시 대정읍 신영로36번길 65',hours:'매월 1, 6, 11, 16, 21, 26일',fee:'품목별 다양',duration:'1시간',parking:'공영주차장',access:'양호',feat:'모슬포항 인근으로 방어 등 제철 수산물 거래가 가장 활발한 서남부 거점 장터',season:'겨울철 방어 시즌',src:'GDR 조사(2026.07) · 비짓제주',subtype:'오일장'}
+];
+
+
+// ============ FOOD (미식·시장) 유형별 색상/필터 ============
+const FTYPE={pork:['흑돼지','#c74a2a'],fish:['갈치·해산물','#3a8bb5'],sea:['보말·전복','#5a8a70'],noodle:['국수·향토','#c9852a'],market:['시장·오일장','#8a5a20'],other:['기타','#5a5a5a']};
+const FTYPE_LABEL={pork:'흑돼지',fish:'갈치·해산물',sea:'보말·전복',noodle:'국수·향토',market:'시장·오일장',other:'기타'};
+function foodColor(p){ return FTYPE[p.ftype]?FTYPE[p.ftype][1]:'#8a4a20'; }
+
 // ============ 공통 상수 ============
-const LV1={1:'#2e8b57',2:'#e0a127',3:'#c0392b'},LVN={1:'저강도',2:'중강도',3:'고강도'};
-const SAFE={ok:["저강도 안전","#eaf5ef","#1f5e3f","#2e8b57"],care:["주의","#fbf3df","#8a6a10","#e0a127"],no:["고강도","#f9e9e7","#a5281c","#c0392b"]};
 const SPC={run:'#ff6b4a',bike:'#f2c14e',dive:'#2b8fd6',hike:'#5ec46a',walk:'#a98bd6'};
 const SPN={run:'러닝',bike:'자전거',dive:'다이빙',hike:'등산',walk:'트레킹/산책'};
 const LVN2={c:'초급',m:'중급',h:'고급'};
@@ -854,49 +913,243 @@ const SHOTG={3:['★★★ 최우선','#c0392b'],2:['★★ 우선','#e0772c']};
 const SHOTG_LABEL={3:'★★★ 최우선',2:'★★ 우선'};
 function shotColor(p){ return SHOTG[p.grade]?SHOTG[p.grade][1]:'#d9543a'; }
 
+
+// ===== 실시간 날씨 (Open-Meteo API, 무API키, CORS, CC BY 4.0) =====
+// WMO 코드 4677 표준 매핑 (한국어 + 이모지 아이콘)
+const WMO = {
+  0:['맑음','☀️'], 1:['대체로 맑음','🌤️'], 2:['부분적 구름','⛅'], 3:['흐림','☁️'],
+  45:['안개','🌫️'], 48:['상고대 안개','🌫️'],
+  51:['약한 이슬비','🌦️'], 53:['이슬비','🌦️'], 55:['강한 이슬비','🌧️'],
+  56:['약한 어는 이슬비','🌨️'], 57:['어는 이슬비','🌨️'],
+  61:['약한 비','🌦️'], 63:['비','🌧️'], 65:['강한 비','🌧️'],
+  66:['약한 어는 비','🌨️'], 67:['어는 비','🌨️'],
+  71:['약한 눈','🌨️'], 73:['눈','❄️'], 75:['강한 눈','❄️'], 77:['싸락눈','❄️'],
+  80:['소나기','🌦️'], 81:['강한 소나기','🌧️'], 82:['매우 강한 소나기','⛈️'],
+  85:['약한 눈보라','🌨️'], 86:['강한 눈보라','❄️'],
+  95:['천둥번개','⛈️'], 96:['천둥+약한 우박','⛈️'], 99:['천둥+강한 우박','⛈️']
+};
+function wmoLabel(code){ return WMO[code] || ['정보 없음','❓']; }
+function wmoNightIcon(code, isDay){
+  // 밤이면 맑음/대체로맑음/부분적구름 아이콘을 달로 교체
+  if(isDay) return wmoLabel(code)[1];
+  const nightMap={0:'🌙', 1:'🌙', 2:'☁️'};
+  return nightMap[code] !== undefined ? nightMap[code] : wmoLabel(code)[1];
+}
+
+// 좌표 반경 캐시: 소수점 2자리(약 1.1km)에서 동일 격자 재사용, TTL 10분
+const wxCache = {};
+const WX_TTL = 10 * 60 * 1000;
+function wxKey(lat, lng){ return lat.toFixed(2)+','+lng.toFixed(2); }
+function wxCacheGet(lat, lng){
+  const k=wxKey(lat,lng), e=wxCache[k];
+  if(!e) return null;
+  if(Date.now()-e.t > WX_TTL) return null;
+  return e.d;
+}
+function wxCacheSet(lat, lng, data){ wxCache[wxKey(lat,lng)] = {t:Date.now(), d:data}; }
+
+// 개별 카드 렌더용 wxbox 뼈대
+function wxSkeleton(lat, lng){
+  const id = 'wx-'+lat.toFixed(4)+'-'+lng.toFixed(4);
+  return `<div class="wxbox" id="${id}">
+    <div class="wxhd">
+      <div class="wxttl">🌤️ 실시간 날씨</div>
+      <button class="wxrf" onclick="loadWeather(${lat},${lng},true)">↻ 새로고침</button>
+    </div>
+    <div class="wxbody"><span class="wxload">불러오는 중…</span></div>
+  </div>`;
+}
+
+async function loadWeather(lat, lng, force){
+  const id = 'wx-'+lat.toFixed(4)+'-'+lng.toFixed(4);
+  const box = document.getElementById(id);
+  if(!box) return;
+  const body = box.querySelector('.wxbody');
+  if(!force){
+    const cached = wxCacheGet(lat, lng);
+    if(cached){ body.innerHTML = renderWx(cached); return; }
+  }
+  body.innerHTML = '<span class="wxload">불러오는 중…</span>';
+  try{
+    const url = 'https://api.open-meteo.com/v1/forecast'
+      + '?latitude=' + lat + '&longitude=' + lng
+      + '&current=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,wind_speed_10m,is_day'
+      + '&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max'
+      + '&forecast_days=3&timezone=Asia%2FSeoul';
+    const res = await fetch(url);
+    if(!res.ok) throw new Error('HTTP '+res.status);
+    const data = await res.json();
+    wxCacheSet(lat, lng, data);
+    body.innerHTML = renderWx(data);
+  }catch(err){
+    body.innerHTML = '<span class="wxerr">날씨 정보를 불러오지 못했습니다. (' + (err.message||'네트워크 오류') + ') · <a href="javascript:loadWeather('+lat+','+lng+',true)" style="color:#1a5b7a">재시도</a></span>';
+  }
+}
+
+function renderWx(d){
+  const c = d.current || {};
+  const dz = d.daily || {};
+  const code = c.weather_code ?? 0;
+  const isDay = (c.is_day ?? 1) === 1;
+  const wLab = wmoLabel(code);
+  const icon = wmoNightIcon(code, isDay);
+  const tmp = c.temperature_2m !== undefined ? Math.round(c.temperature_2m*10)/10 + '°C' : '—';
+  const feels = c.apparent_temperature !== undefined ? Math.round(c.apparent_temperature*10)/10 + '°C' : '—';
+  const rh = c.relative_humidity_2m !== undefined ? c.relative_humidity_2m + '%' : '—';
+  const wind = c.wind_speed_10m !== undefined ? Math.round(c.wind_speed_10m*10)/10 + ' km/h' : '—';
+  const rain = c.precipitation !== undefined ? c.precipitation + ' mm' : '—';
+  // 일별 예보
+  let fc = '';
+  if(dz.time && dz.time.length){
+    fc = '<div class="wxfc">' + dz.time.map((t,i)=>{
+      const dayLbl = i===0?'오늘':(i===1?'내일':'모레');
+      const dc = dz.weather_code ? dz.weather_code[i] : 0;
+      const dicon = wmoLabel(dc)[1];
+      const tmax = dz.temperature_2m_max ? Math.round(dz.temperature_2m_max[i]) : '—';
+      const tmin = dz.temperature_2m_min ? Math.round(dz.temperature_2m_min[i]) : '—';
+      const pop = (dz.precipitation_probability_max && dz.precipitation_probability_max[i]!=null) ? dz.precipitation_probability_max[i]+'%' : '';
+      return `<span class="wxday"><span class="wxdylbl">${dayLbl}</span> ${dicon} ${tmax}°/${tmin}°${pop?' · ☔'+pop:''}</span>`;
+    }).join('') + '</div>';
+  }
+  return `<div class="wxrow">
+    <div class="wxnow"><span class="wxico">${icon}</span><span class="wxtmp">${tmp}</span></div>
+    <div><div class="wxdsc"><b>${wLab[0]}</b></div>
+    <div class="wxdet">체감 ${feels} · 습도 ${rh} · 풍속 ${wind} · 시간강수 ${rain}</div></div>
+  </div>${fc}`;
+}
+
+// 카드 상세 열림 후 날씨 자동 로딩
+function attachWeatherLoaders(){
+  document.querySelectorAll('.wxbox').forEach(el=>{
+    const id = el.id; // wx-33.xxxx-126.xxxx
+    const parts = id.replace('wx-','').split('-');
+    if(parts.length < 2) return;
+    const lat = parseFloat(parts[0]);
+    // 음수 lng의 경우 대비 (제주는 양수만)
+    const lng = parseFloat(parts[1]);
+    if(!isNaN(lat) && !isNaN(lng)) loadWeather(lat, lng, false);
+  });
+}
+
 let map,markers={},mode=null,selName=null;
 let meLocMarker=null,meLocCircle=null,meWatchId=null;
-let meActive={1:true,2:true,3:true};
 let allSp={run:true,bike:true,dive:true,hike:true,walk:true},allLv={c:true,m:true,h:true};
 let cafeType={ocean:true,bakery:true,roastery:true,dessert:true,garden:true,forest:true};
 let wellType={yoga:true,outdoor:true,forest:true,heal:true};
 let cultType={museum:true,art:true,expo:true,stage:true,park:true};
 let shotGrade={3:true,2:true};
+let foodType={pork:true,fish:true,sea:true,noodle:true,market:true,other:true};
+let styleMood=null; // one of: healing/active/sense/food/culture/family (or null)
+let styleSeason=null; // one of: spring/summer/fall/winter (or null)
+
+
+// ============ 취향·스타일 자동 태그 부여 ============
+// 각 장소의 이름·특징·유형 등 텍스트에서 키워드 매칭으로 MOOD/SEASON 태그 산출
+function autoTag(p, mode){
+  const t = (
+    (p.name||'')+' '+(p.feat||'')+' '+(p.port||'')+' '+(p.why||'')+' '+
+    (p.view||'')+' '+(p.theme||'')+' '+(p.type||'')+' '+(p.wtype||'')+' '+
+    (p.ctype||'')+' '+(p.season||'')+' '+(p.note||'')+' '+(p.safety||'')+' '+
+    (p.subtype||'')+' '+(p.ftypeLabel||'')+' '+(p.health||'')+' '+(p.region||'')+' '+
+    (p.prep||'')+' '+(p.env||'')+' '+(p.method||'')+' '+(p.access||'')+' '+
+    (p.dist||'')+' '+(p.req||'')+' '+(p.hours||'')+' '+(p.program||'')
+  ).toLowerCase();
+  const moods = new Set();
+  const seasons = new Set();
+  // ---- MOOD 판정 ----
+  if(/힐링|산책|숲|명상|요가|평화|조용|치유|사려니|비자|삼나무|산림욕|웰니스|물영아리|습지|숲길|둘레길|치유의숲|편백/.test(t)) moods.add('healing');
+  if(/러닝|등산|자전거|다이빙|서핑|트레킹|등반|승마|카약|하이킹|스노클|급경사|고급|중급|가파|오름|오르막|정상|봉|악\b/.test(t)) moods.add('active');
+  if(/포토|감성|일몰|일출|노을|전망|경관|카페|베이커리|디저트|루프탑|뷰|스팟|억새|메밀|풍차|비양도|해변|해수욕|주상절리|기암|절경|폭포|바다|파도|드라이브|해안도로|동백|수국|벚꽃|유채꽃|튤립|정원|수목원|꽃밭|핑크뮬리|무지개/.test(t)) moods.add('sense');
+  if(/맛집|흑돼지|갈치|보말|전복|국수|해장|시장|미식|장어|성게|한우|오일장|야시장|짜장|쫄면|육회|고기|해산물|음식|식당/.test(t)) moods.add('food');
+  if(/박물관|미술관|유적|문화재|기념|전시|테마파크|아쿠아|공연|극장|헤리티지|세계자연유산|올레|사당|향교|성|비석|4·3|4.3/.test(t)) moods.add('culture');
+  if(/가족|아이|유아|유모차|키즈|체험|테마파크|아쿠아|승마|낚시|놀이|테지움|헬로키티|스누피|초콜릿|파크|랜드|워터파크|무장애|휠체어/.test(t)) moods.add('family');
+  // 폴백 (모드별 기본 mood)
+  if(moods.size === 0){
+    if(mode==='cafe') moods.add('sense');
+    else if(mode==='well') moods.add('healing');
+    else if(mode==='cult') moods.add('culture');
+    else if(mode==='all') moods.add('active');
+    else if(mode==='shot') moods.add('sense');
+    else if(mode==='food') moods.add('food');
+  }
+  // ---- SEASON 판정 ----
+  if(/봄|벚꽃|유채|매화|튤립|개나리|봄꽃|4월|3월|5월|왕벚|철쭉/.test(t)) seasons.add('spring');
+  if(/여름|해수욕|수국|피서|용천수|서핑|7월|8월|6월|장마|워터|해변|시원/.test(t)) seasons.add('summer');
+  if(/가을|억새|단풍|메밀|핑크뮬리|10월|11월|9월|추석/.test(t)) seasons.add('fall');
+  if(/겨울|동백|감귤|눈|해맞이|12월|1월|2월|해돋이|한파|첫눈/.test(t)) seasons.add('winter');
+  // 사계절 기본 (계절 특정 언급 없으면 모두)
+  if(seasons.size === 0){
+    seasons.add('spring'); seasons.add('summer'); seasons.add('fall'); seasons.add('winter');
+  }
+  return {moods, seasons};
+}
+
+const MOOD_LABEL={healing:['🌿 힐링','#2e7d57'],active:['🏃 액티브','#c4502a'],sense:['📸 감성','#a03d76'],food:['🍽 미식','#8a4a20'],culture:['🏛 문화','#534a8a'],family:['👨‍👩‍👧 가족','#2e7d67']};
+const SEASON_LABEL={spring:['🌸 봄','#a33c6b'],summer:['🌊 여름','#186b7a'],fall:['🍁 가을','#8a5a1a'],winter:['❄️ 겨울','#3a5a8a']};
+
+function tSTYLEMood(m){ styleMood = (styleMood===m ? null : m); buildStagbar(); render(); }
+function tSTYLESeason(s){ styleSeason = (styleSeason===s ? null : s); buildStagbar(); render(); }
+function tSTYLEClear(){ styleMood=null; styleSeason=null; buildStagbar(); render(); }
+
+function buildStagbar(){
+  const s = document.getElementById('stagbar');
+  if(!s) return;
+  const moodChips = Object.keys(MOOD_LABEL).map(k=>{
+    const on = styleMood===k;
+    return `<div class="stag ${on?'on':''}" onclick="tSTYLEMood('${k}')">${MOOD_LABEL[k][0]}</div>`;
+  }).join('');
+  const seasonChips = Object.keys(SEASON_LABEL).map(k=>{
+    const on = styleSeason===k;
+    return `<div class="stag ${on?'on':''}" onclick="tSTYLESeason('${k}')">${SEASON_LABEL[k][0]}</div>`;
+  }).join('');
+  const hasAny = styleMood || styleSeason;
+  s.innerHTML = 
+    '<span class="slabel">취향</span>' + moodChips +
+    '<span class="slabel" style="margin-left:6px">계절</span>' + seasonChips +
+    (hasAny ? '<button class="stagclear" onclick="tSTYLEClear()">✕ 태그 해제</button>' : '');
+}
+
+// 랜딩에서 스타일 바로가기 클릭 시: 관련 모드로 진입 + 해당 mood 태그 활성
+function startStyle(mood){
+  styleMood = mood;
+  styleSeason = null;
+  // 각 스타일에 가장 밀접한 기본 모드
+  const modeMap = {healing:'well', active:'all', sense:'shot', food:'food', culture:'cult', family:'cult'};
+  enter(modeMap[mood] || 'all');
+}
 
 function enter(m){
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='me'?'theme-me':(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':(m==='cult'?'theme-cult':'theme-shot')))));app.classList.remove('hidden');
-  document.getElementById('swMe').classList.toggle('active',m==='me');
+  app.className=(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':(m==='cult'?'theme-cult':(m==='shot'?'theme-shot':'theme-food')))));app.classList.remove('hidden');
   document.getElementById('swAll').classList.toggle('active',m==='all');
   document.getElementById('swCafe').classList.toggle('active',m==='cafe');
   document.getElementById('swWell').classList.toggle('active',m==='well');
   document.getElementById('swCult').classList.toggle('active',m==='cult');
   document.getElementById('swShot').classList.toggle('active',m==='shot');
-  buildFilters();initMap();render();
-  document.getElementById('vtitle').textContent = m==='me'?'회복기·저강도 맞춤 (무장애·안전·접근성 중심)':(m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':(m==='well'?'제주 웰니스 — 요가·숲해설·마음치유':(m==='cult'?'제주 문화·공원 — 박물관·미술관·전시장·공원':'제주 3D 촬영후보 — 드론·LiDAR·Gaussian Splatting'))));
-  document.getElementById('panelTitle').textContent = m==='me'?'저강도 안전 기준 장소':(m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':(m==='cult'?'권역·유형별 문화·공원':'등급별 3D 촬영후보'))));
-  document.getElementById('panelSub').textContent = m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성이 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':(m==='shot'?'핀 또는 카드를 누르면 드론 적합성·3D스캔·추천 촬영방식·허가주체가 펼쳐집니다. 드론 비행은 실제 촬영 전 별도 승인 확인 필수.':'핀 또는 카드를 누르면 상세가 펼쳐집니다. 3D 뷰는 제작된 지점에만 표시.')));
-  document.getElementById('vfoot').innerHTML = (m==='me'
-    ? '출처: 공간정보 조사 + Google Places 실측 좌표 · EPSG:4326 · 정보 제공용이며 운동 강도 판단은 본인·전문가가 합니다. · v16 (2026.05.25)'
-    : (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v16 (2026.05.25)'
+  document.getElementById('swFood').classList.toggle('active',m==='food');
+  buildFilters();buildStagbar();initMap();render();
+  document.getElementById('vtitle').textContent = (m==='all'?'러닝·자전거·다이빙·등산·트레킹 종목별':(m==='cafe'?'제주 전역 카페 — 권역·유형별':(m==='well'?'제주 웰니스 — 요가·숲해설·마음치유':(m==='cult'?'제주 문화·공원 — 박물관·미술관·전시장·공원':(m==='shot'?'제주 명소·자연·경관 — 오름·해변·폭포·드라이브':'제주 미식·시장 — 흑돼지·갈치·전통시장·오일장')))));
+  document.getElementById('panelTitle').textContent = (m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':(m==='cult'?'권역·유형별 문화·공원':(m==='shot'?'등급별 명소·자연·경관':'유형별 미식·시장')))));
+  document.getElementById('panelSub').textContent = (m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰·실시간 날씨가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다. 드론/3D 촬영 정보는 상세 하단 전문가용 섹션에 포함.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다.':'핀 또는 카드를 누르면 대표 메뉴·운영시간·실시간 날씨가 펼쳐집니다. 영업시간·휴무는 방문 전 확인 권장.')))));
+  document.getElementById('vfoot').innerHTML = (m==='all'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v2 traveler (2026.07.02)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v16 (2026.05.25)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v2 traveler (2026.07.02)'
     : (m==='well'
-    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 의료행위 아님, 일반 웰니스 정보 제공용. · v16 (2026.05.25)'
-    : '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v16 (2026.05.25)'))));
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 일반 웰니스 정보 제공용. · v2 traveler (2026.07.02)'
+    : (m==='cult'
+    ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v2 traveler (2026.07.02)'
+    : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v2 traveler (2026.07.02)'))));
+  document.getElementById('vfoot').innerHTML += ' · 날씨: <a href="https://open-meteo.com" target="_blank" style="color:inherit">Open-Meteo</a> (CC BY 4.0)';
 }
-function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();if(map){map.remove();map=null;}}
+function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();styleMood=null;styleSeason=null;if(map){map.remove();map=null;}}
 
 function buildFilters(){
   const f=document.getElementById('filters');f.innerHTML='';
-  if(mode==='me'){
-    f.innerHTML='<span class="flabel">강도</span>'+
-      [1,2,3].map(l=>`<div class="chip ${meActive[l]?'on':'off'}" onclick="tME(${l})"><span class="dot" style="background:${LV1[l]}"></span>${LVN[l]}</div>`).join('');
-  }else if(mode==='all'){
+  if(mode==='all'){
     f.innerHTML='<span class="flabel">종목</span>'+
       Object.keys(SPN).map(s=>`<div class="chip ${allSp[s]?'on':'off'}" onclick="tSP('${s}')"><span class="dot" style="background:${SPC[s]}"></span>${SPN[s]}</div>`).join('')+
       '<span class="flabel" style="margin-left:8px">난이도</span>'+
@@ -910,18 +1163,21 @@ function buildFilters(){
   }else if(mode==='cult'){
     f.innerHTML='<span class="flabel">유형</span>'+
       Object.keys(CULTT).map(k=>`<div class="chip ${cultType[k]?'on':'off'}" onclick="tCULT('${k}')"><span class="dot" style="background:${CULTT[k][1]}"></span>${CULTT_LABEL[k]}</div>`).join('');
-  }else{
+  }else if(mode==='shot'){
     f.innerHTML='<span class="flabel">등급</span>'+
       [3,2].map(g=>`<div class="chip ${shotGrade[g]?'on':'off'}" onclick="tSHOT(${g})"><span class="dot" style="background:${SHOTG[g][1]}"></span>${SHOTG_LABEL[g]}</div>`).join('');
+  }else{ // food
+    f.innerHTML='<span class="flabel">유형</span>'+
+      Object.keys(FTYPE).map(k=>`<div class="chip ${foodType[k]?'on':'off'}" onclick="tFOOD('${k}')"><span class="dot" style="background:${FTYPE[k][1]}"></span>${FTYPE_LABEL[k]}</div>`).join('');
   }
 }
-function tME(l){meActive[l]=!meActive[l];buildFilters();render();}
 function tSP(s){allSp[s]=!allSp[s];buildFilters();render();}
 function tLV(l){allLv[l]=!allLv[l];buildFilters();render();}
 function tCAFE(k){cafeType[k]=!cafeType[k];buildFilters();render();}
 function tWELL(k){wellType[k]=!wellType[k];buildFilters();render();}
 function tCULT(k){cultType[k]=!cultType[k];buildFilters();render();}
 function tSHOT(g){shotGrade[g]=!shotGrade[g];buildFilters();render();}
+function tFOOD(k){foodType[k]=!foodType[k];buildFilters();render();}
 
 function initMap(){
   if(map){map.remove();}
@@ -930,7 +1186,6 @@ function initMap(){
   map=L.map('map',{scrollWheelZoom:true}).setView([33.38,126.55],10);
   const tile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
   L.tileLayer(tile,{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
-  if(mode==='me') L.circleMarker(ARA,{radius:8,color:'#1a6b6b',fillColor:'#e8722c',fillOpacity:1,weight:3}).addTo(map).bindTooltip("기준 위치(제주시)");
   // 모바일 등에서 컨테이너 크기 확정 후 지도 재계산
   setTimeout(()=>{if(map)map.invalidateSize();},200);
   setTimeout(()=>{if(map)map.invalidateSize();},600);
@@ -986,39 +1241,48 @@ function render(){
   const list=document.getElementById('list');list.innerHTML='';
   Object.values(markers).forEach(m=>map.removeLayer(m));markers={};
   let data;
-  if(mode==='me') data = ME.filter(p=>meActive[p.lv]);
-  else if(mode==='all') data = ALL.filter(p=>allSp[p.sp]&&allLv[p.lv]);
+  // Merge GDR-added entries into their respective modes
+  const ALL_MERGED = ALL.concat(ALL_NEW);
+  const CULT_MERGED = CULT.concat(CULT_NEW);
+  const SHOT_MERGED = SHOT.concat(SHOT_NEW);
+  if(mode==='all') data = ALL_MERGED.filter(p=>allSp[p.sp]&&allLv[p.lv]);
   else if(mode==='cafe') data = CAFE.filter(p=>Object.keys(CTYPE).some(k=>cafeType[k]&&p.type.includes(CTYPE_KEY[k])) || Object.keys(CTYPE).every(k=>!cafeType[k]));
   else if(mode==='well') data = WELL.filter(p=>Object.keys(WTYPE).some(k=>wellType[k]&&p.wtype.includes(WTYPE_KEY[k])) || Object.keys(WTYPE).every(k=>!wellType[k]));
-  else if(mode==='cult') data = CULT.filter(p=>Object.keys(CULTT).some(k=>cultType[k]&&p.ctype.includes(CULTT_KEY[k])) || Object.keys(CULTT).every(k=>!cultType[k]));
-  else data = SHOT.filter(p=>shotGrade[p.grade] || (!shotGrade[3]&&!shotGrade[2]));
+  else if(mode==='cult') data = CULT_MERGED.filter(p=>Object.keys(CULTT).some(k=>cultType[k]&&p.ctype.includes(CULTT_KEY[k])) || Object.keys(CULTT).every(k=>!cultType[k]));
+  else if(mode==='shot') data = SHOT_MERGED.filter(p=>shotGrade[p.grade] || (!shotGrade[3]&&!shotGrade[2]));
+  else data = FOOD.filter(p=>foodType[p.ftype]);
+  // Apply style tag filters (MOOD × SEASON) — post-filter
+  if(styleMood || styleSeason){
+    data = data.filter(p=>{
+      const t = autoTag(p, mode);
+      if(styleMood && !t.moods.has(styleMood)) return false;
+      if(styleSeason && !t.seasons.has(styleSeason)) return false;
+      return true;
+    });
+  }
   if(!data.length){list.innerHTML='<p style="padding:24px 18px;font-size:13px;opacity:.7">선택된 항목이 없습니다. 위 필터를 켜 주세요.</p>';return;}
   data.forEach(p=>{
     let color,ring;
-    if(mode==='me'){color=LV1[p.lv];ring=SAFE[p.safe][3];}
-    else if(mode==='all'){color=SPC[p.sp];ring='#fff';}
+    if(mode==='all'){color=SPC[p.sp];ring='#fff';}
     else if(mode==='cafe'){color=cafeColor(p);ring='#fff';}
     else if(mode==='well'){color=wellColor(p);ring='#fff';}
     else if(mode==='cult'){color=cultColor(p);ring='#fff';}
-    else{color=shotColor(p);ring='#fff';}
+    else if(mode==='shot'){color=shotColor(p);ring='#fff';}
+    else{color=foodColor(p);ring='#fff';}
     const m=L.marker([p.lat,p.lng],{icon:pin(color,ring)}).addTo(map);
     let sub;
-    if(mode==='me') sub=`${LVN[p.lv]} · ${SAFE[p.safe][0]}<br>${p.length}`;
-    else if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
+    if(mode==='all') sub=`${SPN[p.sp]} · ${LVN2[p.lv]}<br>${p.dist}`;
     else if(mode==='cafe') sub=`${p.type}<br>${p.area}`;
     else if(mode==='well') sub=`${p.wtype}<br>${p.area}`;
     else if(mode==='cult') sub=`${p.ctype}<br>${p.area}`;
-    else sub=`${SHOTG_LABEL[p.grade]} · 드론 ${p.drone}<br>${p.region} · ${p.method}`;
+    else if(mode==='shot') sub=`${SHOTG_LABEL[p.grade]} 명소<br>${p.region} · ${p.env}`;
+    else sub=`${p.ftypeLabel||FTYPE_LABEL[p.ftype]}<br>${p.region}`;
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
     const has3d=p.splatUrl?'<span class="has3d">3D</span>':'';
     let head,meta,detail='';
-    if(mode==='me'){
-      head=`<span class="badge" style="background:${LV1[p.lv]}">${LVN[p.lv]}</span> <span class="lvb" style="background:${SAFE[p.safe][1]};color:${SAFE[p.safe][2]};border:1px solid ${SAFE[p.safe][3]}">${SAFE[p.safe][0]}</span>`;
-      meta=`${p.region} · ${p.length} · ${p.araTime}`;
-      if(selName===p.name) detail=detailME(p);
-    }else if(mode==='all'){
+    if(mode==='all'){
       head=`<span class="badge" style="background:${SPC[p.sp]};color:#fff">${SPN[p.sp]}</span> <span class="lvb" style="border:1px solid #b9c6c3">${LVN2[p.lv]}</span>`;
       meta=`${p.region} · ${p.dist} · ${p.time}`;
       if(selName===p.name) detail=detailALL(p);
@@ -1034,29 +1298,33 @@ function render(){
       head=`<span class="badge" style="background:${cultColor(p)};color:#fff">${p.ctype.split(/[·\/]/)[0]}</span>`;
       meta=`${p.region} · ${p.area} · ${p.hours}`;
       if(selName===p.name) detail=detailCULT(p);
-    }else{
-      head=`<span class="badge" style="background:${shotColor(p)};color:#fff">${SHOTG_LABEL[p.grade]}</span> <span class="lvb" style="border:1px solid #d9543a;color:#a5341f">드론 ${p.drone}</span>`;
-      meta=`${p.region} · ${p.method}`;
+    }else if(mode==='shot'){
+      head=`<span class="badge" style="background:${shotColor(p)};color:#fff">${SHOTG_LABEL[p.grade]}</span>`;
+      meta=`${p.region} · ${p.env}`;
       if(selName===p.name) detail=detailSHOT(p);
+    }else{ // food
+      head=`<span class="badge" style="background:${foodColor(p)};color:#fff">${p.ftypeLabel||FTYPE_LABEL[p.ftype]}</span>`;
+      meta=`${p.region} · ${p.hours||'영업시간 확인'}`;
+      if(selName===p.name) detail=detailFOOD(p);
     }
-    card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div>${detail}`;
+    // Compute style tags for this entry to render as small badges
+    const tg = autoTag(p, mode);
+    const moodBadges = [...tg.moods].slice(0,2).map(m=>`<span class="stagbadge ${m}">${MOOD_LABEL[m][0]}</span>`).join('');
+    const seasonBadges = tg.seasons.size < 4 ? [...tg.seasons].slice(0,2).map(s=>`<span class="stagbadge ${s}">${SEASON_LABEL[s][0]}</span>`).join('') : '';
+    card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div><div>${moodBadges}${seasonBadges}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
   });
 }
 function splatBtn(p){return p.splatUrl?`<a class="splat-btn" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:'';}
-function detailME(p){return `<div class="detail">
-  <div class="infobox" style="background:${SAFE[p.safe][1]};border-left:4px solid ${SAFE[p.safe][3]};color:${SAFE[p.safe][2]}"><b>안전 안내</b><br>${p.health}</div>
-  <dt>접근성</dt><dd>${p.araTime}</dd><dt>코스/소요</dt><dd>${p.length} · ${p.time}</dd>
-  <dt>경사</dt><dd>${p.slope}</dd><dt>노면</dt><dd>${p.surface}</dd><dt>무장애</dt><dd>${p.bf}</dd>
-  <dt>인프라</dt><dd>${p.infra}</dd><dt>그늘</dt><dd>${p.shade}</dd><dt>우천 위험</dt><dd>${p.rain}</dd>
-  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 function detailALL(p){return `<div class="detail">
+  ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#fff0eb;border-left:4px solid #ff6b4a;color:#9c3d22"><b>안전·주의</b><br>${p.safety}</div>
   <dt>거리</dt><dd>${p.dist}</dd><dt>소요시간</dt><dd>${p.time}</dd>
   <dt>핵심 물리(노면/수심/표고)</dt><dd>${p.phys}</dd><dt>인프라</dt><dd>${p.infra}</dd>
   <dt>경관·볼거리</dt><dd>${p.view}</dd><dt>자격/예약</dt><dd>${p.req}</dd>
   <dt>접근성</dt><dd>${p.ara}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 function detailCAFE(p){return `<div class="detail">
+  ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#f6efe2;border-left:4px solid #c8a063;color:#7a5e2a"><b>뷰·콘셉트</b><br>${p.view}</div>
   <dt>유형</dt><dd>${p.type}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
   <dt>영업시간</dt><dd>${p.hours}</dd><dt>정기휴무</dt><dd>${p.closed}</dd>
@@ -1064,6 +1332,7 @@ function detailCAFE(p){return `<div class="detail">
   <dt>무장애</dt><dd>${p.bf}</dd><dt>아이동반</dt><dd>${p.kid}</dd>
   <dt>주의사항</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 function detailWELL(p){return `<div class="detail">
+  ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#e7f2ea;border-left:4px solid #5ca57e;color:#2e7d57"><b>프로그램</b><br>${p.program}</div>
   <dt>유형</dt><dd>${p.wtype}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
   <dt>운영시간·일정</dt><dd>${p.hours}</dd><dt>예약</dt><dd>${p.booking}</dd>
@@ -1071,6 +1340,7 @@ function detailWELL(p){return `<div class="detail">
   <dt>환경</dt><dd>${p.env}</dd><dt>준비물·복장</dt><dd>${p.prep}</dd>
   <dt>주의사항·접근성</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 function detailCULT(p){return `<div class="detail">
+  ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#ece9f5;border-left:4px solid #7b6fb0;color:#534a8a"><b>주제·소장/프로그램</b><br>${p.theme}</div>
   <dt>유형</dt><dd>${p.ctype}</dd><dt>위치</dt><dd>${p.region} · ${p.area}</dd>
   <dt>운영시간</dt><dd>${p.hours}</dd><dt>정기휴무</dt><dd>${p.closed}</dd>
@@ -1080,14 +1350,35 @@ function detailCULT(p){return `<div class="detail">
   <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
 
 function detailSHOT(p){return `<div class="detail">
-  <div class="infobox" style="background:#fbe5e0;border-left:4px solid #d9543a;color:#a5341f"><b>${SHOTG_LABEL[p.grade]}</b> · 추천 촬영방식: <b>${p.method}</b><br>${p.why}</div>
-  <dt>드론 비행</dt><dd><b>${p.drone}</b> <span style="color:#a5341f">⚠ 실제 비행·촬영 전 드론원스톱 등 공식 채널로 별도 승인 확인 필수(항공안전법)</span></dd>
-  <dt>3D 스캔·Splatting</dt><dd>${p.scan}</dd><dt>포트폴리오 가치</dt><dd>${p.port}</dd>
-  <dt>추천 촬영방식</dt><dd>${p.method}</dd><dt>실내외</dt><dd>${p.env}</dd>
-  <dt>허가 주체·연락처</dt><dd>${p.permit}</dd><dt>접근·주차·촬영적기</dt><dd>${p.access}</dd>
-  <dt>위치</dt><dd>${p.region}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+  ${wxSkeleton(p.lat,p.lng)}
+  <div class="infobox" style="background:#fbe5e0;border-left:4px solid #d9543a;color:#a5341f"><b>${SHOTG_LABEL[p.grade]}</b> 명소 · <b>${p.why}</b></div>
+  <dt>실내외</dt><dd>${p.env}</dd>
+  <dt>접근·주차·방문 적기</dt><dd>${p.access}</dd>
+  <dt>위치</dt><dd>${p.region}</dd>
+  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}
+  <details class="expert"><summary>📷 드론·3D 촬영 정보 (전문가용)</summary>
+    <dt>드론 비행</dt><dd><b>${p.drone}</b> <span style="color:#a5341f">⚠ 실제 비행·촬영 전 드론원스톱 등 공식 채널로 별도 승인 확인 필수(항공안전법)</span></dd>
+    <dt>추천 촬영방식</dt><dd>${p.method}</dd>
+    <dt>3D 스캔·Splatting</dt><dd>${p.scan}</dd>
+    <dt>포트폴리오 가치</dt><dd>${p.port}</dd>
+    <dt>허가 주체·연락처</dt><dd>${p.permit}</dd>
+  </details>
+  <div class="src">출처: ${p.src}</div></div>`;}
 
-function select(nm){selName=(selName===nm?null:nm);render();
+function detailFOOD(p){return `<div class="detail">
+  ${wxSkeleton(p.lat,p.lng)}
+  <div class="infobox" style="background:#fde3cd;border-left:4px solid #d9843a;color:#8a4a20"><b>${p.ftypeLabel||FTYPE_LABEL[p.ftype]}</b><br>${p.feat||''}</div>
+  <dt>위치</dt><dd>${p.region} · ${p.area||''}</dd>
+  <dt>영업시간</dt><dd>${p.hours||'확인 필요'}</dd>
+  <dt>가격대</dt><dd>${p.fee||'—'}</dd>
+  <dt>예상 소요</dt><dd>${p.duration||'—'}</dd>
+  <dt>주차</dt><dd>${p.parking||'—'}</dd>
+  <dt>접근성</dt><dd>${p.access||'—'}</dd>
+  <dt>방문 팁</dt><dd>${p.season||'—'}</dd>
+  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>
+  <div class="src">출처: ${p.src||''}</div></div>`;}
+
+function select(nm){selName=(selName===nm?null:nm);render();attachWeatherLoaders();
   if(selName&&markers[nm]){map.setView(markers[nm].getLatLng(),12,{animate:true});markers[nm].openPopup();
     setTimeout(()=>{const el=document.getElementById('c-'+nm);if(el)el.scrollIntoView({behavior:'smooth',block:'nearest'});},80);}}
 </script>
