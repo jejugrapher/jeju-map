@@ -1,30 +1,31 @@
 <!DOCTYPE html>
 <!--
   제주 여행자 지도 | JEJUGRAPHER
-  버전: v13 (traveler)
+  버전: v14 (traveler)
   작성일: 2026.07.05
-  베이스: v12 (2026.07.05) — 쿠팡 파트너스 광고 통합 (수익화)
-  변경(v13 traveler):
-    ① 쿠팡 파트너스 배너 2개 정적 삽입
-       · 배너 ①: 랜딩 stylebar 뒤·foot 앞 (id:1005568, 680x140 carousel · 자동 추천)
-       · 배너 ②: 상세 카드 detail 최하단 (id:1005570, 300x250 carousel · 국내여행 고정)
-    ② 기술 대응 — document.write 우회
-       · iframe srcdoc 격리로 script 완전 분리 (상위 DOM 오염 방지)
-       · script 태그를 문자열 조합('scr'+'ipt')으로 상위 HTML 파서 회피
-       · detail 동적 재렌더링 대응: placeholder slot + render() 종료 후 iframe DOM append
-       · innerHTML 통한 iframe 삽입 대신 createElement + srcdoc 방식으로 안정성 확보
-    ③ 정책 준수
-       · 플로팅/팝업 배치 없음 - 정적 콘텐츠 영역만 사용
-       · 경제적 이해관계 표시 (E-commerce Partnership Disclosure)
-         - 랜딩 광고 카드 안내문
-         - 앱 뷰 vfoot 하단 안내문
-    ④ 라이트 테마 유지
-       · 반투명 배경 (rgba(255,255,255,0.55))·Gowun Batang 서체·베이지 톤 테두리
-       · 상세 카드 광고는 더 컴팩트(border-top: dashed)로 흐름 유지
-       · 색상 톤 #f4f1e8 흐름 위 이질감 최소화
-    ⑤ v1~v12 기능 전부 유지
+  베이스: v13 (2026.07.05) — 앱 뷰(지도 화면) 광고 추가
+  변경(v14 traveler):
+    ① 패널 카드 리스트 하단 광고 추가 (배너 ② 재사용, 300x250)
+       · <aside class="panel"> 안, #list의 sibling으로 정적 배치
+       · 카드 리스트 재렌더링(필터 변경 시) 무관하게 iframe 유지
+       · 첫 진입 시 1회만 로드 → 필터 클릭·검색마다 재로드 없음
+    ② 상세 카드 열림 시 panel 하단 광고 자동 숨김 (중복 노출 방지)
+       · render() 시 selName 유무에 따라 .panel.detail-open 클래스 토글
+       · CSS로 .panel.detail-open .panel-ad-slot { display:none }
+       · 사용자에게 배너 항상 1개만 시각 노출 → 반복 부담 회피
+    ③ 사용 방해 없는 배치 원칙
+       · 지도 위 오버레이 없음
+       · 필터·검색·마커·카드 클릭 영역 침범 없음
+       · 카드 리스트 자연 스크롤 하단에 위치 (콘텐츠 흐름의 끝)
+    ④ injectDetailCoupangAd() 확장 — [data-cp-ad] 속성으로 통합 처리
+       · detail-ad-slot + panel-ad-slot 모두 자동 감지 및 iframe 주입
+       · 각 슬롯 iframe 이미 존재 시 skip (재로드 방지)
+    ⑤ 앱 뷰 광고 노출 시점
+       · 랜딩 배너 ① (1회, 큰 배너 자동 추천)
+       · 앱 진입 즉시 panel 하단 배너 ② (지도 사용 중 노출)
+       · 카드 상세 열림 시 detail 안 배너 ② (panel 하단 자동 숨김)
+    ⑥ v1~v13 기능 전부 유지
   총계: 931곳 · DRONE 317곳
-  광고: 쿠팡 파트너스 · trackingCode AF5499890
 -->
 <html lang="ko">
 <head>
@@ -349,6 +350,13 @@
   .ad-notice{margin-top:10px;font-size:10.5px;color:#7a7a5a;line-height:1.55;font-family:'Gowun Batang',serif;padding:0 8px;}
   /* Detail 하단 광고 (더 컴팩트) */
   .detail-ad-slot{margin:14px auto 4px auto;padding:10px 8px;background:rgba(255,255,255,0.4);border-top:1px dashed #c0dae4;border-radius:0;text-align:center;font-family:'Gowun Batang',serif;}
+  /* v14: 패널 카드 리스트 하단 광고 (지도 화면) — 사용 방해 없이 흐름 하단 */
+  .panel-ad-slot{margin:16px 8px 12px 8px;padding:12px 10px;background:rgba(255,255,255,0.55);border:1px solid #e0d8c0;border-radius:5px;text-align:center;font-family:'Gowun Batang',serif;}
+  .panel-ad-slot .ad-label{font-size:10px;color:#a89a70;letter-spacing:0.4px;margin-bottom:8px;}
+  .panel-ad-slot iframe{border:0;display:block;margin:0 auto;max-width:100%;}
+  .panel-ad-slot .ad-notice-inline{margin-top:8px;font-size:10px;color:#8a8a70;line-height:1.5;}
+  /* 상세 카드 열림 시 panel 하단 광고 숨김 (중복 노출 방지) */
+  .panel.detail-open .panel-ad-slot{display:none;}
   .detail-ad-slot .ad-label{font-size:9.5px;color:#8a9aa8;letter-spacing:0.4px;margin-bottom:6px;}
   .detail-ad-slot iframe{border:0;display:block;margin:0 auto;max-width:100%;}
   .detail-ad-slot .ad-notice-inline{margin-top:6px;font-size:9.5px;color:#8a8a70;line-height:1.4;}
@@ -359,7 +367,7 @@
 
 <!-- ===== 랜딩 ===== -->
 <div id="landing">
-  <div class="brand">JEJUGRAPHER · TRAVELER v13</div>
+  <div class="brand">JEJUGRAPHER · TRAVELER v14</div>
   <h1>제주 여행자 지도</h1>
   <p class="tag">제주 전역 931곳 · 실시간 날씨 · 취향별 필터 · 장소 검색 · 드론 촬영 317곳 (v12 관할 기관 통합 · 🟢 189 🟡 44 🔴 84). 원하는 방식으로 시작하세요.</p>
   <div class="choose">
@@ -467,6 +475,11 @@
     <aside class="panel">
       <div class="panel-head"><h2 id="panelTitle"></h2><p id="panelSub"></p></div>
       <div id="list"></div>
+      <!-- v14: 패널 하단 광고 (배너 ② 재사용, list 재렌더링과 무관한 정적 컨테이너) -->
+      <div class="panel-ad-slot" data-cp-ad="1005570" id="panel-ad">
+        <div class="ad-label">— sponsored · 국내여행 —</div>
+        <div class="ad-notice-inline">이 사이트는 쿠팡 파트너스 활동의 일환으로 수수료를 제공받습니다.</div>
+      </div>
     </aside>
   </div>
   <div class="vfoot" id="vfoot"></div>
@@ -1874,13 +1887,14 @@ const DETAIL_AD_HTML = `<div class="detail-ad-slot" data-cp-ad="1005570">
     </div>`;
 
 function injectDetailCoupangAd(){
-  document.querySelectorAll('.detail-ad-slot[data-cp-ad]').forEach(slot => {
-    if(slot.querySelector('iframe')) return; // 이미 삽입됨
+  // v14: detail 슬롯 + panel 슬롯 모두 처리 (data-cp-ad 속성 기준)
+  document.querySelectorAll('[data-cp-ad]').forEach(slot => {
+    if(slot.querySelector('iframe')) return; // 이미 삽입됨 (재로드 방지)
     const iframe = document.createElement('iframe');
     iframe.width = '300';
     iframe.height = '250';
     iframe.scrolling = 'no';
-    iframe.setAttribute('title', '쿠팡 파트너스 광고 — 국내여행 (배너 2)');
+    iframe.setAttribute('title', '쿠팡 파트너스 광고 — 국내여행');
     iframe.style.cssText = 'border:0;display:block;margin:0 auto;max-width:100%';
     iframe.srcdoc = coupangAdHTML(1005570, 300, 250);
     slot.appendChild(iframe);
@@ -2170,14 +2184,14 @@ function enter(m){
   document.getElementById('panelTitle').textContent = (m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':(m==='cult'?'권역·유형별 문화·공원':(m==='shot'?'등급별 명소·자연·경관':(m==='food'?'유형별 미식·시장':'카테고리별 드론 촬영 스팟'))))));
   document.getElementById('panelSub').textContent = (m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰·실시간 날씨가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다. 드론/3D 촬영 정보는 상세 하단 전문가용 섹션에 포함.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다.':(m==='food'?'핀 또는 카드를 누르면 대표 메뉴·운영시간·실시간 날씨가 펼쳐집니다.':'핀 또는 카드를 누르면 규제 상태·필요 승인·권장 고도·촬영 팁이 펼쳐집니다. 드론원스톱 링크로 정확 확인 가능.'))))));
   document.getElementById('vfoot').innerHTML = (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v13 traveler (2026.07.05)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v14 traveler (2026.07.05)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 traveler (2026.07.05)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v14 traveler (2026.07.05)'
     : (m==='well'
-    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 일반 웰니스 정보 제공용. · v13 traveler (2026.07.05)'
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 일반 웰니스 정보 제공용. · v14 traveler (2026.07.05)'
     : (m==='cult'
-    ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 traveler (2026.07.05)'
-    : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v13 traveler (2026.07.05)'))));
+    ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v14 traveler (2026.07.05)'
+    : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v14 traveler (2026.07.05)'))));
   document.getElementById('vfoot').innerHTML += ' · 날씨: <a href="https://open-meteo.com" target="_blank" style="color:inherit">Open-Meteo</a> (CC BY 4.0)';
 }
 
@@ -2508,7 +2522,13 @@ function render(){
     card.onclick=()=>select(p.name);list.appendChild(card);
   });
 
-  // v13: Coupang detail ad injection (after DOM updates)
+  // v14: panel 하단 광고 숨김/표시 - 상세 카드 열림 시 중복 방지
+  const _panelEl = document.querySelector('.panel');
+  if(_panelEl){
+    if(selName) _panelEl.classList.add('detail-open');
+    else _panelEl.classList.remove('detail-open');
+  }
+  // v13: Coupang ad injection (detail slots + panel slot, after DOM updates)
   setTimeout(injectDetailCoupangAd, 0);
 }
 function splatBtn(p){return p.splatUrl?`<a class="splat-btn" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:'';}
