@@ -1,32 +1,30 @@
 <!DOCTYPE html>
 <!--
   제주 여행자 지도 | JEJUGRAPHER
-  버전: v12 (traveler)
+  버전: v13 (traveler)
   작성일: 2026.07.05
-  베이스: v11 (2026.07.05) — 관할 기관 다이렉토리 + 드론 유형 구분 제거
-  변경(v12 traveler):
-    ① 관할 기관 다이렉토리 신규 (10개 기관)
-       · 국가유산청 (통합예약 1600-0064, royal.khs.go.kr) — 명승·천연기념물
-       · 제주도 세계유산본부 (064-783-0959) — 세계자연유산·성산·거문오름
-       · 한라산국립공원사무소 (064-713-9950) — 국립공원
-       · 제주지방항공청 안전운항과 (064-797-1735) — 관제권 비행승인
-       · 국방부 국방정보본부 (02-748-1111) — 군사시설
-       · 제주시청·서귀포시청 관광체육국 — 지자체 문화재
-       · 해수욕장 관리소 (제주시·서귀포시) — 개장기 통제
-       · 드론원스톱 (drone.onestop.go.kr) — 통합 접수
-       · DJI Fly Safe (fly-safe.dji.com) — 기체 GEO 언락
-    ② 스팟별 필요 기관 자동 매칭
-       · 규제 상태·문화재 지정·해수욕장·특수시설 조합으로 필요 기관만 선별
-       · 상세 카드에 관할 기관 카드 렌더링 (아이콘·이름·업무·전화·사이트)
-       · 승인 절차 흐름: 각 기관 사전 협의 → 드론원스톱 접수 → DJI 언락
-    ③ FPV/센서 구분 완전 제거 (사용자 요구)
-       · DTYPE 상수 제거 · droneType 상태 제거 · tDTYPE 토글 제거
-       · 필터: 카테고리 × 규제상태 2축으로 단순화
-       · 상세 카드: 드론 유형·적합도 섹션 제거
-       · G 카테고리 명 유지 (특수 촬영 스팟)
-    ④ 상단 배너 관할 기관 요약 추가
-    ⑤ v1~v11 기능 전부 유지 (문화재 21곳·해수욕장 12곳 시간 판별·계절풍·골든아워)
+  베이스: v12 (2026.07.05) — 쿠팡 파트너스 광고 통합 (수익화)
+  변경(v13 traveler):
+    ① 쿠팡 파트너스 배너 2개 정적 삽입
+       · 배너 ①: 랜딩 stylebar 뒤·foot 앞 (id:1005568, 680x140 carousel · 자동 추천)
+       · 배너 ②: 상세 카드 detail 최하단 (id:1005570, 300x250 carousel · 국내여행 고정)
+    ② 기술 대응 — document.write 우회
+       · iframe srcdoc 격리로 script 완전 분리 (상위 DOM 오염 방지)
+       · script 태그를 문자열 조합('scr'+'ipt')으로 상위 HTML 파서 회피
+       · detail 동적 재렌더링 대응: placeholder slot + render() 종료 후 iframe DOM append
+       · innerHTML 통한 iframe 삽입 대신 createElement + srcdoc 방식으로 안정성 확보
+    ③ 정책 준수
+       · 플로팅/팝업 배치 없음 - 정적 콘텐츠 영역만 사용
+       · 경제적 이해관계 표시 (E-commerce Partnership Disclosure)
+         - 랜딩 광고 카드 안내문
+         - 앱 뷰 vfoot 하단 안내문
+    ④ 라이트 테마 유지
+       · 반투명 배경 (rgba(255,255,255,0.55))·Gowun Batang 서체·베이지 톤 테두리
+       · 상세 카드 광고는 더 컴팩트(border-top: dashed)로 흐름 유지
+       · 색상 톤 #f4f1e8 흐름 위 이질감 최소화
+    ⑤ v1~v12 기능 전부 유지
   총계: 931곳 · DRONE 317곳
+  광고: 쿠팡 파트너스 · trackingCode AF5499890
 -->
 <html lang="ko">
 <head>
@@ -343,13 +341,25 @@
   .droneonestop-btn{display:inline-block;background:#2b8fd6;color:#fff !important;font-size:11.5px;padding:6px 12px;border-radius:5px;text-decoration:none;font-family:'Gowun Batang',serif;font-weight:700;margin-top:6px;}
   .droneonestop-btn:hover{background:#1a5b7a;}
 
+
+  /* ===== v13 쿠팡 파트너스 광고 (라이트 테마 최소 이질감) ===== */
+  .ad-slot{margin:22px auto;padding:14px 12px;background:rgba(255,255,255,0.55);border:1px solid #e0d8c0;border-radius:6px;max-width:720px;text-align:center;font-family:'Gowun Batang',serif;}
+  .ad-slot .ad-label{font-size:10px;color:#a89a70;letter-spacing:0.5px;margin-bottom:8px;text-transform:uppercase;}
+  .ad-slot iframe{border:0;display:block;margin:0 auto;max-width:100%;}
+  .ad-notice{margin-top:10px;font-size:10.5px;color:#7a7a5a;line-height:1.55;font-family:'Gowun Batang',serif;padding:0 8px;}
+  /* Detail 하단 광고 (더 컴팩트) */
+  .detail-ad-slot{margin:14px auto 4px auto;padding:10px 8px;background:rgba(255,255,255,0.4);border-top:1px dashed #c0dae4;border-radius:0;text-align:center;font-family:'Gowun Batang',serif;}
+  .detail-ad-slot .ad-label{font-size:9.5px;color:#8a9aa8;letter-spacing:0.4px;margin-bottom:6px;}
+  .detail-ad-slot iframe{border:0;display:block;margin:0 auto;max-width:100%;}
+  .detail-ad-slot .ad-notice-inline{margin-top:6px;font-size:9.5px;color:#8a8a70;line-height:1.4;}
+
 </style>
 </head>
 <body>
 
 <!-- ===== 랜딩 ===== -->
 <div id="landing">
-  <div class="brand">JEJUGRAPHER · TRAVELER v12</div>
+  <div class="brand">JEJUGRAPHER · TRAVELER v13</div>
   <h1>제주 여행자 지도</h1>
   <p class="tag">제주 전역 931곳 · 실시간 날씨 · 취향별 필터 · 장소 검색 · 드론 촬영 317곳 (v12 관할 기관 통합 · 🟢 189 🟡 44 🔴 84). 원하는 방식으로 시작하세요.</p>
   <div class="choose">
@@ -415,6 +425,16 @@
       <div class="stylebtn" onclick="startStyle('family')"><div class="sico">👨‍👩‍👧</div><div class="snm">가족·아이</div><div class="sdesc">테마파크·체험·놀이</div></div>
     </div>
   </div>
+  <!-- v13: 쿠팡 파트너스 배너 ① (랜딩 carousel 680x140) -->
+  <div class="ad-slot" id="ad-landing">
+    <div class="ad-label">— sponsored —</div>
+    <iframe
+      title="쿠팡 파트너스 광고 — 자동 추천 (배너 1)"
+      width="680" height="140" scrolling="no"
+      srcdoc='<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;background:transparent;overflow:hidden}</style></head><body><script src="https://ads-partners.coupang.com/g.js"></script><script>new PartnersCoupang.G({"id":1005568,"template":"carousel","trackingCode":"AF5499890","width":"680","height":"140","tsource":""});</script></body></html>'
+    ></iframe>
+    <div class="ad-notice">이 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
+  </div>
   <p class="foot">출처: 제주 공간정보·스포츠레저·문화·경관·미식·시장·드론 조사(2026) + Google Places 실측 좌표 + 자체 심층 조사(2026.07, 1차 30곳 · 2차 미식 150곳 · 문화재 47곳 · 드론 촬영 83곳) + 드론 규제(국토교통부 항공안전법 · 드론원스톱) · 좌표계 EPSG:4326 · 날씨: Open-Meteo (CC BY 4.0) · 정보 제공용이며 방문 전 현장 확인 권장. 취향·계절 태그는 명시 정보 기반 자동 부여이므로 개별 케이스 참고용.</p>
 </div>
 
@@ -450,6 +470,7 @@
     </aside>
   </div>
   <div class="vfoot" id="vfoot"></div>
+    <div class="vfoot" style="font-size:10px;color:#8a8a70;font-family:'Gowun Batang',serif;padding:6px 22px;background:rgba(255,255,255,0.4);border-top:1px dashed #d0c8b0">이 사이트는 쿠팡 파트너스 활동의 일환으로, 이에 따른 일정액의 수수료를 제공받습니다.</div>
 </div>
 
 <script>
@@ -1829,6 +1850,43 @@ function assignAgencies(p) {
   return Array.from(agencies);
 }
 
+
+// ============ v13 쿠팡 파트너스 광고 헬퍼 (배너 ② 상세 카드용) ============
+// document.write 우회: iframe srcdoc 격리
+// 동적 detail 재렌더링 대응: renderCoupangDetailAd() 호출 후 DOM insert
+function coupangAdHTML(id, w, h){
+  // srcdoc 내 script 태그가 상위 HTML parser에 종료로 인식되지 않도록 안전한 문자열 생성
+  const cfg = '{"id":'+id+',"template":"carousel","trackingCode":"AF5499890","width":"'+w+'","height":"'+h+'","tsource":""}';
+  const sTag = 'scr'+'ipt';
+  const doc = '<!DOCTYPE html><html><head><meta charset="utf-8"><style>body{margin:0;padding:0;background:transparent;overflow:hidden}</style></head><body>'+
+    '<'+sTag+' src="https://ads-partners.coupang.com/g.js"></'+sTag+'>'+
+    '<'+sTag+'>new PartnersCoupang.G('+cfg+');</'+sTag+'>'+
+    '</body></html>';
+  return doc;
+}
+
+// detail 카드 렌더링 후 슬롯에 iframe 삽입 (호출 시점: select() 및 render() 완료 후)
+
+// v13: detail 최하단 쿠팡 광고 슬롯 (placeholder만; iframe은 render 후 injectDetailCoupangAd()가 삽입)
+const DETAIL_AD_HTML = `<div class="detail-ad-slot" data-cp-ad="1005570">
+      <div class="ad-label">— sponsored · 국내여행 —</div>
+      <div class="ad-notice-inline">이 사이트는 쿠팡 파트너스 활동의 일환으로 수수료를 제공받습니다.</div>
+    </div>`;
+
+function injectDetailCoupangAd(){
+  document.querySelectorAll('.detail-ad-slot[data-cp-ad]').forEach(slot => {
+    if(slot.querySelector('iframe')) return; // 이미 삽입됨
+    const iframe = document.createElement('iframe');
+    iframe.width = '300';
+    iframe.height = '250';
+    iframe.scrolling = 'no';
+    iframe.setAttribute('title', '쿠팡 파트너스 광고 — 국내여행 (배너 2)');
+    iframe.style.cssText = 'border:0;display:block;margin:0 auto;max-width:100%';
+    iframe.srcdoc = coupangAdHTML(1005570, 300, 250);
+    slot.appendChild(iframe);
+  });
+}
+
 // ============ 공통 상수 ============
 const SPC={run:'#ff6b4a',bike:'#f2c14e',dive:'#2b8fd6',hike:'#5ec46a',walk:'#a98bd6'};
 const SPN={run:'러닝',bike:'자전거',dive:'다이빙',hike:'등산',walk:'트레킹/산책'};
@@ -2112,14 +2170,14 @@ function enter(m){
   document.getElementById('panelTitle').textContent = (m==='all'?'종목별 코스':(m==='cafe'?'권역·유형별 카페':(m==='well'?'권역·유형별 웰니스':(m==='cult'?'권역·유형별 문화·공원':(m==='shot'?'등급별 명소·자연·경관':(m==='food'?'유형별 미식·시장':'카테고리별 드론 촬영 스팟'))))));
   document.getElementById('panelSub').textContent = (m==='cafe'?'핀 또는 카드를 누르면 영업정보·메뉴·뷰·실시간 날씨가 펼쳐집니다. 영업시간·휴무는 변동될 수 있어 방문 전 확인 권장.':(m==='well'?'핀 또는 카드를 누르면 프로그램·예약·요금·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문·예약 전 확인 권장.':(m==='cult'?'핀 또는 카드를 누르면 운영정보·요금·접근성·실시간 날씨가 펼쳐집니다. 운영시간·요금은 변동될 수 있어 방문 전 확인 권장.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다. 드론/3D 촬영 정보는 상세 하단 전문가용 섹션에 포함.':(m==='shot'?'핀 또는 카드를 누르면 명소 정보·접근·실시간 날씨가 펼쳐집니다.':(m==='food'?'핀 또는 카드를 누르면 대표 메뉴·운영시간·실시간 날씨가 펼쳐집니다.':'핀 또는 카드를 누르면 규제 상태·필요 승인·권장 고도·촬영 팁이 펼쳐집니다. 드론원스톱 링크로 정확 확인 가능.'))))));
   document.getElementById('vfoot').innerHTML = (m==='all'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v12 traveler (2026.07.05)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 다이빙·등산은 자격·예약·기상 별도 확인. 정보 제공용. · v13 traveler (2026.07.05)'
     : (m==='cafe'
-    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v12 traveler (2026.07.05)'
+    ? '출처: 공간정보·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 영업시간·정기휴무·노키즈 등은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 traveler (2026.07.05)'
     : (m==='well'
-    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 일반 웰니스 정보 제공용. · v12 traveler (2026.07.05)'
+    ? '출처: 공간정보·웰니스 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·예약·요금은 변동될 수 있어 방문·예약 전 확인 권장. 일반 웰니스 정보 제공용. · v13 traveler (2026.07.05)'
     : (m==='cult'
-    ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v12 traveler (2026.07.05)'
-    : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v12 traveler (2026.07.05)'))));
+    ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v13 traveler (2026.07.05)'
+    : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v13 traveler (2026.07.05)'))));
   document.getElementById('vfoot').innerHTML += ' · 날씨: <a href="https://open-meteo.com" target="_blank" style="color:inherit">Open-Meteo</a> (CC BY 4.0)';
 }
 
@@ -2449,6 +2507,9 @@ function render(){
     card.innerHTML=`<div class="nm">${p.name} ${head} ${has3d}</div><div class="meta">${meta}</div><div>${moodBadges}${seasonBadges}</div>${detail}`;
     card.onclick=()=>select(p.name);list.appendChild(card);
   });
+
+  // v13: Coupang detail ad injection (after DOM updates)
+  setTimeout(injectDetailCoupangAd, 0);
 }
 function splatBtn(p){return p.splatUrl?`<a class="splat-btn" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:'';}
 function detailALL(p){return `<div class="detail">
@@ -2457,7 +2518,8 @@ function detailALL(p){return `<div class="detail">
   <dt>거리</dt><dd>${p.dist}</dd><dt>소요시간</dt><dd>${p.time}</dd>
   <dt>핵심 물리(노면/수심/표고)</dt><dd>${p.phys}</dd><dt>인프라</dt><dd>${p.infra}</dd>
   <dt>경관·볼거리</dt><dd>${p.view}</dd><dt>자격/예약</dt><dd>${p.req}</dd>
-  <dt>접근성</dt><dd>${p.ara}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+  <dt>접근성</dt><dd>${p.ara}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div>${DETAIL_AD_HTML}
+    </div>`;}
 function detailCAFE(p){return `<div class="detail">
   ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#f6efe2;border-left:4px solid #c8a063;color:#7a5e2a"><b>뷰·콘셉트</b><br>${p.view}</div>
@@ -2465,7 +2527,8 @@ function detailCAFE(p){return `<div class="detail">
   <dt>영업시간</dt><dd>${p.hours}</dd><dt>정기휴무</dt><dd>${p.closed}</dd>
   <dt>대표 메뉴</dt><dd>${p.menu}</dd><dt>주차</dt><dd>${p.parking}</dd>
   <dt>무장애</dt><dd>${p.bf}</dd><dt>아이동반</dt><dd>${p.kid}</dd>
-  <dt>주의사항</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+  <dt>주의사항</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div>${DETAIL_AD_HTML}
+    </div>`;}
 function detailWELL(p){return `<div class="detail">
   ${wxSkeleton(p.lat,p.lng)}
   <div class="infobox" style="background:#e7f2ea;border-left:4px solid #5ca57e;color:#2e7d57"><b>프로그램</b><br>${p.program}</div>
@@ -2473,7 +2536,8 @@ function detailWELL(p){return `<div class="detail">
   <dt>운영시간·일정</dt><dd>${p.hours}</dd><dt>예약</dt><dd>${p.booking}</dd>
   <dt>요금</dt><dd>${p.fee}</dd><dt>소요시간</dt><dd>${p.duration}</dd>
   <dt>환경</dt><dd>${p.env}</dd><dt>준비물·복장</dt><dd>${p.prep}</dd>
-  <dt>주의사항·접근성</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+  <dt>주의사항·접근성</dt><dd>${p.note}</dd><dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div>${DETAIL_AD_HTML}
+    </div>`;}
 function detailCULT(p){
   // Heritage-specific rich block if designation info present
   const heritageBox = p.designNum ? `
@@ -2498,7 +2562,8 @@ function detailCULT(p){
   ${tipSection}
   ${nearbySection}
   ${statusSection}
-  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div></div>`;}
+  <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>${splatBtn(p)}<div class="src">출처: ${p.src}</div>${DETAIL_AD_HTML}
+    </div>`;}
 
 function detailSHOT(p){return `<div class="detail">
   ${wxSkeleton(p.lat,p.lng)}
@@ -2514,7 +2579,8 @@ function detailSHOT(p){return `<div class="detail">
     <dt>포트폴리오 가치</dt><dd>${p.port}</dd>
     <dt>허가 주체·연락처</dt><dd>${p.permit}</dd>
   </details>
-  <div class="src">출처: ${p.src}</div></div>`;}
+  <div class="src">출처: ${p.src}</div>${DETAIL_AD_HTML}
+    </div>`;}
 
 function detailFOOD(p){
   const hoursLine = p.hours || '확인 필요';
@@ -2533,7 +2599,8 @@ function detailFOOD(p){
   ${p.award ? `<dt>🏆 인증·방송</dt><dd style="color:#a5341f"><b>${p.award}</b></dd>` : ''}
   ${p.season ? `<dt>💡 방문 팁</dt><dd>${p.season}</dd>` : ''}
   <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>
-  <div class="src">출처: ${p.src||''}</div></div>`;
+  <div class="src">출처: ${p.src||''}</div>${DETAIL_AD_HTML}
+    </div>`;
 }
 
 
@@ -2667,7 +2734,8 @@ function detailDRONE(p){
     <dt>좌표</dt><dd>${p.lat}, ${p.lng}</dd>
     ${oneStopBtn}
     <div class="src">출처: ${p.src || '자체 심층 조사'} · 실전정보: Claude 선조사 (기상청·항공학회·바다타임 종합)</div>
-  </div>`;
+  ${DETAIL_AD_HTML}
+    </div>`;
 }
 
 function select(nm){selName=(selName===nm?null:nm);render();attachWeatherLoaders();
