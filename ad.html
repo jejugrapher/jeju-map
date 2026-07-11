@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>쿠팡 파트너스 광고</title>
+<style>
+  html,body{margin:0;padding:0;background:transparent;overflow:hidden;font-family:sans-serif;}
+</style>
+</head>
+<body>
+<script>
+  // URL 파라미터에서 광고 설정 추출
+  const params = new URLSearchParams(window.location.search);
+  const adId = parseInt(params.get('id') || '1005568', 10);
+  const adWidth = params.get('w') || '680';
+  const adHeight = params.get('h') || '140';
+</script>
+<script src="https://ads-partners.coupang.com/g.js"></script>
+<script>
+  // 쿠팡 파트너스 캐러셀 렌더링
+  new PartnersCoupang.G({
+    "id": adId,
+    "template": "carousel",
+    "trackingCode": "AF5499890",
+    "width": adWidth,
+    "height": adHeight,
+    "tsource": ""
+  });
+</script>
+</body>
+</html>
