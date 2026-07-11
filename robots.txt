@@ -1,0 +1,25 @@
+# robots.txt for JEJUGRAPHER · 제주 여행자 지도
+# https://jejugrapher.github.io/jeju-map/
+
+User-agent: *
+Allow: /
+Disallow: /ad.html
+
+# 네이버 검색로봇
+User-agent: Yeti
+Allow: /
+Crawl-delay: 1
+
+# 구글봇
+User-agent: Googlebot
+Allow: /
+
+# 다음/카카오
+User-agent: Daumoa
+Allow: /
+
+# 빙봇
+User-agent: bingbot
+Allow: /
+
+Sitemap: https://jejugrapher.github.io/jeju-map/sitemap.xml
