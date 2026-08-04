@@ -428,5 +428,20 @@
     "spots": [
       "샤이니숲길"
     ]
+  },
+  "NiLFq7hBvoY": {
+    "title": "제주 숲길 8K 360 VR 드라이브 (선흘→사려니→첨단)",
+    "url": "https://youtu.be/NiLFq7hBvoY",
+    "type": "360drive",
+    "duration": 1501,
+    "spots": [
+      "비자림로 삼나무길 (1112도로)",
+      "샤이니숲길",
+      "사려니숲길(둘레길 제7코스)",
+      "삼다수숲길(1·2코스)",
+      "성미가든",
+      "교래곶자왈손칼국수"
+    ],
+    "note": "youtubeStart/videos.s로 장소별 등장 시점 연동"
   }
 }
