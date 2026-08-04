@@ -949,6 +949,13 @@
       <p>제주 전역 317곳 드론 촬영 스팟 (v8 대량 확장). 좌표 기반 자동 규제 판별로 <b>🟢 자유 비행 가능 189곳</b> · 🟡 협의 권장 44 · 🔴 승인 필수 84 표시. 계절 카테고리 (🌸벚꽃·🌻유채·💠수국·🌾억새·🌺매화·동백) · 관제권 (제주공항 9.3km + 정석 5.6km) 원 오버레이 · 드론원스톱 원터치.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enterTown()">
+      <div class="ico">🏘</div>
+      <h2>동네지도</h2>
+      <span class="who" style="background:#eef2e4;color:#5c7a4a">마을지도·동네지도·산책로 지도</span>
+      <p>제주 전도에서 영역을 골라 들어가는 <b>손그림 마을지도 모음</b>. 첫 번째로 <b>선흘2리 세계자연유산마을 지도</b>(거문오름·오름 군락·4·3 유적 20곳) 공개. 마을·동네·산책로 단위의 정밀 일러스트 지도가 계속 추가됩니다.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
   </div>
   <div class="stylebar">
     <h3>여행 스타일로 시작하기</h3>
@@ -1021,6 +1028,7 @@
       <button id="swShot" onclick="enter('shot')">명소·자연</button>
       <button id="swFood" onclick="enter('food')">미식·시장</button>
       <button id="swDrone" onclick="enter('drone')">🛸 드론</button>
+      <button id="swTown" onclick="enterTown()">🏘 동네지도</button>
       <div class="searchwrap">
         <span class="searchico">🔍</span>
         <input type="text" id="searchbox" class="searchbox" placeholder="장소 검색…" oninput="onSearchInput(event)" onfocus="onSearchInput(event)" onblur="setTimeout(closeSearch, 250)" autocomplete="off">
@@ -2809,6 +2817,7 @@ function startStyle(mood){
 }
 
 function enter(m){
+  const _ta=document.getElementById('townApp'); if(_ta) _ta.classList.add('hidden');
   document.getElementById('landing').classList.add('hidden');
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
@@ -2965,7 +2974,7 @@ document.addEventListener('click', (e) => {
   }
 });
 
-function goHome(){document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();styleMood=null;styleSeason=null;if(map){map.remove();map=null;}}
+function goHome(){const _ta=document.getElementById('townApp'); if(_ta) _ta.classList.add('hidden');document.getElementById('app').classList.add('hidden');document.getElementById('landing').classList.remove('hidden');clearMeLoc();styleMood=null;styleSeason=null;if(map){map.remove();map=null;}}
 
 function buildFilters(){
   const f=document.getElementById('filters');f.innerHTML='';
@@ -3438,5 +3447,67 @@ document.addEventListener('DOMContentLoaded', function(){
 });
 
 </script>
+
+<!-- ============ 동네지도 (Town Maps) ============ -->
+<div id="townApp" class="hidden" style="position:fixed;inset:0;z-index:900;background:#f6f2e8;display:flex;flex-direction:column">
+  <div style="display:flex;align-items:center;gap:12px;padding:10px 16px;background:#fff;border-bottom:1px solid #e0dbc9;flex-wrap:wrap">
+    <button class="home" onclick="goHome()">← 홈</button>
+    <b style="font-size:16px">🏘 동네지도 — 마을·동네·산책로 지도 모음</b>
+    <span style="font-size:12px;color:#8a8577">제주 전도에서 영역을 누르면 해당 지역의 일러스트 지도가 열립니다</span>
+  </div>
+  <div style="flex:1;display:flex;min-height:0" id="townWrap">
+    <div id="townMap" style="flex:1;min-height:300px"></div>
+    <aside style="width:330px;overflow-y:auto;background:#fff;border-left:1px solid #e0dbc9;padding:14px" id="townPanel">
+      <h3 style="font-size:14px;margin-bottom:8px">공개된 동네지도</h3>
+      <div id="townList"></div>
+      <div style="margin-top:14px;font-size:11.5px;color:#a09a8c;border-top:1px dashed #e0dbc9;padding-top:10px">
+        마을지도·동네지도·산책로 지도가 계속 추가됩니다.<br>추가 요청: 피드백 폼으로 제안해 주세요.
+      </div>
+    </aside>
+  </div>
+</div>
+<script>
+const TOWN_MAPS=[
+ {name:'선흘2리 세계자연유산마을 지도',kind:'마을지도',lat:33.470,lng:126.700,radius:2800,status:'공개',
+  desc:'거문오름(유네스코 세계자연유산)을 품은 조천읍 중산간 마을. 오름 8곳, 벵뒤굴, 4·3 유적, 마을 시설 등 20곳을 파스텔 손그림 일러스트로 담았다.',
+  url:'town/seonheul2/'},
+];
+let townMapObj=null, townLayers=[];
+function enterTown(){
+  document.getElementById('landing').classList.add('hidden');
+  document.getElementById('app').classList.add('hidden');
+  document.getElementById('townApp').classList.remove('hidden');
+  if(map){try{map.remove();}catch(e){} map=null;}
+  setTimeout(initTownMap,60);
+}
+function initTownMap(){
+  if(townMapObj){townMapObj.invalidateSize();return;}
+  townMapObj=L.map('townMap');townMapObj.fitBounds([[33.11,126.14],[33.60,126.98]]);
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:18}).addTo(townMapObj);
+  TOWN_MAPS.forEach(t=>{
+    const circ=L.circle([t.lat,t.lng],{radius:t.radius,color:'#5c7a4a',weight:2.5,fillColor:'#8fae6d',fillOpacity:.25}).addTo(townMapObj);
+    circ.bindTooltip('🏘 '+t.name,{permanent:true,direction:'top',className:'town-tip'});
+    circ.on('click',()=>openTownCard(t));
+    townLayers.push(circ);
+  });
+  renderTownList();
+}
+function renderTownList(){
+  const el=document.getElementById('townList');
+  el.innerHTML=TOWN_MAPS.map((t,i)=>`
+   <div style="border:1.5px solid #e0dbc9;border-radius:12px;padding:11px 13px;margin-bottom:9px;cursor:pointer" onclick="openTownCard(TOWN_MAPS[${i}])">
+     <b style="font-size:13.5px">${t.name}</b>
+     <span style="font-size:10px;background:#eef2e4;color:#5c7a4a;border-radius:8px;padding:1px 7px;margin-left:5px">${t.kind}</span>
+     <p style="font-size:12px;color:#6d675b;margin-top:4px;line-height:1.55">${t.desc}</p>
+     <a href="${t.url}" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="display:inline-block;margin-top:7px;background:#5c7a4a;color:#fff;border-radius:9px;padding:6px 14px;font-size:12.5px;text-decoration:none;font-weight:700">🗺 지도 열기</a>
+   </div>`).join('');
+}
+function openTownCard(t){
+  if(townMapObj) townMapObj.setView([t.lat,t.lng],12);
+  renderTownList();
+}
+</script>
+<style>.town-tip{background:#fffdf4;border:2px solid #5c7a4a;border-radius:10px;font-weight:700;color:#42583a}
+@media(max-width:760px){#townWrap{flex-direction:column}#townPanel{width:100% !important;max-height:40vh}}</style>
 </body>
 </html>

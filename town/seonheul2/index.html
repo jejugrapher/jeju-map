@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선흘2리 마을지도 | 거문오름 세계자연유산마을 | JEJUGRAPHER</title>
+<meta name="description" content="제주 조천읍 선흘2리 손그림 마을지도 — 거문오름, 오름 군락, 벵뒤굴, 4·3 유적, 마을 시설.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#5a4a3a;--paper:#fdf8ec;--cream:#f7efdb;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;background:#f2e9d8;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:18px 10px 40px}
+.frame{background:var(--paper);border:3px solid #d9c9a8;border-radius:26px;box-shadow:0 10px 40px rgba(90,74,58,.15);max-width:1000px;width:100%;padding:20px 22px 14px;position:relative}
+h1{font-family:'Gaegu',cursive;font-size:34px;color:#4a6b4f;letter-spacing:1px}
+h1 small{display:block;font-size:15px;color:#b08d57;margin-top:-2px}
+.sub{font-size:13px;color:#8d7c66;margin:2px 0 10px;line-height:1.5}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-family:'Gaegu',cursive;font-size:15px;padding:4px 14px;border-radius:18px;border:2px solid;cursor:pointer;background:#fff;user-select:none;transition:.15s}
+.chip.off{opacity:.32;filter:grayscale(.6)}
+svg{width:100%;height:auto;display:block;border-radius:18px}
+.pin-g{cursor:pointer}
+.pin-g:hover .pin-label{filter:brightness(1.03)}
+.pin-g:hover{opacity:.92}
+.detail{position:fixed;z-index:50;right:24px;top:70px;width:330px;max-height:76vh;overflow-y:auto;background:#fffdf6;border:3px solid #d9c9a8;border-radius:18px;box-shadow:0 12px 36px rgba(90,74,58,.28);padding:18px;display:none}
+.detail h2{font-family:'Gaegu',cursive;font-size:24px}
+.detail .close{position:absolute;top:8px;right:12px;border:0;background:0;font-size:20px;cursor:pointer;color:#b8a88c}
+.detail .cat{display:inline-block;font-size:11px;color:#fff;border-radius:10px;padding:2px 10px;margin:4px 4px 0 0}
+.badge{display:inline-block;font-size:10.5px;border-radius:10px;padding:2px 8px;margin-top:4px;background:#eef4ec;color:#4a7a52;border:1px solid #cfe0cd}
+.badge.warn{background:#fdf0e4;color:#b06c2a;border-color:#ecd3b4}
+.detail dt{font-size:11px;color:#b08d57;margin-top:10px;font-weight:700;letter-spacing:.5px}
+.detail dd{font-size:13px;line-height:1.65}
+.detail .src{font-size:10px;color:#bdae95;margin-top:12px;border-top:2px dashed #e8dcc0;padding-top:8px;line-height:1.5}
+.foot{font-size:11px;color:#a99878;margin-top:8px;line-height:1.6}
+.buslane{margin-top:8px;background:var(--cream);border-radius:12px;padding:8px 12px;font-size:12px;color:#7c6b52;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="frame">
+  <h1>🌿 선흘2리 마을지도 <small>거문오름 세계자연유산마을</small></h1>
+  <div class="sub">제주시 조천읍 · 해발 200~400m 중산간 · 자연부락 선진동·선화동·우진동·선인동 — 핀을 누르면 이야기가 열립니다</div>
+  <div class="chips" id="chips"></div>
+  <svg id="mapsvg" viewBox="0 0 1240 1200" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="buslane">🚌 <b>810-1·810-2 관광지순환버스</b>가 마을을 관통합니다 — 세계자연유산센터 ↔ 선흘2리마을 ↔ 선인동마을 ↔ 제주라프 정류장 (1,200원) · 공항에서는 111·112·121·122 급행 → 대천환승정류장 환승, 약 1시간</div>
+  <div class="foot">v0.2 · 선조사(OSM 좌표) + GDR 조사(2026.08) 반영 · ⚠ 표시는 좌표 개략·출처 충돌로 재검증 예정 · © 2026 JEJUGRAPHER</div>
+</div>
+<div class="detail" id="detail"></div>
+<script>
+const CATS={
+ unesco:{label:'세계유산·동굴',color:'#5a7fb5'},
+ oreum:{label:'오름',color:'#6a9e6f'},
+ nature:{label:'물·생태',color:'#4aa3a0'},
+ hist:{label:'역사·4·3',color:'#c77b7b'},
+ town:{label:'마을·시설',color:'#9c7fc0'},
+ exp:{label:'체험·상업',color:'#d99a4e'}
+};
+// verify: 'osm' 확인 / 'gdr' GDR / 'approx' 개략·충돌
+const SPOTS=[
+ {name:'거문오름',cat:'unesco',lat:33.454786,lng:126.718221,verify:'osm',la:'right',
+  desc:'유네스코 세계자연유산(2007)·천연기념물(2005). 비고 112m의 말굽형 분석구로, 여기서 흘러간 용암이 벵뒤굴·만장굴·용천동굴 등 20여 개 동굴계를 만든 모체다.',
+  info:"예약 탐방제 · 출입증 수령 08:00~13:00 · '태극길' 정상코스 1.8km(1시간)/분화구코스 5.5km(2.5시간)/전체 10km(3.5시간) · 분화구 코스는 해설사 동행 필수 · 스틱·음식물 금지, 등산화 착용",src:'GDR 2026.08 / 국가유산포털 / 좌표 OSM'},
+ {name:'세계자연유산센터',cat:'unesco',lat:33.456939,lng:126.714640,verify:'osm',la:'left',
+  desc:'거문오름용암동굴계 전시관이자 거문오름 탐방의 출발점. 810 순환버스 기점, 대형 무료주차장과 무장애 화장실 완비.',info:'거문오름 탐방안내소 인접',src:'GDR 2026.08 / 좌표 OSM'},
+ {name:'벵뒤굴',cat:'unesco',lat:33.4775,lng:126.71833,verify:'gdr',dy:-12,la:'right',
+  desc:'천연기념물 제490호. 거문오름용암동굴계의 미로형 용암동굴로 비공개. 4·3 당시 주민들의 은신처(벤뱅듸굴)이기도 했다.',info:'출입 불가(보존) · 용암길 행사 시 일대 개방',src:'GDR 2026.08 (선흘리 365)'},
+ {name:'알밤오름',cat:'oreum',lat:33.491130,lng:126.712637,verify:'osm',dy:-8,la:'right',
+  desc:'밤알을 닮은 형세에서 이름이 온 오름(알바메기). 마을 북쪽의 부드러운 능선.',info:'',src:'좌표 OSM'},
+ {name:'웃밤오름',cat:'oreum',lat:33.477334,lng:126.715422,verify:'osm',la:'left',
+  desc:'알밤오름과 짝을 이루는 웃바메기. 기슭에 벵뒤굴과 옛 목축 유산이 흩어져 있다.',info:'',src:'좌표 OSM'},
+ {name:'우진제비오름',cat:'oreum',lat:33.467779,lng:126.699483,verify:'approx',la:'left',
+  desc:'U자로 벌어진 산체가 제비가 나는 모습 같다는 오름. 분화구 안 우진샘(용천수)을 품고 있다.',info:'⚠ 좌표 출처 간 차이 있어 재검증 예정',src:'GDR 2026.08 / 좌표 OSM(우선)'},
+ {name:'부대오름',cat:'oreum',lat:33.446218,lng:126.708948,verify:'approx',la:'bottom',
+  desc:'마을 남쪽의 오름(부대악). 경방초소가 있던 오름으로 전해진다.',info:'⚠ 좌표 출처 간 차이 있어 재검증 예정',src:'GDR 2026.08 / 좌표 OSM(우선)'},
+ {name:'부소오름',cat:'oreum',lat:33.442246,lng:126.717705,verify:'approx',la:'right',
+  desc:'부대오름 남동쪽의 오름. 주소는 교래리 산2 — 마을 경계부의 오름이다.',info:'⚠ 경계(교래리) — 소속 재확인 예정',src:'GDR 2026.08 / 좌표 OSM'},
+ {name:'민오름',cat:'oreum',lat:33.4715,lng:126.685,verify:'gdr',la:'left',
+  desc:'선흘리 산141의 오름. 숲이 짙어 이름처럼 민둥하지 않은 것이 반전이다.',info:'⚠ 좌표 개략',src:'GDR 2026.08'},
+ {name:'골체오름',cat:'oreum',lat:33.492,lng:126.663,verify:'gdr',la:'right',
+  desc:'마을 북서쪽 끝자락의 오름. 삼태기(골체)를 닮았다 하여 붙은 이름.',info:'⚠ 좌표 개략',src:'GDR 2026.08'},
+ {name:'흐린내 생태공원',cat:'nature',lat:33.491,lng:126.710,verify:'gdr',dy:12,la:'left',
+  desc:'빌레(너럭바위)와 습지가 어우러진 생태공원. 용암길 트레킹의 하산 거점으로 무료주차장이 있다.',info:'무료 주차 · 화장실',src:'GDR 2026.08'},
+ {name:'우진샘(우진제비물)',cat:'nature',lat:33.4695,lng:126.7010,verify:'approx',dy:16,dx:24,la:'bottom',
+  desc:'우진제비오름 분화구 계곡의 용천수. 중산간 마을의 귀한 옛 식수원.',info:'⚠ 위치 개략(오름 북동 기슭)',src:'GDR 2026.08'},
+ {name:'선세미(웃바메기물)',cat:'nature',lat:33.4745,lng:126.7185,verify:'approx',dy:10,dx:-6,la:'bottom',
+  desc:'웃밤오름 굼부리 북쪽 기슭의 샘. 목축과 생활을 지탱한 물자리다.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
+ {name:'어욱산전 궤',cat:'hist',lat:33.481,lng:126.702,verify:'approx',dy:8,la:'left',
+  desc:'4·3 당시 선인동 주민들이 몸을 숨겼던 자연동굴(궤). 곶자왈이 피난처가 된 아픈 기억의 장소.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
+ {name:'선인동 주둔소 터',cat:'hist',lat:33.484,lng:126.7045,verify:'approx',dy:-10,la:'right',
+  desc:'4·3 시기 토벌대 주둔소가 있던 자리. 마을 재건의 역사와 겹쳐 있는 터다.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
+ {name:'곡장 잣담',cat:'hist',lat:33.476,lng:126.7135,verify:'approx',dy:20,la:'left',
+  desc:'웃밤오름 기슭의 옛 목축 돌담(잣담). 마을 공동목장 시대의 생활사 유산.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
+ {name:'벵뒤못',cat:'hist',lat:33.475,lng:126.7205,verify:'approx',dy:16,la:'right',
+  desc:'우마 격리장으로 쓰이던 못. 벵뒤(넓은 들판)라는 지명이 남았다.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
+ {name:'선인분교장',cat:'town',lat:33.4815,lng:126.7060,verify:'approx',la:'bottom',
+  desc:'함덕초등학교 선인분교장. 마을 아이들의 배움터이자 공동체의 거점.',info:'⚠ 좌표 출처 충돌(OSM/카카오 추정) — 재검증 예정',src:'GDR 2026.08 / OSM',},
+ {name:'선흘2리 마을회',cat:'town',lat:33.490,lng:126.687,verify:'gdr',la:'top',
+  desc:'선흘2리복지회관(선진길 7-10). 세계자연유산마을 프로그램과 마을 일들이 모이는 곳.',info:'',src:'GDR 2026.08'},
+ {name:'제주라프(구 다희연)',cat:'exp',lat:33.487228,lng:126.706051,verify:'osm',la:'right',
+  desc:'동굴카페 다희연으로 알려졌던 곳, 지금은 짚라인 등 체험형 테마파크 제주라프로 영업 중이다.',info:'영업 중 (2026.08 GDR 확인) · 810 버스 정류장 인접',src:'GDR 2026.08 / 좌표 OSM'},
+];
+const AREAS=[
+ {name:'선진동',lat:33.493,lng:126.681},
+ {name:'선화동',lat:33.475,lng:126.671},
+ {name:'우진동',lat:33.4865,lng:126.695},
+ {name:'선인동',lat:33.479,lng:126.7075},
+];
+const W=1240,H=1200,LA0=33.500,LA1=33.438,LN0=126.655,LN1=126.732;
+const X=lng=>(lng-LN0)/(LN1-LN0)*W, Y=lat=>(LA0-lat)/(LA0-LA1)*H;
+const svg=document.getElementById('mapsvg');
+const state={};Object.keys(CATS).forEach(k=>state[k]=true);
+
+function hill(x,y,s,c1,c2){
+ return `<g transform="translate(${x},${y}) scale(${s})">
+  <path d="M-52 18 Q-40 -26 -14 -30 Q-2 -46 16 -34 Q42 -40 52 18 Z" fill="${c1}" stroke="#5f7a5a" stroke-width="3" stroke-linejoin="round"/>
+  <path d="M-30 18 Q-22 -10 -6 -16" fill="none" stroke="${c2}" stroke-width="3" stroke-linecap="round"/>
+  <path d="M14 18 Q20 -6 30 -10" fill="none" stroke="${c2}" stroke-width="3" stroke-linecap="round"/>
+ </g>`;
+}
+function tree(x,y,s){
+ return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-10" r="9" fill="#9ec49a" stroke="#5f7a5a" stroke-width="2"/><line x1="0" y1="-2" x2="0" y2="8" stroke="#8a6f52" stroke-width="2.5" stroke-linecap="round"/></g>`;
+}
+function decorations(){
+ let d='';
+ d+=`<rect x="0" y="0" width="${W}" height="${H}" rx="18" fill="#f3ecd8"/>`;
+ // 곶자왈 forest blobs (동쪽 거문오름~벵뒤굴 일대, 북동 선흘곶 방향)
+ d+=`<path d="M950 320 Q1080 260 1160 360 Q1230 470 1150 590 Q1190 700 1100 780 Q1000 860 930 760 Q850 700 890 590 Q850 460 950 320 Z" fill="#e2ecd8" stroke="none"/>`;
+ d+=`<path d="M640 250 Q760 190 850 250 Q920 300 880 390 Q820 470 720 440 Q620 410 620 330 Z" fill="#e9efdb"/>`;
+ d+=`<path d="M300 950 Q420 880 560 940 Q700 1000 640 1090 Q520 1160 380 1110 Q280 1060 300 950 Z" fill="#e9efdb"/>`;
+ // 도로: 선교로 느낌의 리본
+ d+=`<path d="M120 120 Q360 150 515 194 Q700 230 823 248 Q930 400 955 620 Q965 740 960 834 Q950 960 1010 1140" fill="none" stroke="#fff" stroke-width="22" stroke-linecap="round"/>`;
+ d+=`<path d="M120 120 Q360 150 515 194 Q700 230 823 248 Q930 400 955 620 Q965 740 960 834 Q950 960 1010 1140" fill="none" stroke="#e8d9b8" stroke-width="16" stroke-linecap="round"/>`;
+ d+=`<path d="M120 120 Q360 150 515 194 Q700 230 823 248 Q930 400 955 620 Q965 740 960 834 Q950 960 1010 1140" fill="none" stroke="#fffdf4" stroke-width="3" stroke-dasharray="14 16" stroke-linecap="round"/>`;
+ d+=`<path d="M823 248 Q800 320 781 400 Q770 480 740 560" fill="none" stroke="#fff" stroke-width="14" stroke-linecap="round"/>`;
+ d+=`<path d="M823 248 Q800 320 781 400 Q770 480 740 560" fill="none" stroke="#eadfc2" stroke-width="9" stroke-linecap="round"/>`;
+ // 오름 언덕 일러스트 (핀 위치 뒤 배경)
+ const oreums=[[X(126.718221),Y(33.454786),1.7],[X(126.712637),Y(33.491130),1.0],[X(126.715422),Y(33.477334),1.0],[X(126.699483),Y(33.467779),0.95],[X(126.708948),Y(33.446218),0.95],[X(126.717705),Y(33.442246),0.85],[X(126.685),Y(33.4715),0.85],[X(126.663),Y(33.492),0.8]];
+ oreums.forEach(([x,y,s],i)=>{d+=hill(x,y-6,s,i===0?'#b7cfa4':'#c8dbb0','#93b287');});
+ // 거문오름 분화구 표시
+ d+=`<path d="M${X(126.718221)-20} ${Y(33.454786)-22} Q${X(126.718221)} ${Y(33.454786)-40} ${X(126.718221)+22} ${Y(33.454786)-20}" fill="none" stroke="#7d9873" stroke-width="4" stroke-linecap="round" stroke-dasharray="1 8"/>`;
+ // 나무들
+ [[1060,420],[1120,520],[1000,700],[700,300],[760,420],[420,1000],[540,1060],[350,300],[200,500],[600,800]].forEach(([x,y])=>d+=tree(x,y,1));
+ // 구름·해
+ d+=`<g opacity=".85"><circle cx="150" cy="70" r="26" fill="#fff"/><circle cx="185" cy="62" r="20" fill="#fff"/><circle cx="120" cy="64" r="18" fill="#fff"/></g>`;
+ d+=`<circle cx="1150" cy="80" r="34" fill="#f6d98a" stroke="#e0b95c" stroke-width="3"/>`;
+ // 자연부락 라벨
+ AREAS.forEach(a=>{
+   d+=`<g font-family="Gaegu" text-anchor="middle">
+     <circle cx="${X(a.lng)}" cy="${Y(a.lat)}" r="34" fill="none" stroke="#c9a86a" stroke-width="2.5" stroke-dasharray="6 7"/>
+     <text x="${X(a.lng)}" y="${Y(a.lat)+6}" font-size="19" fill="#a5854e">${a.name}</text></g>`;
+ });
+ // 나침반
+ d+=`<g transform="translate(${W-70},170)" font-family="Gaegu"><circle r="30" fill="#fffdf4" stroke="#c9b294" stroke-width="3"/><path d="M0 -20 L7 6 L0 1 L-7 6 Z" fill="#c77b7b"/><text y="-36" text-anchor="middle" font-size="18" fill="#8d7c66">N</text></g>`;
+ return d;
+}
+function pinSVG(p){
+ const c=CATS[p.cat].color, x=X(p.lng), y=Y(p.lat);
+ const label=p.name, wdt=label.length*15.5+22;
+ let lx=x, ly=y, anchor='middle';
+ if(p.la==='right'){lx=x+20;ly=y-2;anchor='start'}
+ else if(p.la==='left'){lx=x-20;ly=y-2;anchor='end'}
+ else if(p.la==='top'){lx=x;ly=y-34}
+ else {lx=x;ly=y+34}
+ lx+=(p.dx||0); ly+=(p.dy||0);
+ const rectX=anchor==='start'?lx-8:anchor==='end'?lx-wdt+8:lx-wdt/2;
+ return `<g class="pin-g" data-name="${p.name}">
+   <path d="M${x} ${y} m0 -26 c-11 0 -17 8 -17 16 c0 11 17 28 17 28 c0 0 17 -17 17 -28 c0 -8 -6 -16 -17 -16 Z" fill="${c}" stroke="#fffdf4" stroke-width="3"/>
+   <circle cx="${x}" cy="${y-11}" r="5.5" fill="#fffdf4"/>
+   <g class="pin-label">
+     <rect x="${rectX}" y="${ly-15}" rx="10" width="${wdt}" height="26" fill="#fffdf4" stroke="${c}" stroke-width="2"/>
+     <text x="${lx}" y="${ly+4}" text-anchor="${anchor==='start'?'start':anchor==='end'?'end':'middle'}" font-family="Gaegu" font-weight="700" font-size="17" fill="#54463a">${anchor==='start'?' ':''}${label}</text>
+   </g></g>`;
+}
+function render(){
+ let s=decorations();
+ SPOTS.filter(p=>state[p.cat]).forEach(p=>{s+=pinSVG(p)});
+ svg.innerHTML=s;
+ svg.querySelectorAll('.pin-g').forEach(g=>{
+   g.addEventListener('click',()=>{
+     const p=SPOTS.find(q=>q.name===g.dataset.name);
+     openDetail(p);
+   });
+ });
+}
+function openDetail(p){
+ const d=document.getElementById('detail');
+ const vb=p.verify==='osm'?'<span class="badge">좌표 확인(OSM)</span>':p.verify==='gdr'?'<span class="badge">GDR 조사</span>':'<span class="badge warn">⚠ 위치 개략·재검증 예정</span>';
+ d.innerHTML=`<button class="close" onclick="this.parentElement.style.display='none'">✕</button>
+  <h2>${p.name}</h2>
+  <div><span class="cat" style="background:${CATS[p.cat].color}">${CATS[p.cat].label}</span>${vb}</div>
+  <dt>이야기</dt><dd>${p.desc}</dd>
+  ${p.info?`<dt>이용 정보</dt><dd>${p.info}</dd>`:''}
+  ${p.splatUrl?`<a class="splat-btn" style="display:block;text-align:center;margin-top:12px;padding:9px;border-radius:12px;background:#5a7fb5;color:#fff;text-decoration:none;font-size:13px" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:''}
+  ${p.youtube?`<div style="margin-top:12px;position:relative;padding-top:56%;border-radius:12px;overflow:hidden"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube-nocookie.com/embed/${p.youtube}?rel=0${p.youtubeStart?'&start='+Math.floor(p.youtubeStart):''}" allowfullscreen loading="lazy"></iframe></div>`:''}
+  <div class="src">출처: ${p.src}</div>`;
+ d.style.display='block';
+}
+const chips=document.getElementById('chips');
+Object.entries(CATS).forEach(([k,c])=>{
+ const el=document.createElement('div');
+ el.className='chip';el.textContent=c.label;el.style.borderColor=c.color;el.style.color=c.color;
+ el.onclick=()=>{state[k]=!state[k];el.classList.toggle('off');render();};
+ chips.appendChild(el);
+});
+render();
+</script>
+</body>
+</html>
