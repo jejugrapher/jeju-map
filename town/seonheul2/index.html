@@ -52,6 +52,7 @@ svg{width:100%;height:auto;display:block;border-radius:18px}
   <div class="chips" id="chips"></div>
   <svg id="mapsvg" viewBox="0 0 1240 1200" xmlns="http://www.w3.org/2000/svg"></svg>
   <div class="buslane">🚌 <b>810-1·810-2 관광지순환버스</b>가 마을을 관통합니다 — 세계자연유산센터 ↔ 선흘2리마을 ↔ 선인동마을 ↔ 제주라프 정류장 (1,200원) · 공항에서는 111·112·121·122 급행 → 대천환승정류장 환승, 약 1시간</div>
+  <div class="buslane" id="videolane"></div>
   <div class="foot">v0.2 · 선조사(OSM 좌표) + GDR 조사(2026.08) 반영 · ⚠ 표시는 좌표 개략·출처 충돌로 재검증 예정 · © 2026 JEJUGRAPHER</div>
 </div>
 <div class="detail" id="detail"></div>
@@ -68,19 +69,23 @@ const CATS={
 // ================= 다국어 (i18n) =================
 let LANG='ko';
 const UI={
- ko:{title:'선흘2리 마을지도',sub1:'거문오름 세계자연유산마을',story:'이야기',info:'이용 정보',src:'출처',osm:'좌표 확인(OSM)',gdr:'GDR 조사',approx:'⚠ 위치 개략·재검증 예정',
+
+ ko:{video:'🎥 <b>이 마을을 지나는 360° 드라이브</b> — <a href="https://youtu.be/P-kW2ob24jU" target="_blank" rel="noopener">마을길 5분(전 구간)</a> · <a href="https://youtu.be/NiLFq7hBvoY" target="_blank" rel="noopener">숲길 드라이브 25분(선인동 출발)</a> — 핀 팝업에서 해당 지점 장면이 바로 재생됩니다',itle:'선흘2리 마을지도',sub1:'거문오름 세계자연유산마을',story:'이야기',info:'이용 정보',src:'출처',osm:'좌표 확인(OSM)',gdr:'GDR 조사',approx:'⚠ 위치 개략·재검증 예정',
   cats:{unesco:'세계유산·동굴',oreum:'오름',nature:'물·생태',hist:'역사·4·3',town:'마을·시설',exp:'체험·상업'},
   subtitle:'제주시 조천읍 · 해발 200~400m 중산간 · 자연부락 선진동·선화동·우진동·선인동 — 핀을 누르면 이야기가 열립니다',
   bus:'🚌 <b>810-1·810-2 관광지순환버스</b>가 마을을 관통합니다 — 세계자연유산센터 ↔ 선흘2리마을 ↔ 선인동마을 ↔ 제주라프 정류장 (1,200원) · 공항에서는 111·112·121·122 급행 → 대천환승정류장 환승, 약 1시간'},
- en:{title:'Seonheul2-ri Village Map',sub1:'Geomunoreum UNESCO World Heritage Village',story:'Story',info:'Visitor Info',src:'Source',osm:'Verified (OSM)',gdr:'Researched',approx:'⚠ Approx. location',
+
+ en:{video:'🎥 <b>360° drives through this village</b> — <a href="https://youtu.be/P-kW2ob24jU" target="_blank" rel="noopener">Village Lanes 5min (full)</a> · <a href="https://youtu.be/NiLFq7hBvoY" target="_blank" rel="noopener">Forest Drive 25min (starts here)</a> — pin popups play the exact moment',itle:'Seonheul2-ri Village Map',sub1:'Geomunoreum UNESCO World Heritage Village',story:'Story',info:'Visitor Info',src:'Source',osm:'Verified (OSM)',gdr:'Researched',approx:'⚠ Approx. location',
   cats:{unesco:'World Heritage·Caves',oreum:'Oreum (Volcanic Hills)',nature:'Water·Ecology',hist:'History·Jeju 4·3',town:'Village',exp:'Shops·Experience'},
   subtitle:'Jocheon-eup, Jeju · mid-mountain village (200–400m) · hamlets: Seonjin, Seonhwa, Ujin, Seonin — tap a pin to open its story',
   bus:'🚌 <b>Tourist loop bus 810-1·810-2</b> runs through the village — Heritage Center ↔ Seonheul2-ri ↔ Seonindong ↔ Jeju Raf (₩1,200). From the airport: express 111·112·121·122 to Daecheon transfer stop, ~1 hr total'},
- ja:{title:'善屹(ソンフル)2里 村マップ',sub1:'拒文岳 世界自然遺産の村',story:'ものがたり',info:'利用情報',src:'出典',osm:'座標確認済(OSM)',gdr:'調査済',approx:'⚠ 位置は概略',
+
+ ja:{video:'🎥 <b>この村を通る360°ドライブ</b> — <a href="https://youtu.be/P-kW2ob24jU" target="_blank" rel="noopener">村の道 5分(全区間)</a> · <a href="https://youtu.be/NiLFq7hBvoY" target="_blank" rel="noopener">森の道 25分(善仁洞出発)</a> — ピンのポップアップで該当シーンを再生',itle:'善屹(ソンフル)2里 村マップ',sub1:'拒文岳 世界自然遺産の村',story:'ものがたり',info:'利用情報',src:'出典',osm:'座標確認済(OSM)',gdr:'調査済',approx:'⚠ 位置は概略',
   cats:{unesco:'世界遺産·洞窟',oreum:'オルム',nature:'水·生態',hist:'歴史·4·3',town:'村·施設',exp:'体験·お店'},
   subtitle:'済州市朝天邑 · 中山間の村(標高200~400m) · 集落: 善進洞·善花洞·牛真洞·善仁洞 — ピンをタップすると物語が開きます',
   bus:'🚌 <b>観光地循環バス810-1·810-2</b>が村を通ります — 世界自然遺産センター ↔ 善屹2里 ↔ 善仁洞 ↔ チェジュラフ(1,200ウォン)。空港からは急行111·112·121·122で大川乗換停留所へ、約1時間'},
- zh:{title:'善屹2里 村庄地图',sub1:'拒文岳 世界自然遗产村',story:'故事',info:'游览信息',src:'来源',osm:'坐标已核实(OSM)',gdr:'已调查',approx:'⚠ 位置为大致',
+
+ zh:{video:'🎥 <b>经过本村的360°兜风影像</b> — <a href="https://youtu.be/P-kW2ob24jU" target="_blank" rel="noopener">村路5分钟(全程)</a> · <a href="https://youtu.be/NiLFq7hBvoY" target="_blank" rel="noopener">林间兜风25分钟(善仁洞出发)</a> — 点击图钉即可播放对应场景',itle:'善屹2里 村庄地图',sub1:'拒文岳 世界自然遗产村',story:'故事',info:'游览信息',src:'来源',osm:'坐标已核实(OSM)',gdr:'已调查',approx:'⚠ 位置为大致',
   cats:{unesco:'世界遗产·洞窟',oreum:'火山丘(Oreum)',nature:'水·生态',hist:'历史·4·3',town:'村庄·设施',exp:'体验·商店'},
   subtitle:'济州市朝天邑 · 中山间村庄(海拔200~400米) · 自然村落: 善进洞·善花洞·牛真洞·善仁洞 — 点击图钉即可打开故事',
   bus:'🚌 <b>观光循环巴士810-1·810-2</b>贯穿村庄 — 世界自然遗产中心 ↔ 善屹2里 ↔ 善仁洞 ↔ Jeju Raf(1,200韩元)。从机场乘111·112·121·122急行至大川换乘站,全程约1小时'}
@@ -123,7 +128,8 @@ function applyLang(){ const u=UI[LANG];
   document.getElementById('t_title').textContent='🌿 '+u.title;
   document.getElementById('t_sub1').textContent=u.sub1;
   document.querySelector('.sub').textContent=u.subtitle;
-  document.querySelector('.buslane').innerHTML=u.bus;
+  document.querySelectorAll('.buslane')[0].innerHTML=u.bus;
+  const vl=document.getElementById('videolane'); if(vl&&u.video) vl.innerHTML=u.video;
   const chips=document.querySelectorAll('#chips .chip');
   Object.keys(CATS).forEach((k,i)=>{ if(chips[i]) chips[i].textContent=u.cats[k]; });
 }
@@ -133,7 +139,7 @@ const SPOTS=[
  {name:'거문오름',cat:'unesco',lat:33.454786,lng:126.718221,verify:'osm',la:'right',
   desc:'유네스코 세계자연유산(2007)·천연기념물(2005). 비고 112m의 말굽형 분석구로, 여기서 흘러간 용암이 벵뒤굴·만장굴·용천동굴 등 20여 개 동굴계를 만든 모체다.',
   info:"예약 탐방제 · 출입증 수령 08:00~13:00 · '태극길' 정상코스 1.8km(1시간)/분화구코스 5.5km(2.5시간)/전체 10km(3.5시간) · 분화구 코스는 해설사 동행 필수 · 스틱·음식물 금지, 등산화 착용",src:'GDR 2026.08 / 국가유산포털 / 좌표 OSM'},
- {name:'세계자연유산센터',cat:'unesco',lat:33.456939,lng:126.714640,verify:'osm',la:'left',
+ {name:'세계자연유산센터',cat:'unesco',lat:33.456939,lng:126.714640,verify:'osm',la:'left',youtube:'P-kW2ob24jU',youtubeStart:6,
   desc:'거문오름용암동굴계 전시관이자 거문오름 탐방의 출발점. 810 순환버스 기점, 대형 무료주차장과 무장애 화장실 완비.',info:'거문오름 탐방안내소 인접',src:'GDR 2026.08 / 좌표 OSM'},
  {name:'벵뒤굴',cat:'unesco',lat:33.4775,lng:126.71833,verify:'gdr',dy:-12,la:'right',
   desc:'천연기념물 제490호. 거문오름용암동굴계의 미로형 용암동굴로 비공개. 4·3 당시 주민들의 은신처(벤뱅듸굴)이기도 했다.',info:'출입 불가(보존) · 용암길 행사 시 일대 개방',src:'GDR 2026.08 (선흘리 365)'},
@@ -141,7 +147,7 @@ const SPOTS=[
   desc:'밤알을 닮은 형세에서 이름이 온 오름(알바메기). 마을 북쪽의 부드러운 능선.',info:'',src:'좌표 OSM'},
  {name:'웃밤오름',cat:'oreum',lat:33.477334,lng:126.715422,verify:'osm',la:'left',
   desc:'알밤오름과 짝을 이루는 웃바메기. 기슭에 벵뒤굴과 옛 목축 유산이 흩어져 있다.',info:'',src:'좌표 OSM'},
- {name:'우진제비오름',cat:'oreum',lat:33.467779,lng:126.699483,verify:'approx',la:'left',
+ {name:'우진제비오름',cat:'oreum',lat:33.467779,lng:126.699483,verify:'approx',la:'left',youtube:'NiLFq7hBvoY',youtubeStart:47,
   desc:'U자로 벌어진 산체가 제비가 나는 모습 같다는 오름. 분화구 안 우진샘(용천수)을 품고 있다.',info:'⚠ 좌표 출처 간 차이 있어 재검증 예정',src:'GDR 2026.08 / 좌표 OSM(우선)'},
  {name:'부대오름',cat:'oreum',lat:33.446218,lng:126.708948,verify:'approx',la:'bottom',
   desc:'마을 남쪽의 오름(부대악). 경방초소가 있던 오름으로 전해진다.',info:'⚠ 좌표 출처 간 차이 있어 재검증 예정',src:'GDR 2026.08 / 좌표 OSM(우선)'},
@@ -165,17 +171,17 @@ const SPOTS=[
   desc:'웃밤오름 기슭의 옛 목축 돌담(잣담). 마을 공동목장 시대의 생활사 유산.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
  {name:'벵뒤못',cat:'hist',lat:33.475,lng:126.7205,verify:'approx',dy:16,la:'right',
   desc:'우마 격리장으로 쓰이던 못. 벵뒤(넓은 들판)라는 지명이 남았다.',info:'⚠ 위치 개략',src:'GDR 2026.08'},
- {name:'선인분교장',cat:'town',lat:33.459081,lng:126.704090,verify:'osm',la:'bottom',
+ {name:'선인분교장',cat:'town',lat:33.459081,lng:126.704090,verify:'osm',la:'bottom',youtube:'P-kW2ob24jU',youtubeStart:178,
   desc:'함덕초등학교 선인분교장. 마을 아이들의 배움터이자 공동체의 거점.',info:'좌표: OSM + 2026.08.04 차량 GPS 실측 통과로 확정',src:'OSM / GPS 실측(260804 드라이브)',},
  {name:'선흘2리 마을회',cat:'town',lat:33.490,lng:126.687,verify:'gdr',la:'top',
   desc:'선흘2리복지회관(선진길 7-10). 세계자연유산마을 프로그램과 마을 일들이 모이는 곳.',info:'',src:'GDR 2026.08'},
- {name:'오름나그네',cat:'exp',lat:33.45906,lng:126.71203,verify:'osm',la:'left',dy:4,
+ {name:'오름나그네',cat:'exp',lat:33.45906,lng:126.71203,verify:'osm',la:'left',dy:4,youtube:'P-kW2ob24jU',youtubeStart:99,
   desc:'보말칼국수·전복성게칼국수의 토속 한식집. 거문오름 탐방객의 든든한 한 끼.',info:'~15:00 단축 영업 · 화요일 휴무 (2026.08 GDR 확인)',src:'GDR 2026.08 / OSM'},
- {name:'바코 BACCO',cat:'exp',lat:33.45847,lng:126.71091,verify:'osm',la:'bottom',dy:6,
+ {name:'바코 BACCO',cat:'exp',lat:33.45847,lng:126.71091,verify:'osm',la:'bottom',dy:6,youtube:'P-kW2ob24jU',youtubeStart:107,
   desc:'중산간 마을의 이탈리안 와인 바. 채끝 스테이크와 파스타, 테이블 4개의 예약제 공간.',info:'17:30~23:00 · 월·화 휴무 · 예약 권장, 성인 전용·드레스코드 있음 (2026.08 GDR)',src:'GDR 2026.08 / OSM'},
- {name:'오름지기',cat:'exp',lat:33.45868,lng:126.71324,verify:'osm',la:'right',dy:24,
+ {name:'오름지기',cat:'exp',lat:33.45868,lng:126.71324,verify:'osm',la:'right',dy:24,youtube:'P-kW2ob24jU',youtubeStart:96,
   desc:'흑돼지 고기국수(7,000원)와 정식이 푸짐한 국수 전문점.',info:'이른 아침부터 영업 · 휴무 미확인 (2026.08 GDR)',src:'GDR 2026.08 / OSM'},
- {name:'빠우사 PAUSA',cat:'exp',lat:33.4592,lng:126.7122,verify:'approx',la:'right',dy:40,
+ {name:'빠우사 PAUSA',cat:'exp',lat:33.4592,lng:126.7122,verify:'approx',la:'right',dy:40,youtube:'P-kW2ob24jU',youtubeStart:108,
   desc:'거문오름 자락을 통창으로 담은 요가·명상 공간이자 비건 카페. 만다라와 요가를 결합한 컬러요가가 시그니처.',info:'10:00~18:00 · 월요일 휴무 · 컬러요가 매일 3회(10:00/13:30/16:00), 화~금 08:00 모닝빠우사 명상 · ⚠좌표 근사(선교로 539)',src:'GDR 2026.08'},
  {name:'제주라프(구 다희연)',cat:'exp',lat:33.487228,lng:126.706051,verify:'osm',la:'right',
   desc:'동굴카페 다희연으로 알려졌던 곳, 지금은 짚라인 등 체험형 테마파크 제주라프로 영업 중이다.',info:'영업 중 (2026.08 GDR 확인) · 810 버스 정류장 인접',src:'GDR 2026.08 / 좌표 OSM'},
@@ -286,6 +292,7 @@ Object.entries(CATS).forEach(([k,c])=>{
  chips.appendChild(el);
 });
 render();
+document.getElementById('videolane').innerHTML=UI[LANG].video;
 </script>
 </body>
 </html>
