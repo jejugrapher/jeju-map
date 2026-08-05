@@ -297,7 +297,7 @@ function openDetail(p){
   <dt>${u.story}</dt><dd>${trDesc(p)}</dd>
   ${p.info?`<dt>${u.info}</dt><dd>${p.info}</dd>`:''}
   ${p.splatUrl?`<a class="splat-btn" style="display:block;text-align:center;margin-top:12px;padding:9px;border-radius:12px;background:#5a7fb5;color:#fff;text-decoration:none;font-size:13px" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:''}
-  ${p.youtube?`<div style="margin-top:12px;position:relative;padding-top:56%;border-radius:12px;overflow:hidden"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube-nocookie.com/embed/${p.youtube}?rel=0${p.youtubeStart?'&start='+Math.floor(p.youtubeStart):''}" allowfullscreen loading="lazy"></iframe></div>`:''}
+  ${p.youtube?`<div style="margin-top:8px;font-size:10.5px;color:#a99878">🎬 ${p.ytCap||'360° 영상'}</div><div style="margin-top:6px;position:relative;padding-top:56%;border-radius:12px;overflow:hidden"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube-nocookie.com/embed/${p.youtube}?rel=0${p.youtubeStart?'&start='+Math.floor(p.youtubeStart):''}" allowfullscreen loading="lazy"></iframe></div>`:''}
   <div class="src">${UI[LANG].src}: ${p.src}</div>`;
  d.style.display='block';
 }
