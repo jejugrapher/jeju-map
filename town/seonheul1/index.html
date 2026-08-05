@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>선흘1리 마을지도 | 동백동산 람사르습지 마을 | JEJUGRAPHER</title>
+<meta name="description" content="제주 조천읍 선흘1리 손그림 마을지도 — 동백동산 람사르습지, 먼물깍, 낙선동 4·3성, 그림할망 미술관, 걷기길.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Gaegu:wght@400;700&family=Gowun+Dodum&display=swap" rel="stylesheet">
+<style>
+:root{--ink:#5a4a3a;--paper:#fdf8ec;--cream:#f7efdb;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Gowun Dodum','Apple SD Gothic Neo',sans-serif;background:#f2e9d8;color:var(--ink);display:flex;flex-direction:column;align-items:center;padding:18px 10px 40px}
+.frame{background:var(--paper);border:3px solid #d9c9a8;border-radius:26px;box-shadow:0 10px 40px rgba(90,74,58,.15);max-width:1000px;width:100%;padding:20px 22px 14px;position:relative}
+h1{font-family:'Gaegu',cursive;font-size:34px;color:#3f6b5e;letter-spacing:1px}
+h1 small{display:block;font-size:15px;color:#b08d57;margin-top:-2px}
+.sub{font-size:13px;color:#8d7c66;margin:2px 0 10px;line-height:1.5}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
+.chip{font-family:'Gaegu',cursive;font-size:15px;padding:4px 14px;border-radius:18px;border:2px solid;cursor:pointer;background:#fff;user-select:none;transition:.15s}
+.chip.off{opacity:.32;filter:grayscale(.6)}
+.langbtn{font-family:'Gaegu',cursive;font-size:13.5px;padding:3px 11px;border-radius:14px;border:2px solid #c9b294;background:#fff;color:#8d7c66;cursor:pointer}
+.langbtn.on{background:#3f6b5e;border-color:#3f6b5e;color:#fff}
+svg{width:100%;height:auto;display:block;border-radius:18px}
+.pin-g{cursor:pointer}
+.pin-g:hover .pin-label{filter:brightness(1.03)}
+.pin-g:hover{opacity:.92}
+.detail{position:fixed;z-index:50;right:24px;top:70px;width:330px;max-height:76vh;overflow-y:auto;background:#fffdf6;border:3px solid #d9c9a8;border-radius:18px;box-shadow:0 12px 36px rgba(90,74,58,.28);padding:18px;display:none}
+.detail h2{font-family:'Gaegu',cursive;font-size:24px}
+.detail .close{position:absolute;top:8px;right:12px;border:0;background:0;font-size:20px;cursor:pointer;color:#b8a88c}
+.detail .cat{display:inline-block;font-size:11px;color:#fff;border-radius:10px;padding:2px 10px;margin:4px 4px 0 0}
+.badge{display:inline-block;font-size:10.5px;border-radius:10px;padding:2px 8px;margin-top:4px;background:#eef4ec;color:#4a7a52;border:1px solid #cfe0cd}
+.badge.warn{background:#fdf0e4;color:#b06c2a;border-color:#ecd3b4}
+.badge.memorial{background:#f6e9e9;color:#a05555;border-color:#e2c4c4}
+.detail dt{font-size:11px;color:#b08d57;margin-top:10px;font-weight:700;letter-spacing:.5px}
+.detail dd{font-size:13px;line-height:1.65}
+.detail .src{font-size:10px;color:#bdae95;margin-top:12px;border-top:2px dashed #e8dcc0;padding-top:8px;line-height:1.5}
+.foot{font-size:11px;color:#a99878;margin-top:8px;line-height:1.6}
+.buslane{margin-top:8px;background:var(--cream);border-radius:12px;padding:8px 12px;font-size:12px;color:#7c6b52;line-height:1.6}
+</style>
+</head>
+<body>
+<div class="frame">
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+    <h1><span id="t_title">🍃 선흘1리 마을지도</span> <small id="t_sub1">동백동산 람사르습지 마을</small></h1>
+    <div style="display:flex;gap:5px">
+      <button class="langbtn on" data-l="ko" onclick="setLang('ko')">한국어</button>
+      <button class="langbtn" data-l="en" onclick="setLang('en')">EN</button>
+      <button class="langbtn" data-l="ja" onclick="setLang('ja')">日本語</button>
+      <button class="langbtn" data-l="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
+  <div class="sub">제주시 조천읍 · 곶자왈과 습지의 마을 · 자연부락 본동·신선동·낙선동·목선동 — 핀을 누르면 이야기가 열립니다</div>
+  <div class="chips" id="chips"></div>
+  <svg id="mapsvg" viewBox="0 0 1240 1130" xmlns="http://www.w3.org/2000/svg"></svg>
+  <div class="buslane">🚌 <b>260번(제주버스터미널)·704-1/704-3번(함덕)</b> 버스가 마을을 지납니다 — 선흘1리 · 선흘초등학교입구 · 동백동산습지센터 정류장 하차</div>
+  <div class="foot">v0.1 · 선조사(OSM 좌표) + GDR 조사(2026.08) 반영 · ⚠ 표시는 좌표 개략·출처 충돌로 재검증 예정 · © 2026 JEJUGRAPHER</div>
+</div>
+<div class="detail" id="detail"></div>
+<script>
+const CATS={
+ wet:{label:'습지·자연',color:'#4aa3a0'},
+ trail:{label:'걷기길',color:'#6a9e6f'},
+ hist:{label:'역사·4·3',color:'#c77b7b'},
+ art:{label:'그림할망·문화',color:'#c4699c'},
+ town:{label:'마을·시설',color:'#9c7fc0'},
+ exp:{label:'카페·식당',color:'#d99a4e'}
+};
+
+// ================= 다국어 (i18n) =================
+let LANG='ko';
+const UI={
+ ko:{title:'선흘1리 마을지도',sub1:'동백동산 람사르습지 마을',story:'이야기',info:'이용 정보',src:'출처',osm:'좌표 확인(OSM)',gdr:'GDR 조사',approx:'⚠ 위치 개략·재검증 예정',memorial:'🕯 추모 공간 · 출입 통제',
+  cats:{wet:'습지·자연',trail:'걷기길',hist:'역사·4·3',art:'그림할망·문화',town:'마을·시설',exp:'카페·식당'},
+  subtitle:'제주시 조천읍 · 곶자왈과 습지의 마을 · 자연부락 본동·신선동·낙선동·목선동 — 핀을 누르면 이야기가 열립니다',
+  bus:'🚌 <b>260번(제주버스터미널)·704-1/704-3번(함덕)</b> 버스가 마을을 지납니다 — 선흘1리 · 선흘초등학교입구 · 동백동산습지센터 정류장 하차'},
+ en:{title:'Seonheul1-ri Village Map',sub1:'Dongbaekdongsan Ramsar Wetland Village',story:'Story',info:'Visitor Info',src:'Source',osm:'Verified (OSM)',gdr:'Researched',approx:'⚠ Approx. location',memorial:'🕯 Memorial site · entry restricted',
+  cats:{wet:'Wetland·Nature',trail:'Walking Trails',hist:'History·Jeju 4·3',art:'Grandma Painters·Culture',town:'Village',exp:'Cafes·Eateries'},
+  subtitle:'Jocheon-eup, Jeju · a village of gotjawal forest and wetlands · hamlets: Bondong, Sinseondong, Nakseondong, Mokseondong — tap a pin to open its story',
+  bus:'🚌 Buses <b>260 (Jeju Bus Terminal) · 704-1/704-3 (Hamdeok)</b> pass the village — stops: Seonheul1-ri, Seonheul Elementary School, Dongbaekdongsan Wetland Center'},
+ ja:{title:'善屹(ソンフル)1里 村マップ',sub1:'東柏東山ラムサール湿地の村',story:'ものがたり',info:'利用情報',src:'出典',osm:'座標確認済(OSM)',gdr:'調査済',approx:'⚠ 位置は概略',memorial:'🕯 追悼の場 · 立入制限',
+  cats:{wet:'湿地·自然',trail:'歩く道',hist:'歴史·4·3',art:'ハルマン絵画·文化',town:'村·施設',exp:'カフェ·食堂'},
+  subtitle:'済州市朝天邑 · 森(コッチャワル)と湿地の村 · 集落: 本洞·新仙洞·楽善洞·木仙洞 — ピンをタップすると物語が開きます',
+  bus:'🚌 バス<b>260番(済州ターミナル)·704-1/704-3番(咸徳)</b>が村を通ります — 善屹1里·善屹小学校入口·トンベクトンサン湿地センター下車'},
+ zh:{title:'善屹1里 村庄地图',sub1:'冬柏东山拉姆萨尔湿地村',story:'故事',info:'游览信息',src:'来源',osm:'坐标已核实(OSM)',gdr:'已调查',approx:'⚠ 位置为大致',memorial:'🕯 追思之地 · 限制进入',
+  cats:{wet:'湿地·自然',trail:'步行路线',hist:'历史·4·3',art:'奶奶画家·文化',town:'村庄·设施',exp:'咖啡·餐厅'},
+  subtitle:'济州市朝天邑 · 熔岩林与湿地之村 · 自然村落: 本洞·新仙洞·乐善洞·木仙洞 — 点击图钉即可打开故事',
+  bus:'🚌 巴士<b>260路(济州客运站)·704-1/704-3路(咸德)</b>经过村庄 — 善屹1里·善屹小学入口·冬柏东山湿地中心下车'}
+};
+const I18N={
+ '동백동산':{en:['Dongbaekdongsan Forest','590,000㎡ of evergreen gotjawal forest on pahoehoe lava — Jeju Monument No.10 (1971), Ramsar Wetland (2011). Over 100 ponds hide beneath the canopy.'],ja:['トンベクトンサン','パホイホイ溶岩の上に広がる59万㎡の常緑広葉樹の森。1971年済州道記念物、2011年ラムサール湿地。'],zh:['冬柏东山','铺展在绳状熔岩上的59万㎡常绿阔叶林,1971年济州道纪念物,2011年拉姆萨尔湿地。']},
+ '동백동산습지센터':{en:['Wetland Center','Gateway to the forest — exhibitions, guided-walk reservations (10:00/14:00), free parking.'],ja:['湿地センター','森の玄関口。展示とガイド予約(10時/14時)、無料駐車場。'],zh:['湿地中心','森林的入口,设展览与解说预约(10时/14时),免费停车。']},
+ '먼물깍':{en:['Meonmulkkak Pond','The forest\'s signature wetland (445㎡) — "far water\'s end" in Jeju dialect. Watershield and the endemic Mankyua chejuense live here.'],ja:['モンムルカク','森を代表する湿地(445㎡)。「遠い水の果て」の意。ジュンサイや済州固有種が息づく。'],zh:['먼물깍湿地','森林的代表性湿地(445㎡),意为"远水之端",栖息着莼菜与济州特有蕨类。']},
+ '상돌언덕':{en:['Sangdol Hill','A tumulus — lava swelled like bread crust. The forest\'s highest viewpoint.'],ja:['サンドル丘','パンの皮のように膨らんだ溶岩丘(トゥムルス)。'],zh:['상돌丘','熔岩如面包皮般隆起的丘岗(熔岩穹丘)。']},
+ '반못':{en:['Banmot Pond','A rock-basin pond that once served as village water — water lilies in May, and a sorrowful 4·3 memory.'],ja:['パンモッ','岩盤の上の池。5月に睡蓮が咲き、4·3の悲しい記憶も宿る。'],zh:['半池(반못)','岩盘上的水池,五月睡莲盛开,也承载着4·3的伤痛记忆。']},
+ '알밤오름':{en:['Albam Oreum','A chestnut-shaped hill between Seonheul 1-ri and 2-ri.'],ja:['アルバムオルム','1里と2里の間にある栗形の丘。'],zh:['알밤오름(栗子丘)','位于1里与2里之间的栗形火山丘。']},
+ '바람길':{en:['Baramgil Trail (5.1km)','The forest loop from the Wetland Center — Dotteulgul, Sangdol Hill and Meonmulkkak in about 1.5–2 hours.'],ja:['パラムギル(5.1km)','湿地センター起点の周回路。ドトゥルグル、サンドル丘、モンムルカクを巡る約1.5~2時間。'],zh:['风之路(5.1km)','以湿地中心为起点的环线,约1.5~2小时,经过도틀굴·상돌丘·먼물깍。']},
+ '4·3역사길':{en:['4·3 History Trail (4.3km)','From the Wetland Center past Dotteulgul cave and the school to Nakseondong 4·3 Fortress — a walk through the village\'s hardest memory.'],ja:['4·3歴史の道(4.3km)','湿地センターからドトゥルグル、学校を経て楽善洞4·3城へ。村の記憶をたどる道。'],zh:['4·3历史之路(4.3km)','从湿地中心经도틀굴、学校至乐善洞4·3城,追寻村庄最沉重的记忆。']},
+ '낙선동 4·3성':{en:['Nakseondong 4·3 Fortress','A strategic hamlet built by forced labor in 1949 — 292m of walls, a hamba hut and watchtowers restored. Jeju\'s best-preserved 4·3 fortress village.'],ja:['楽善洞4·3城','1949年、住民の強制動員で築かれた戦略村。城壁292mと小屋が復元された済州唯一の原形保存遺跡。'],zh:['乐善洞4·3城','1949年村民被迫修筑的战略村,现复原城墙292米与工棚,是济州保存最完整的4·3遗址。']},
+ '목시물굴':{en:['Moksimulgul Cave','A lava cave where 200+ villagers hid in 1948 before being discovered — now a quiet memorial site.'],ja:['モクシムルグル','1948年、200人以上の住民が身を潜めた溶岩洞窟。今は静かな追悼の場。'],zh:['목시물굴','1948年200余名村民藏身的熔岩洞窟,如今是静默的追思之地。']},
+ '도틀굴':{en:['Dotteulgul Cave','The first refuge cave discovered in 1948; sealed with an iron gate to preserve the traces inside.'],ja:['ドトゥルグル','1948年最初に発見された避難洞窟。遺品保存のため鉄扉で閉鎖。'],zh:['도틀굴','1948年最先被发现的避难洞窟,为保存遗物以铁门封闭。']},
+ '대섭이굴':{en:['Daeseobigul Cave','Another refuge-turned-tragedy cave deep in the gotjawal.'],ja:['テソビグル','コッチャワルの奥の避難洞窟。悲劇の場となった。'],zh:['대섭이굴','熔岩林深处的避难洞窟,亦是悲剧之地。']},
+ '불칸낭':{en:['Bulkannang Tree','A 500-year-old machilus tree, half-burned in the 1948 village razing — it survived, and so did the village.'],ja:['プルカンナン','樹齢500年のタブノキ。1948年の焼き討ちで半身を焼かれながら生き残った村の守り木。'],zh:['불칸낭(火烧树)','树龄500年的润楠,1948年村庄被焚时半身烧毁却存活至今,是村庄的守护树。']},
+ '선흘그림작업장':{en:['Seonheul Painting Studio','An old co-op warehouse reborn as the grandma painters\' studio and gallery. Open Fri–Sun.'],ja:['ソンフル絵画作業場','旧農協倉庫を改造したハルマン画家たちのアトリエ兼ギャラリー。金土日オープン。'],zh:['善屹绘画工坊','旧农协仓库改造的奶奶画家工作室兼画廊,周五至周日开放。']},
+ '할망 미술관 아홉 곳':{en:['Nine Grandma Museums','Grandmothers in their 80s turned sheds, cow barns and gardens into tiny museums — Chorok, Somak, Olle and more, scattered through the village.'],ja:['ハルマン美術館 9か所','80代のハルマンたちが倉庫や牛小屋を改造した小さな美術館が村中に点在。'],zh:['九座奶奶美术馆','八旬奶奶们把仓库、牛棚改成的小美术馆散布村中——草绿、牛棚、偶来美术馆等。']},
+ '선흘초등학교':{en:['Seonheul Elementary','Founded 1936; revived as an eco-school and promoted back to full school status in 2022 — a nationwide model of rural school revival.'],ja:['善屹小学校','1936年開校。生態学校として再生し、2022年に本校へ昇格した「小さな学校の奇跡」。'],zh:['善屹小学','1936年建校,以生态教育重生,2022年升格本校,是乡村小学复兴的全国典范。']},
+ '볍씨학교 제주학사':{en:['Byeopssi School Jeju Campus','An alternative school where students live a year of ecological, self-governing life.'],ja:['ビョプシ学校済州学舎','1年間の生態的な共同生活を実践するオルタナティブスクール。'],zh:['稻种学校济州学舍','学生在此实践一年生态自治生活的另类学校。']},
+ '선흘1리사무소·보건진료소':{en:['Village Office & Clinic','The administrative heart of Bondong hamlet.'],ja:['善屹1里事務所·保健診療所','本洞集落の行政の中心。'],zh:['善屹1里事务所·保健诊疗所','本洞村落的行政中心。']},
+ '카페 세바':{en:['Cafe SEBA','A jazz cafe deep in the village lanes — barley bread and live sessions.'],ja:['カフェ セバ','村の路地奥のジャズカフェ。麦パンが名物。'],zh:['SEBA咖啡','村巷深处的爵士咖啡馆,麦面包是招牌。']},
+ '카페동백':{en:['Cafe Dongbaek','A quiet cafe by the forest road.'],ja:['カフェ トンベク','森の道沿いの静かなカフェ。'],zh:['冬柏咖啡','森林路旁的安静咖啡馆。']},
+ '선흘곶 화덕피자':{en:['Seonheulgot Pizza','Wood-fired pizza on the road to the wetland.'],ja:['ソンフルコッ 窯焼きピザ','湿地への道沿いの窯焼きピザ店。'],zh:['善屹串窑烤披萨','通往湿地路上的窑烤披萨店。']},
+ '도르멍식당':{en:['Doreumeong Diner','Homestyle Jeju food — pork stir-fry and buckwheat pancakes.'],ja:['ドルモン食堂','豚炒めやメミルジョンの郷土食堂。'],zh:['도르멍食堂','乡土餐馆,主打炒猪肉与荞麦煎饼。']},
+ '본동':{en:['Bondong'],ja:['本洞'],zh:['本洞']},
+ '신선동':{en:['Sinseondong'],ja:['新仙洞'],zh:['新仙洞']},
+ '낙선동':{en:['Nakseondong'],ja:['楽善洞'],zh:['乐善洞']},
+ '목선동':{en:['Mokseondong'],ja:['木仙洞'],zh:['木仙洞']}
+};
+function trName(n){ if(LANG==='ko') return n; const e=I18N[n]; return e&&e[LANG]?e[LANG][0]:(e&&e.en?e.en[0]:n); }
+function trDesc(p){ if(LANG==='ko') return p.desc; const e=I18N[p.name]; if(e&&e[LANG]&&e[LANG][1]) return e[LANG][1]; if(e&&e.en&&e.en[1]) return e.en[1]; return p.desc; }
+function setLang(l){ LANG=l; applyLang(); render(); document.getElementById('detail').style.display='none';
+  document.querySelectorAll('.langbtn').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); }
+function applyLang(){ const u=UI[LANG];
+  document.getElementById('t_title').textContent='🍃 '+u.title;
+  document.getElementById('t_sub1').textContent=u.sub1;
+  document.querySelector('.sub').textContent=u.subtitle;
+  document.querySelector('.buslane').innerHTML=u.bus;
+  const chips=document.querySelectorAll('#chips .chip');
+  Object.keys(CATS).forEach((k,i)=>{ if(chips[i]) chips[i].textContent=u.cats[k]; });
+}
+
+// verify: 'osm' 확인 / 'gdr' GDR / 'approx' 개략·충돌 · memorial:true → 추모 배지
+const SPOTS=[
+ {name:'동백동산',cat:'wet',lat:33.5160,lng:126.7130,verify:'osm',la:'top',
+  desc:'파호이호이 용암 위에 자란 59만㎡의 난대상록수림 곶자왈. 물을 가두는 용암 암반 덕에 숲 아래 100여 개의 연못이 숨어 있다. 1971년 제주도기념물 제10호, 2011년 람사르습지.',
+  info:'탐방해설 1일 2회(10:00/14:00) 예약 064-784-9445~6 · 순채·백서향·제주고사리삼의 숲',src:'GDR 2026.08 / 한국민족문화대백과 / 좌표 OSM'},
+ {name:'동백동산습지센터',cat:'wet',lat:33.509723,lng:126.715745,verify:'osm',la:'bottom',dy:6,
+  desc:'숲의 관문. 전시와 해설 예약, 마을 미니어처가 있는 잔디마당. 바람길·4·3역사길 두 걷기길의 출발점이다.',
+  info:'4~10월 09:00~17:00 / 11~3월 09:00~16:30 · 무료 주차 · ☎064-784-9446',src:'GDR 2026.08 / 좌표 OSM'},
+ {name:'먼물깍',cat:'wet',lat:33.5175,lng:126.7215,verify:'approx',la:'right',
+  desc:"'마을에서 먼 물'의 끄트머리라는 뜻을 지닌 동백동산 대표 습지(445㎡). 수련 아닌 순채가 물 위에서 춤추고, 세계에서 여기뿐인 제주고사리삼이 곁에 산다.",
+  info:'⚠ 위치 개략 — 현장 GPS로 확정 예정 · 수면고도 96~97m',src:'GDR 2026.08 / 한국민족문화대백과'},
+ {name:'상돌언덕',cat:'wet',lat:33.5185,lng:126.7135,verify:'approx',la:'left',
+  desc:'용암이 빵껍질처럼 부풀어 오른 투물러스(용암언덕). 숲에서 가장 높은 전망 자리다.',info:'⚠ 위치 개략 — 현장 GPS로 확정 예정',src:'GDR 2026.08'},
+ {name:'반못',cat:'wet',lat:33.51144,lng:126.70519,verify:'approx',la:'left',dy:52,
+  desc:'암반 위에 물이 고인 마을 어귀의 연못. 식수와 우마급수로 쓰였고 5월엔 수련이 핀다. 인근 반못굴은 4·3의 학살터 — 지금은 굴 입구가 막혀 있다.',
+  info:'⚠ 좌표 출처 충돌(GDR 마을 중심 vs OSM 벗못) — 재검증 예정',src:'GDR 2026.08 / 구석구석'},
+ {name:'알밤오름',cat:'wet',lat:33.491131,lng:126.712638,verify:'osm',la:'right',
+  desc:'밤알을 닮은 부드러운 오름(알바메기). 선흘1리와 2리 사이 경계부의 언덕이다.',info:'⚠ 소속 경계(선흘2리 지도에도 표시)',src:'좌표 OSM'},
+ {name:'바람길',cat:'trail',lat:33.5195,lng:126.7180,verify:'gdr',la:'right',dy:-6,
+  desc:'습지센터에서 숲을 한 바퀴 도는 5.1km 순환 걷기길. 도틀굴 갈림을 지나 상돌언덕과 먼물깍을 잇는다. 약 1.5~2시간.',
+  info:'경로선은 개략 — 현장 GPS 트랙으로 확정 예정',src:'GDR 2026.08'},
+ {name:'4·3역사길',cat:'trail',lat:33.5095,lng:126.7118,verify:'gdr',la:'bottom',dy:26,dx:-46,
+  desc:'습지센터 → 도틀굴 → 숲 서쪽 입구 → 선흘초등학교 → 낙선동 4·3성으로 이어지는 4.3km 공식 코스. 숲의 은신처에서 전략촌까지, 마을의 가장 아픈 기억을 따라 걷는다.',
+  info:'경로선은 개략 — 현장 GPS 트랙으로 확정 예정',src:'GDR 2026.08 (선조사 4.8km 정정)'},
+ {name:'낙선동 4·3성',cat:'hist',lat:33.515526,lng:126.694099,verify:'osm',la:'top',
+  desc:'1949년 봄, 주민들이 강제 동원되어 한 달간 쌓은 전략촌의 돌성. 성곽 292m와 함바집·통시가 복원된, 제주에서 원형이 가장 잘 남은 4·3 성이다. 정문 앞 폭낭은 그 시절 심은 나무다.',
+  info:'상설전시 무료 · 해설 예약 ☎064-783-4373',src:'GDR 2026.08 / 제주다크투어 / 좌표 OSM(GDR 좌표 기각)'},
+ {name:'목시물굴',cat:'hist',lat:33.510250,lng:126.722333,verify:'gdr',memorial:true,la:'right',dy:8,
+  desc:'1948년 초토화 직후 200여 명의 주민이 숨어들었던 용암굴. 발각되어 많은 이가 희생됐다. 길이 약 100m.',
+  info:'비짓제주·GDR 좌표 일치로 확정 · 숲속 비지정 탐방로 — 해설 동행 권장',src:'GDR 2026.08 / 비짓제주(좌표 교차확인)'},
+ {name:'도틀굴',cat:'hist',lat:33.506583,lng:126.720694,verify:'approx',memorial:true,la:'left',dy:6,
+  desc:'1948년 11월 가장 먼저 발각된 은신 굴. 굴 안 피난 흔적을 지키기 위해 철문으로 닫혀 있다. 바람길 탐방로 곁에 있다.',
+  info:'⚠ 좌표 단독 출처(GDR) — 재검증 예정',src:'GDR 2026.08'},
+ {name:'대섭이굴',cat:'hist',lat:33.503972,lng:126.730750,verify:'approx',memorial:true,la:'right',
+  desc:'곶자왈 깊은 곳의 또 하나의 은신처이자 희생의 자리.',info:'⚠ 좌표 단독 출처(GDR) — 재검증 예정',src:'GDR 2026.08'},
+ {name:'불칸낭',cat:'hist',lat:33.5113,lng:126.7046,verify:'approx',la:'left',dy:20,
+  desc:"'불에 탄 나무'라는 이름의 수령 500년 후박나무. 1948년 마을이 전소될 때 함께 타고도 살아남아, 다시 일어선 마을의 수호목이 되었다.",
+  info:'⚠ 위치 개략(본동 마을 안) — 재검증 예정',src:'GDR 2026.08'},
+ {name:'선흘그림작업장',cat:'art',lat:33.5116,lng:126.7036,verify:'approx',la:'left',dy:-14,
+  desc:'옛 농협 창고가 평균 87세 할머니 화가들의 아틀리에가 됐다. 2021년 최소연 작가와 시작된 그림 수업이 마을을 미술관으로 바꿔 놓았다.',
+  info:'금·토·일 오픈 · ⚠ 위치 개략(중산간동로 1290) — 재검증 예정',src:'GDR 2026.08 / 제주의소리'},
+ {name:'할망 미술관 아홉 곳',cat:'art',lat:33.5104,lng:126.7062,verify:'approx',la:'right',dy:34,
+  desc:'창고는 초록미술관(홍태옥), 소막은 소막미술관(강희선), 올레 곁 창고는 올레미술관(고순자)으로 — 할머니들의 집과 밭이 아홉 개의 작은 미술관이 되어 마을 곳곳에 흩어져 있다.',
+  info:'⚠ 개별 위치 조사 중 — 대표 지점만 표시 · 인간극장 등 다수 방송 소개',src:'GDR 2026.08 / 여성신문·한라일보'},
+ {name:'선흘초등학교',cat:'town',lat:33.514828,lng:126.704876,verify:'osm',la:'top',
+  desc:'1936년 문을 연 배움터. 폐교 위기까지 몰렸다가 동백동산을 교실 삼은 생태교육으로 아이들이 돌아와, 2022년 분교에서 본교로 승격했다 — 작은 학교의 기적.',
+  info:'건강생태학교 · 재학생 약 90~110명(2021~)',src:'GDR 2026.08 (선조사 분교 명칭 정정) / 좌표 OSM'},
+ {name:'볍씨학교 제주학사',cat:'town',lat:33.5145,lng:126.7062,verify:'approx',la:'right',dy:-20,
+  desc:'광명YMCA가 운영하는 대안학교의 제주 캠퍼스. 학생들이 1년간 생태적 자치 생활을 실천한다.',info:'⚠ 위치 개략(선흘동1길) — 재검증 예정',src:'GDR 2026.08'},
+ {name:'선흘1리사무소·보건진료소',cat:'town',lat:33.5124,lng:126.7051,verify:'osm',la:'left',dy:-24,
+  desc:'본동 한가운데의 마을 행정 거점. 리사무소와 보건진료소가 나란히 있다.',info:'☎064-783-8885',src:'GDR 2026.08 / 좌표 OSM(보건진료소)'},
+ {name:'카페 세바',cat:'exp',lat:33.5106,lng:126.7040,verify:'approx',la:'bottom',dy:16,dx:-60,
+  desc:'마을 안길 깊숙한 곳의 재즈 카페. 보리빵과 커피, 그리고 정기 재즈 공연이 흐른다.',
+  info:'⚠ 위치 개략(선흘동2길 20-7) — 재검증 예정',src:'GDR 2026.08'},
+ {name:'카페동백',cat:'exp',lat:33.508831,lng:126.714598,verify:'osm',la:'left',dy:-16,
+  desc:'동백동산 가는 길목의 조용한 카페.',info:'',src:'GDR 2026.08 / 좌표 OSM'},
+ {name:'선흘곶 화덕피자',cat:'exp',lat:33.505699,lng:126.721715,verify:'approx',la:'bottom',dy:6,
+  desc:'습지로 가는 동백로 곁의 화덕피자집.',info:'⚠ OSM 등록 식당(선흘곳)과 동일 여부 확인 예정',src:'GDR 2026.08 / 좌표 OSM 추정',},
+ {name:'도르멍식당',cat:'exp',lat:33.511779,lng:126.705294,verify:'approx',la:'right',dy:16,dx:10,
+  desc:'돼지고기볶음과 메밀전 같은 향토 밥상을 차리는 마을 식당.',info:'⚠ 위치 개략(본동) — 재검증 예정 · 한면가(위치 미상)도 마을에 있다',src:'GDR 2026.08'},
+];
+const AREAS=[
+ {name:'본동',lat:33.5140,lng:126.7108},
+ {name:'신선동',lat:33.5122,lng:126.6990},
+ {name:'낙선동',lat:33.5125,lng:126.6925},
+ {name:'목선동',lat:33.4897,lng:126.7183},
+];
+const W=1240,H=1130,LA0=33.5245,LA1=33.4835,LN0=126.6855,LN1=126.7395;
+const X=lng=>(lng-LN0)/(LN1-LN0)*W, Y=lat=>(LA0-lat)/(LA0-LA1)*H;
+const svg=document.getElementById('mapsvg');
+const state={};Object.keys(CATS).forEach(k=>state[k]=true);
+
+function tree(x,y,s){
+ return `<g transform="translate(${x},${y}) scale(${s})"><circle cx="0" cy="-10" r="9" fill="#9ec49a" stroke="#5f7a5a" stroke-width="2"/><line x1="0" y1="-2" x2="0" y2="8" stroke="#8a6f52" stroke-width="2.5" stroke-linecap="round"/></g>`;
+}
+function camellia(x,y,s){
+ return `<g transform="translate(${x},${y}) scale(${s})"><circle r="7" fill="#d97b8a"/><circle r="2.6" fill="#f2d06b"/></g>`;
+}
+function decorations(){
+ let d='';
+ d+=`<rect x="0" y="0" width="${W}" height="${H}" rx="18" fill="#f3ecd8"/>`;
+ // 동백동산 곶자왈 (동측 큰 숲)
+ d+=`<path d="M560 120 Q760 60 930 110 Q1090 150 1120 300 Q1150 440 1040 540 Q930 630 780 590 Q640 560 590 460 Q520 340 540 240 Q545 170 560 120 Z" fill="#dcead6" stroke="none"/>`;
+ d+=`<path d="M620 200 Q760 140 900 180 Q1030 220 1040 340 Q1040 450 930 500 Q810 550 700 500 Q610 450 610 340 Q608 260 620 200 Z" fill="#e5eeda"/>`;
+ // 마을(본동) 들판
+ d+=`<path d="M300 240 Q440 190 560 250 Q600 330 560 420 Q460 480 340 440 Q260 390 270 310 Z" fill="#efe9d2"/>`;
+ // 남쪽 목선동 방면 들
+ d+=`<path d="M640 850 Q760 800 860 860 Q920 930 860 1010 Q750 1070 660 1010 Q600 940 640 850 Z" fill="#e9efdb"/>`;
+ // 중산간동로 (동서 관통)
+ d+=`<path d="M40 400 Q220 360 420 350 Q560 348 640 420 Q720 500 740 620 Q760 780 753 940 Q750 1030 780 1110" fill="none" stroke="#fff" stroke-width="20" stroke-linecap="round"/>`;
+ d+=`<path d="M40 400 Q220 360 420 350 Q560 348 640 420 Q720 500 740 620 Q760 780 753 940 Q750 1030 780 1110" fill="none" stroke="#e8d9b8" stroke-width="14" stroke-linecap="round"/>`;
+ d+=`<path d="M40 400 Q220 360 420 350 Q560 348 640 420 Q720 500 740 620 Q760 780 753 940 Q750 1030 780 1110" fill="none" stroke="#fffdf4" stroke-width="3" stroke-dasharray="14 16" stroke-linecap="round"/>`;
+ // 동백로 (마을→습지센터→남동)
+ d+=`<path d="M500 360 Q600 380 694 408 Q790 450 831 518 Q870 590 900 680" fill="none" stroke="#fff" stroke-width="13" stroke-linecap="round"/>`;
+ d+=`<path d="M500 360 Q600 380 694 408 Q790 450 831 518 Q870 590 900 680" fill="none" stroke="#eadfc2" stroke-width="8" stroke-linecap="round"/>`;
+ // 북선로 (마을→낙선동)
+ d+=`<path d="M420 350 Q330 320 240 280 Q210 262 197 248" fill="none" stroke="#fff" stroke-width="12" stroke-linecap="round"/>`;
+ d+=`<path d="M420 350 Q330 320 240 280 Q210 262 197 248" fill="none" stroke="#eadfc2" stroke-width="7" stroke-linecap="round"/>`;
+ // 걷기길: 바람길 (초록 점선 순환)
+ if(state.trail){
+  d+=`<path d="M694 408 Q650 320 643 200 Q660 150 730 140 Q800 150 827 193 Q860 280 850 360 Q835 430 808 493 Q750 480 694 408 Z" fill="none" stroke="#5f9468" stroke-width="5" stroke-dasharray="3 10" stroke-linecap="round" opacity=".85"/>`;
+  // 4·3역사길 (붉은 점선)
+  d+=`<path d="M808 493 Q740 470 694 408 Q640 415 604 413 Q520 395 470 370 Q447 330 445 267 Q380 250 300 250 Q240 248 197 248" fill="none" stroke="#c77b7b" stroke-width="5" stroke-dasharray="3 10" stroke-linecap="round" opacity=".8"/>`;
+  // 범례
+  d+=`<g font-family="Gaegu" font-size="15">
+    <rect x="26" y="${H-96}" width="230" height="70" rx="12" fill="#fffdf4" stroke="#d9c9a8" stroke-width="2"/>
+    <line x1="42" y1="${H-72}" x2="86" y2="${H-72}" stroke="#5f9468" stroke-width="5" stroke-dasharray="3 9" stroke-linecap="round"/>
+    <text x="94" y="${H-67}" fill="#54463a">바람길 5.1km</text>
+    <line x1="42" y1="${H-44}" x2="86" y2="${H-44}" stroke="#c77b7b" stroke-width="5" stroke-dasharray="3 9" stroke-linecap="round"/>
+    <text x="94" y="${H-39}" fill="#54463a">4·3역사길 4.3km</text></g>`;
+ }
+ // 나무·동백
+ [[600,160],[900,140],[1060,300],[980,560],[700,560],[560,500],[350,520],[200,600],[480,150],[850,760],[600,940]].forEach(([x,y])=>d+=tree(x,y,1));
+ [[640,250],[760,220],[900,260],[960,400],[700,460],[820,540]].forEach(([x,y])=>d+=camellia(x,y,1));
+ // 습지 점(먼물깍 상징) 물결
+ d+=`<g stroke="#7fb8b5" stroke-width="2.5" fill="none" opacity=".7"><path d="M810 210 q8 -6 16 0 q8 6 16 0"/><path d="M806 224 q8 -6 16 0 q8 6 16 0"/></g>`;
+ // 구름·해
+ d+=`<g opacity=".85"><circle cx="150" cy="70" r="26" fill="#fff"/><circle cx="185" cy="62" r="20" fill="#fff"/><circle cx="120" cy="64" r="18" fill="#fff"/></g>`;
+ d+=`<circle cx="1150" cy="80" r="34" fill="#f6d98a" stroke="#e0b95c" stroke-width="3"/>`;
+ // 자연부락 라벨
+ AREAS.forEach(a=>{
+   d+=`<g font-family="Gaegu" text-anchor="middle">
+     <circle cx="${X(a.lng)}" cy="${Y(a.lat)}" r="34" fill="none" stroke="#c9a86a" stroke-width="2.5" stroke-dasharray="6 7"/>
+     <text x="${X(a.lng)}" y="${Y(a.lat)+6}" font-size="19" fill="#a5854e">${trName(a.name)}</text></g>`;
+ });
+ // 나침반
+ d+=`<g transform="translate(${W-70},170)" font-family="Gaegu"><circle r="30" fill="#fffdf4" stroke="#c9b294" stroke-width="3"/><path d="M0 -20 L7 6 L0 1 L-7 6 Z" fill="#c77b7b"/><text y="-36" text-anchor="middle" font-size="18" fill="#8d7c66">N</text></g>`;
+ return d;
+}
+function pinSVG(p){
+ const c=CATS[p.cat].color, x=X(p.lng), y=Y(p.lat);
+ const label=trName(p.name);
+ let wdt=22; for(const ch of label){ wdt += (ch.charCodeAt(0)<256?9.8:15.8); }
+ let lx=x, ly=y, anchor='middle';
+ if(p.la==='right'){lx=x+20;ly=y-2;anchor='start'}
+ else if(p.la==='left'){lx=x-20;ly=y-2;anchor='end'}
+ else if(p.la==='top'){lx=x;ly=y-34}
+ else {lx=x;ly=y+34}
+ lx+=(p.dx||0); ly+=(p.dy||0);
+ const rectX=anchor==='start'?lx-8:anchor==='end'?lx-wdt+8:lx-wdt/2;
+ return `<g class="pin-g" data-name="${p.name}">
+   <path d="M${x} ${y} m0 -26 c-11 0 -17 8 -17 16 c0 11 17 28 17 28 c0 0 17 -17 17 -28 c0 -8 -6 -16 -17 -16 Z" fill="${c}" stroke="#fffdf4" stroke-width="3"/>
+   <circle cx="${x}" cy="${y-11}" r="5.5" fill="#fffdf4"/>
+   <g class="pin-label">
+     <rect x="${rectX}" y="${ly-15}" rx="10" width="${wdt}" height="26" fill="#fffdf4" stroke="${c}" stroke-width="2"/>
+     <text x="${lx}" y="${ly+4}" text-anchor="${anchor==='start'?'start':anchor==='end'?'end':'middle'}" font-family="Gaegu" font-weight="700" font-size="17" fill="#54463a">${anchor==='start'?' ':''}${label}</text>
+   </g></g>`;
+}
+function render(){
+ let s=decorations();
+ SPOTS.filter(p=>state[p.cat]).forEach(p=>{s+=pinSVG(p)});
+ svg.innerHTML=s;
+ svg.querySelectorAll('.pin-g').forEach(g=>{
+   g.addEventListener('click',()=>{
+     const p=SPOTS.find(q=>q.name===g.dataset.name);
+     openDetail(p);
+   });
+ });
+}
+function openDetail(p){
+ const d=document.getElementById('detail');
+ const u=UI[LANG];
+ const vb=p.verify==='osm'?`<span class="badge">${u.osm}</span>`:p.verify==='gdr'?`<span class="badge">${u.gdr}</span>`:`<span class="badge warn">${u.approx}</span>`;
+ const mb=p.memorial?`<span class="badge memorial">${u.memorial}</span>`:'';
+ d.innerHTML=`<button class="close" onclick="this.parentElement.style.display='none'">✕</button>
+  <h2>${trName(p.name)}</h2>
+  <div><span class="cat" style="background:${CATS[p.cat].color}">${u.cats[p.cat]}</span>${vb}${mb}</div>
+  <dt>${u.story}</dt><dd>${trDesc(p)}</dd>
+  ${p.info?`<dt>${u.info}</dt><dd>${p.info}</dd>`:''}
+  ${p.splatUrl?`<a class="splat-btn" style="display:block;text-align:center;margin-top:12px;padding:9px;border-radius:12px;background:#5a7fb5;color:#fff;text-decoration:none;font-size:13px" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:''}
+  ${p.youtube?`<div style="margin-top:12px;position:relative;padding-top:56%;border-radius:12px;overflow:hidden"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube-nocookie.com/embed/${p.youtube}?rel=0${p.youtubeStart?'&start='+Math.floor(p.youtubeStart):''}" allowfullscreen loading="lazy"></iframe></div>`:''}
+  <div class="src">${UI[LANG].src}: ${p.src}</div>`;
+ d.style.display='block';
+}
+const chips=document.getElementById('chips');
+Object.entries(CATS).forEach(([k,c])=>{
+ const el=document.createElement('div');
+ el.className='chip';el.textContent=c.label;el.style.borderColor=c.color;el.style.color=c.color;
+ el.onclick=()=>{state[k]=!state[k];el.classList.toggle('off');render();};
+ chips.appendChild(el);
+});
+render();
+</script>
+</body>
+</html>

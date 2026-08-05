@@ -18,6 +18,8 @@ h1 small{display:block;font-size:15px;color:#b08d57;margin-top:-2px}
 .chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:8px}
 .chip{font-family:'Gaegu',cursive;font-size:15px;padding:4px 14px;border-radius:18px;border:2px solid;cursor:pointer;background:#fff;user-select:none;transition:.15s}
 .chip.off{opacity:.32;filter:grayscale(.6)}
+.langbtn{font-family:'Gaegu',cursive;font-size:13.5px;padding:3px 11px;border-radius:14px;border:2px solid #c9b294;background:#fff;color:#8d7c66;cursor:pointer}
+.langbtn.on{background:#4a6b4f;border-color:#4a6b4f;color:#fff}
 svg{width:100%;height:auto;display:block;border-radius:18px}
 .pin-g{cursor:pointer}
 .pin-g:hover .pin-label{filter:brightness(1.03)}
@@ -37,7 +39,15 @@ svg{width:100%;height:auto;display:block;border-radius:18px}
 </head>
 <body>
 <div class="frame">
-  <h1>🌿 선흘2리 마을지도 <small>거문오름 세계자연유산마을</small></h1>
+  <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap">
+    <h1><span id="t_title">🌿 선흘2리 마을지도</span> <small id="t_sub1">거문오름 세계자연유산마을</small></h1>
+    <div style="display:flex;gap:5px">
+      <button class="langbtn on" data-l="ko" onclick="setLang('ko')">한국어</button>
+      <button class="langbtn" data-l="en" onclick="setLang('en')">EN</button>
+      <button class="langbtn" data-l="ja" onclick="setLang('ja')">日本語</button>
+      <button class="langbtn" data-l="zh" onclick="setLang('zh')">中文</button>
+    </div>
+  </div>
   <div class="sub">제주시 조천읍 · 해발 200~400m 중산간 · 자연부락 선진동·선화동·우진동·선인동 — 핀을 누르면 이야기가 열립니다</div>
   <div class="chips" id="chips"></div>
   <svg id="mapsvg" viewBox="0 0 1240 1200" xmlns="http://www.w3.org/2000/svg"></svg>
@@ -54,6 +64,70 @@ const CATS={
  town:{label:'마을·시설',color:'#9c7fc0'},
  exp:{label:'체험·상업',color:'#d99a4e'}
 };
+
+// ================= 다국어 (i18n) =================
+let LANG='ko';
+const UI={
+ ko:{title:'선흘2리 마을지도',sub1:'거문오름 세계자연유산마을',story:'이야기',info:'이용 정보',src:'출처',osm:'좌표 확인(OSM)',gdr:'GDR 조사',approx:'⚠ 위치 개략·재검증 예정',
+  cats:{unesco:'세계유산·동굴',oreum:'오름',nature:'물·생태',hist:'역사·4·3',town:'마을·시설',exp:'체험·상업'},
+  subtitle:'제주시 조천읍 · 해발 200~400m 중산간 · 자연부락 선진동·선화동·우진동·선인동 — 핀을 누르면 이야기가 열립니다',
+  bus:'🚌 <b>810-1·810-2 관광지순환버스</b>가 마을을 관통합니다 — 세계자연유산센터 ↔ 선흘2리마을 ↔ 선인동마을 ↔ 제주라프 정류장 (1,200원) · 공항에서는 111·112·121·122 급행 → 대천환승정류장 환승, 약 1시간'},
+ en:{title:'Seonheul2-ri Village Map',sub1:'Geomunoreum UNESCO World Heritage Village',story:'Story',info:'Visitor Info',src:'Source',osm:'Verified (OSM)',gdr:'Researched',approx:'⚠ Approx. location',
+  cats:{unesco:'World Heritage·Caves',oreum:'Oreum (Volcanic Hills)',nature:'Water·Ecology',hist:'History·Jeju 4·3',town:'Village',exp:'Shops·Experience'},
+  subtitle:'Jocheon-eup, Jeju · mid-mountain village (200–400m) · hamlets: Seonjin, Seonhwa, Ujin, Seonin — tap a pin to open its story',
+  bus:'🚌 <b>Tourist loop bus 810-1·810-2</b> runs through the village — Heritage Center ↔ Seonheul2-ri ↔ Seonindong ↔ Jeju Raf (₩1,200). From the airport: express 111·112·121·122 to Daecheon transfer stop, ~1 hr total'},
+ ja:{title:'善屹(ソンフル)2里 村マップ',sub1:'拒文岳 世界自然遺産の村',story:'ものがたり',info:'利用情報',src:'出典',osm:'座標確認済(OSM)',gdr:'調査済',approx:'⚠ 位置は概略',
+  cats:{unesco:'世界遺産·洞窟',oreum:'オルム',nature:'水·生態',hist:'歴史·4·3',town:'村·施設',exp:'体験·お店'},
+  subtitle:'済州市朝天邑 · 中山間の村(標高200~400m) · 集落: 善進洞·善花洞·牛真洞·善仁洞 — ピンをタップすると物語が開きます',
+  bus:'🚌 <b>観光地循環バス810-1·810-2</b>が村を通ります — 世界自然遺産センター ↔ 善屹2里 ↔ 善仁洞 ↔ チェジュラフ(1,200ウォン)。空港からは急行111·112·121·122で大川乗換停留所へ、約1時間'},
+ zh:{title:'善屹2里 村庄地图',sub1:'拒文岳 世界自然遗产村',story:'故事',info:'游览信息',src:'来源',osm:'坐标已核实(OSM)',gdr:'已调查',approx:'⚠ 位置为大致',
+  cats:{unesco:'世界遗产·洞窟',oreum:'火山丘(Oreum)',nature:'水·生态',hist:'历史·4·3',town:'村庄·设施',exp:'体验·商店'},
+  subtitle:'济州市朝天邑 · 中山间村庄(海拔200~400米) · 自然村落: 善进洞·善花洞·牛真洞·善仁洞 — 点击图钉即可打开故事',
+  bus:'🚌 <b>观光循环巴士810-1·810-2</b>贯穿村庄 — 世界自然遗产中心 ↔ 善屹2里 ↔ 善仁洞 ↔ Jeju Raf(1,200韩元)。从机场乘111·112·121·122急行至大川换乘站,全程约1小时'}
+};
+const I18N={
+ '거문오름':{en:['Geomunoreum','UNESCO World Natural Heritage (2007). The horseshoe tuff cone whose lava flows carved 20+ lava tubes including Manjanggul. Reservation-only trekking.'],ja:['拒文岳(コムンオルム)','溶岩洞窟群を生んだ世界自然遺産のオルム。予約制トレッキング。'],zh:['拒文岳','孕育出万丈窟等20余条熔岩洞窟的世界自然遗产火山丘,需预约探访。']},
+ '세계자연유산센터':{en:['World Natural Heritage Center','Exhibition hall and the starting point of Geomunoreum tours. Free parking, bus 810 terminus.'],ja:['世界自然遺産センター','拒文岳探訪の出発点。展示館と無料駐車場。'],zh:['世界自然遗产中心','拒文岳探访的出发点,设有展馆与免费停车场。']},
+ '벵뒤굴':{en:['Bengdwigul Cave','Natural Monument No.490 — a maze-type lava tube, closed for preservation. Also a 4·3 refuge site.'],ja:['ベンディグル','天然記念物第490号の迷路型溶岩洞窟(非公開)。4·3の避難場所でもあった。'],zh:['벵뒤굴熔岩洞','天然纪念物第490号迷宫型熔岩洞(不对外开放),也是4·3时期的避难所。']},
+ '알밤오름':{en:['Albam Oreum','A gentle chestnut-shaped hill on the village\'s north side.'],ja:['アルバムオルム','栗の実の形に由来する北側の丘。'],zh:['알밤오름(栗子丘)','村北形似栗子的柔缓火山丘。']},
+ '웃밤오름':{en:['Utbam Oreum','Albam\'s twin hill; Bengdwigul cave lies at its foot.'],ja:['ウッバムオルム','アルバムと対をなす丘。麓にベンディグルがある。'],zh:['웃밤오름(上栗丘)','与栗子丘成对的火山丘,山脚下有벵뒤굴。']},
+ '우진제비오름':{en:['Ujinjebi Oreum','A U-shaped hill said to resemble a flying swallow, with a spring inside its crater.'],ja:['ウジンジェビオルム','ツバメが飛ぶ姿に見立てられたU字型の丘。火口に湧き水を抱く。'],zh:['우진제비오름(燕子丘)','形似飞燕的U形火山丘,火口内有涌泉。']},
+ '부대오름':{en:['Budae Oreum','A forested hill on the village\'s south edge.'],ja:['ブデオルム','村の南側の丘。'],zh:['부대오름','村庄南侧的火山丘。']},
+ '부소오름':{en:['Buso Oreum','A boundary hill toward Gyorae-ri.'],ja:['ブソオルム','教来里との境の丘。'],zh:['부소오름','与桥来里交界处的火山丘。']},
+ '민오름':{en:['Min Oreum','A densely wooded hill, despite its name meaning "bare".'],ja:['ミンオルム','名前は「はげ山」だが実は森深い丘。'],zh:['민오름','名为"秃丘"实则林木茂密。']},
+ '골체오름':{en:['Golche Oreum','A hill at the northwest edge, named after a winnowing basket.'],ja:['ゴルチェオルム','箕(み)の形に由来する北西の丘。'],zh:['골체오름(簸箕丘)','村西北形似簸箕的火山丘。']},
+ '흐린내 생태공원':{en:['Heurinnae Eco Park','Wetland and lava-rock eco park; free parking, base for the Lava Trail walk.'],ja:['フリンネ生態公園','湿地と溶岩台地の生態公園。無料駐車場あり。'],zh:['흐린내生态公园','湿地与熔岩台地生态公园,设免费停车场。']},
+ '우진샘(우진제비물)':{en:['Ujin Spring','A spring in Ujinjebi\'s crater valley — the village\'s old water source.'],ja:['ウジン泉','ウジンジェビ火口の湧き水。かつての村の水源。'],zh:['우진泉','우진제비火口溪谷的涌泉,昔日村庄水源。']},
+ '선세미(웃바메기물)':{en:['Seonsemi Spring','A spring at Utbam\'s foot that sustained herding life.'],ja:['ソンセミ泉','ウッバム山麓の泉。牧畜の暮らしを支えた。'],zh:['선세미泉','上栗丘山脚的泉水,滋养了牧业生活。']},
+ '어욱산전 궤':{en:['Eouksanjeon Cave (4·3 site)','A natural cave where Seonindong villagers hid during the Jeju 4·3 tragedy.'],ja:['オウクサンジョンの岩窟','済州4·3の際、住民が身を隠した自然洞窟。'],zh:['어욱산전岩窟(4·3遗迹)','济州4·3时期善仁洞村民藏身的天然洞窟。']},
+ '선인동 주둔소 터':{en:['Seonindong Garrison Site','Site of a 4·3-era garrison, layered with the village\'s rebuilding history.'],ja:['善仁洞駐屯所跡','4·3期の討伐隊駐屯所の跡地。'],zh:['善仁洞驻屯所遗址','4·3时期讨伐队驻屯所旧址。']},
+ '곡장 잣담':{en:['Gokjang Jatdam Walls','Old pastoral stone walls from the communal ranch era.'],ja:['コクチャンの石垣','共同牧場時代の牧畜用石垣。'],zh:['곡장石墙','共同牧场时代的放牧石墙遗产。']},
+ '벵뒤못':{en:['Bengdwi Pond','A pond once used as a livestock quarantine ground.'],ja:['ベンディ池','かつて牛馬の隔離場だった池。'],zh:['벵뒤池','昔日用作牛马隔离场的池塘。']},
+ '선인분교장':{en:['Seonin Branch School','The village children\'s small schoolhouse, heart of Seonindong.'],ja:['善仁分校','村の子どもたちの小さな学び舎。'],zh:['善仁分校','村里孩子们的小学校,善仁洞的中心。']},
+ '선흘2리 마을회':{en:['Village Hall','Seonheul2-ri community center on Seonjin-gil.'],ja:['村会館','善進キルの村コミュニティ会館。'],zh:['村会馆','位于善进路的村庄活动中心。']},
+ '오름나그네':{en:['Oreumnageune','Homestyle noodle house — bomal (top shell) kalguksu. Open till 3pm, closed Tue.'],ja:['オルムナグネ','ボマル(バテイラ)カルグクスの郷土食堂。15時まで、火曜定休。'],zh:['오름나그네','乡土刀切面馆,招牌海螺刀切面。营业至15时,周二休。']},
+ '바코 BACCO':{en:['BACCO','An intimate Italian wine bar (4 tables, adults only). 17:30–23:00, closed Mon–Tue.'],ja:['BACCO','テーブル4席のイタリアン·ワインバー(大人専用)。17:30~23:00、月火定休。'],zh:['BACCO','仅4桌的意式红酒吧(仅限成人)。17:30-23:00,周一二休。']},
+ '오름지기':{en:['Oreumjigi','Black-pork noodle specialist with generous portions.'],ja:['オルムジギ','黒豚肉クッスの店。ボリューム満点。'],zh:['오름지기','黑猪肉面专门店,分量十足。']},
+ '빠우사 PAUSA':{en:['PAUSA','Yoga & meditation space with a vegan cafe, framing Geomunoreum through its windows. Color Yoga daily; closed Mon.'],ja:['パウサ PAUSA','拒文岳を望むヨガ·瞑想スペース&ビーガンカフェ。月曜定休。'],zh:['PAUSA','眺望拒文岳的瑜伽冥想空间与纯素咖啡馆,周一休。']},
+ '제주라프(구 다희연)':{en:['Jeju Raf (fmr. Dahee-yeon)','Adventure park with ziplines, once famous as a cave cafe.'],ja:['チェジュラフ(旧タヒヨン)','ジップラインの体験パーク。かつては洞窟カフェで有名。'],zh:['Jeju Raf(原多喜然)','滑索体验乐园,前身为著名的洞窟咖啡馆。']},
+ '선진동':{en:['Seonjindong'],ja:['善進洞'],zh:['善进洞']},
+ '선화동':{en:['Seonhwadong'],ja:['善花洞'],zh:['善花洞']},
+ '우진동':{en:['Ujindong'],ja:['牛真洞'],zh:['牛真洞']},
+ '선인동':{en:['Seonindong'],ja:['善仁洞'],zh:['善仁洞']}
+};
+function trName(n){ if(LANG==='ko') return n; const e=I18N[n]; return e&&e[LANG]?e[LANG][0]:(e&&e.en?e.en[0]:n); }
+function trDesc(p){ if(LANG==='ko') return p.desc; const e=I18N[p.name]; if(e&&e[LANG]&&e[LANG][1]) return e[LANG][1]; if(e&&e.en&&e.en[1]) return e.en[1]; return p.desc; }
+function setLang(l){ LANG=l; applyLang(); render(); document.getElementById('detail').style.display='none';
+  document.querySelectorAll('.langbtn').forEach(b=>b.classList.toggle('on',b.dataset.l===l)); }
+function applyLang(){ const u=UI[LANG];
+  document.getElementById('t_title').textContent='🌿 '+u.title;
+  document.getElementById('t_sub1').textContent=u.sub1;
+  document.querySelector('.sub').textContent=u.subtitle;
+  document.querySelector('.buslane').innerHTML=u.bus;
+  const chips=document.querySelectorAll('#chips .chip');
+  Object.keys(CATS).forEach((k,i)=>{ if(chips[i]) chips[i].textContent=u.cats[k]; });
+}
+
 // verify: 'osm' 확인 / 'gdr' GDR / 'approx' 개략·충돌
 const SPOTS=[
  {name:'거문오름',cat:'unesco',lat:33.454786,lng:126.718221,verify:'osm',la:'right',
@@ -154,7 +228,7 @@ function decorations(){
  AREAS.forEach(a=>{
    d+=`<g font-family="Gaegu" text-anchor="middle">
      <circle cx="${X(a.lng)}" cy="${Y(a.lat)}" r="34" fill="none" stroke="#c9a86a" stroke-width="2.5" stroke-dasharray="6 7"/>
-     <text x="${X(a.lng)}" y="${Y(a.lat)+6}" font-size="19" fill="#a5854e">${a.name}</text></g>`;
+     <text x="${X(a.lng)}" y="${Y(a.lat)+6}" font-size="19" fill="#a5854e">${trName(a.name)}</text></g>`;
  });
  // 나침반
  d+=`<g transform="translate(${W-70},170)" font-family="Gaegu"><circle r="30" fill="#fffdf4" stroke="#c9b294" stroke-width="3"/><path d="M0 -20 L7 6 L0 1 L-7 6 Z" fill="#c77b7b"/><text y="-36" text-anchor="middle" font-size="18" fill="#8d7c66">N</text></g>`;
@@ -162,7 +236,8 @@ function decorations(){
 }
 function pinSVG(p){
  const c=CATS[p.cat].color, x=X(p.lng), y=Y(p.lat);
- const label=p.name, wdt=label.length*15.5+22;
+ const label=trName(p.name);
+ let wdt=22; for(const ch of label){ wdt += (ch.charCodeAt(0)<256?9.8:15.8); }
  let lx=x, ly=y, anchor='middle';
  if(p.la==='right'){lx=x+20;ly=y-2;anchor='start'}
  else if(p.la==='left'){lx=x-20;ly=y-2;anchor='end'}
@@ -191,15 +266,16 @@ function render(){
 }
 function openDetail(p){
  const d=document.getElementById('detail');
- const vb=p.verify==='osm'?'<span class="badge">좌표 확인(OSM)</span>':p.verify==='gdr'?'<span class="badge">GDR 조사</span>':'<span class="badge warn">⚠ 위치 개략·재검증 예정</span>';
+ const u=UI[LANG];
+ const vb=p.verify==='osm'?`<span class="badge">${u.osm}</span>`:p.verify==='gdr'?`<span class="badge">${u.gdr}</span>`:`<span class="badge warn">${u.approx}</span>`;
  d.innerHTML=`<button class="close" onclick="this.parentElement.style.display='none'">✕</button>
-  <h2>${p.name}</h2>
-  <div><span class="cat" style="background:${CATS[p.cat].color}">${CATS[p.cat].label}</span>${vb}</div>
-  <dt>이야기</dt><dd>${p.desc}</dd>
-  ${p.info?`<dt>이용 정보</dt><dd>${p.info}</dd>`:''}
+  <h2>${trName(p.name)}</h2>
+  <div><span class="cat" style="background:${CATS[p.cat].color}">${u.cats[p.cat]}</span>${vb}</div>
+  <dt>${u.story}</dt><dd>${trDesc(p)}</dd>
+  ${p.info?`<dt>${u.info}</dt><dd>${p.info}</dd>`:''}
   ${p.splatUrl?`<a class="splat-btn" style="display:block;text-align:center;margin-top:12px;padding:9px;border-radius:12px;background:#5a7fb5;color:#fff;text-decoration:none;font-size:13px" href="${p.splatUrl}" target="_blank">▶ 3D 가우시안 스플래팅 뷰</a>`:''}
   ${p.youtube?`<div style="margin-top:12px;position:relative;padding-top:56%;border-radius:12px;overflow:hidden"><iframe style="position:absolute;inset:0;width:100%;height:100%;border:0" src="https://www.youtube-nocookie.com/embed/${p.youtube}?rel=0${p.youtubeStart?'&start='+Math.floor(p.youtubeStart):''}" allowfullscreen loading="lazy"></iframe></div>`:''}
-  <div class="src">출처: ${p.src}</div>`;
+  <div class="src">${UI[LANG].src}: ${p.src}</div>`;
  d.style.display='block';
 }
 const chips=document.getElementById('chips');
