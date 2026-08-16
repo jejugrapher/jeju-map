@@ -399,7 +399,7 @@
   .searchbox{background:#fff;border:1.5px solid var(--line);border-radius:20px;padding:5px 12px 5px 30px;font-family:'Gowun Batang',serif;font-size:12.5px;width:180px;color:var(--ink);outline:none;transition:.2s;}
   .searchbox:focus{border-color:var(--sea);width:240px;box-shadow:0 2px 8px rgba(0,0,0,.08);}
   .searchico{position:absolute;left:10px;top:50%;transform:translateY(-50%);font-size:12px;color:#7a8a8a;pointer-events:none;}
-  .searchresults{position:absolute;top:calc(100% + 4px);right:0;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.13);max-height:60vh;overflow-y:auto;width:320px;z-index:9999;display:none;}
+  .searchresults{position:fixed;background:#fff;border:1px solid var(--line);border-radius:6px;box-shadow:0 4px 16px rgba(0,0,0,.13);max-height:60vh;overflow-y:auto;width:320px;z-index:9999;display:none;}
   .searchresults.on{display:block;}
   .searchresults .sr-empty{padding:16px 14px;color:#8a8a8a;font-size:12.5px;text-align:center;font-family:'Gowun Batang',serif;}
   .searchresults .sr-group{padding:6px 12px 3px;background:#f7f4ea;color:#6a6555;font-size:10.5px;font-weight:700;letter-spacing:.5px;border-top:1px solid var(--line);font-family:sans-serif;}
@@ -2947,6 +2947,7 @@ function onSearchInput(e){
   if(matches.length === 0){
     box.innerHTML = '<div class="sr-empty">검색 결과가 없습니다.<br><span style="font-size:10.5px;color:#a0a0a0">이름·지역·유형으로 검색해 보세요.</span></div>';
     box.classList.add('on');
+    positionSearchBox();
     return;
   }
   // Group by mode
@@ -2968,7 +2969,19 @@ function onSearchInput(e){
   });
   box.innerHTML = html_;
   box.classList.add('on');
+  positionSearchBox();
 }
+/* v20260815: 결과창을 fixed로 띄우고 검색창 아래 정렬 (탭바 overflow:hidden 클리핑 버그 수정) */
+function positionSearchBox(){
+  const sb=document.getElementById('searchbox'), box=document.getElementById('searchresults');
+  if(!sb||!box) return;
+  const r=sb.getBoundingClientRect();
+  const w=Math.min(320, window.innerWidth-16);
+  let left=r.right-w; if(left<8) left=8;
+  box.style.width=w+'px'; box.style.left=left+'px'; box.style.top=(r.bottom+4)+'px';
+  box.style.maxHeight=Math.max(160, window.innerHeight-r.bottom-16)+'px';
+}
+window.addEventListener('resize', ()=>{ const b=document.getElementById('searchresults'); if(b&&b.classList.contains('on')) positionSearchBox(); });
 
 function closeSearch(){
   const box = document.getElementById('searchresults');
