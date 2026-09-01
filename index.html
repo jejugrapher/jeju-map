@@ -149,6 +149,7 @@
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"/>
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 <style>
+.leaflet-tile-pane{filter:grayscale(0.9) brightness(1.07) contrast(0.9) saturate(0.55);}
   @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Black+Han+Sans&display=swap');
   :root{--sea:#1a6b6b;--sea-l:#2bb3b3;--coral:#ff6b4a;--paper:#f4f1e8;
     --lv1:#2e8b57;--lv2:#e0a127;--lv3:#c0392b;
@@ -3098,8 +3099,8 @@ function initMap(){
   meLocMarker=null;meLocCircle=null;
   if(meWatchId!=null&&navigator.geolocation){navigator.geolocation.clearWatch(meWatchId);meWatchId=null;}
   map=L.map('map',{scrollWheelZoom:true}).setView([33.38,126.55],10);
-  const tile = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
-  L.tileLayer(tile,{maxZoom:19,attribution:'© OpenStreetMap © CARTO'}).addTo(map);
+  const tile = 'https://tile.openstreetmap.org/{z}/{x}/{y}.png';
+  L.tileLayer(tile,{maxZoom:19,className:'basemap-tiles',attribution:'© OpenStreetMap'}).addTo(map);
   // Drone mode: control zone circles overlay (제주공항 관제권 9.3km + 감시 15km)
   if(mode === 'drone'){
     // 제주공항 관제권
@@ -3572,7 +3573,7 @@ function enterTown(){
 function initTownMap(){
   if(townMapObj){townMapObj.invalidateSize();return;}
   townMapObj=L.map('townMap');townMapObj.fitBounds([[33.11,126.14],[33.60,126.98]]);
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',{attribution:'© OpenStreetMap © CARTO',maxZoom:18}).addTo(townMapObj);
+  L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap',maxZoom:19,className:'basemap-tiles'}).addTo(townMapObj);
   TOWN_MAPS.forEach(t=>{
     const circ=L.circle([t.lat,t.lng],{radius:t.radius,color:'#5c7a4a',weight:2.5,fillColor:'#8fae6d',fillOpacity:.25}).addTo(townMapObj);
     circ.bindTooltip('🏘 '+t.name,{permanent:true,direction:'top',className:'town-tip'});
