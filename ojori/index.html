@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>오조리 해양생물 관찰지도 — JEJUGRAPHER</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"></script>
+<style>
+:root{--bg:#F8F4EC;--navy:#1F3A5F;--terra:#C97B5B;--ink:#2C2825;--line:#E3DCCE;
+ --g1:#2e9e5b;--g2:#2f6fd0;--g3:#d9534f;--g4:#8e44ad;}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'IBM Plex Sans KR',sans-serif;background:var(--bg);color:var(--ink);height:100vh;overflow:hidden;display:flex}
+#map{flex:1;height:100vh}
+.leaflet-tile-pane{filter:saturate(.92) brightness(1.02)}
+/* 사이드바 */
+#side{width:380px;height:100vh;background:#fff;border-left:1px solid var(--line);display:flex;flex-direction:column}
+.shead{padding:14px 18px;background:var(--navy);color:#fff}
+.shead h1{font-size:16px;font-weight:700;letter-spacing:.5px}
+.shead .sub{font-size:11px;color:#c3cddc;margin-top:3px;line-height:1.5}
+.ctrl{padding:10px 14px;border-bottom:1px solid var(--line);display:flex;flex-direction:column;gap:8px}
+.row{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+button{font-family:inherit;font-size:12px;border:1px solid var(--line);background:#fff;color:var(--ink);padding:6px 10px;border-radius:6px;cursor:pointer}
+button:hover{border-color:var(--terra)} button.on{background:var(--navy);color:#fff;border-color:var(--navy)}
+.search{width:100%;border:1px solid var(--line);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit}
+label.mini{font-size:11px;color:#8d8577}
+input[type=range]{flex:1}
+.gfilter{display:flex;gap:8px;flex-wrap:wrap;font-size:11px}
+.gfilter label{display:flex;align-items:center;gap:3px;cursor:pointer}
+.dot{width:11px;height:11px;border-radius:50%;display:inline-block}
+#cat{flex:1;overflow-y:auto;padding:6px 10px}
+.gsec{margin-bottom:4px}
+.gtitle{font-size:12px;font-weight:700;color:var(--navy);padding:8px 4px 4px;position:sticky;top:0;background:#fff}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sp{border:1px solid var(--line);border-radius:7px;overflow:hidden;cursor:pointer;background:#fff;transition:.1s}
+.sp:hover{border-color:var(--terra)}
+.sp .th{width:100%;height:78px;object-fit:cover;background:#eee;display:block}
+.sp .cap{padding:5px 7px}
+.sp .cd{font-size:10.5px;font-weight:700}
+.sp .nm{font-size:11.5px;color:var(--navy);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.count{font-size:11px;color:#8d8577}
+/* 마커 */
+.mk{border-radius:50%;border:2px solid #fff;box-shadow:0 1px 4px rgba(0,0,0,.4);color:#fff;font-size:10px;font-weight:700;display:flex;align-items:center;justify-content:center;line-height:1;cursor:pointer}
+/* 상세 모달 */
+.modal{position:fixed;inset:0;background:rgba(20,18,15,.55);display:none;align-items:center;justify-content:center;z-index:3000}
+.modal.on{display:flex}
+.card{background:#fff;border-radius:12px;width:560px;max-width:94vw;max-height:90vh;overflow:auto;padding:22px}
+.card .x{float:right;cursor:pointer;font-size:20px;color:#8d8577;line-height:1}
+.card h2{font-size:20px;color:var(--navy)}
+.card .code{display:inline-block;font-size:12px;font-weight:700;color:#fff;padding:2px 9px;border-radius:10px;margin-bottom:8px}
+.gal{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px;margin:14px 0}
+.gal img{width:100%;height:130px;object-fit:cover;border-radius:8px;cursor:pointer;background:#eee}
+.card label{display:block;font-size:12px;font-weight:500;color:var(--navy);margin:12px 0 5px}
+.card textarea{width:100%;border:1px solid var(--line);border-radius:6px;padding:9px 11px;font-size:13.5px;font-family:inherit;min-height:80px;resize:vertical}
+.cbtns{display:flex;gap:8px;margin-top:16px;justify-content:flex-end;flex-wrap:wrap}
+/* 라이트박스 */
+#lb{position:fixed;inset:0;background:rgba(0,0,0,.9);display:none;align-items:center;justify-content:center;z-index:4000;cursor:zoom-out}
+#lb img{max-width:94vw;max-height:94vh;object-fit:contain}
+.hint{font-size:11px;color:#8d8577;line-height:1.6}
+.leaflet-popup-content{font-family:'IBM Plex Sans KR',sans-serif;margin:10px 12px}
+.pop img{width:100%;height:110px;object-fit:cover;border-radius:6px;margin-bottom:6px}
+.pop .pc{font-weight:700;color:var(--navy)} .pop .pn{font-size:13px}
+.pop button{margin-top:8px;font-size:11px}
+</style>
+</head>
+<body>
+<div id="map"></div>
+<div id="side">
+  <div class="shead"><h1>오조리 해양생물 관찰지도</h1><div class="sub">성산읍 오조리 내수면·식산봉 · 생태조사 관찰지점을 실제 지도에 배치 · 번호를 클릭하면 사진·설명</div></div>
+  <div class="ctrl">
+    <div class="row">
+      <span class="label mini">조사도</span>
+      <button id="ovToggle" class="on">보이기</button>
+      <label class="mini">투명도</label><input type="range" id="ovOpacity" min="0" max="100" value="62">
+    </div>
+    <input type="text" class="search" id="search" placeholder="종 코드·이름 검색 (예: 3-7, 소라)">
+    <div class="gfilter" id="gfilter"></div>
+    <div class="hint" id="modeHint">지도의 <b>번호</b>를 클릭하면 해당 생물의 사진과 설명을 볼 수 있습니다. 총 <b id="ptCount"></b></div>
+  </div>
+  <div id="cat"></div>
+</div>
+
+<!-- 종 상세 -->
+<div class="modal" id="modal"><div class="card">
+  <span class="x" id="mX">✕</span>
+  <span class="code" id="mCode"></span>
+  <h2 id="mName"></h2>
+  <div class="gal" id="mGal"></div>
+  <label>설명 · 서식 메모</label>
+  <textarea id="mDesc" placeholder="서식 특징·개체수·조간대 위치 등 기록"></textarea>
+  <div class="cbtns">
+    <button id="mSave">설명 저장</button>
+  </div>
+</div></div>
+<div id="lb"><img id="lbImg"></div>
+
+<script>
+const G={1:{n:'어류·멍게',c:'#2e9e5b'},2:{n:'갑각류',c:'#2f6fd0'},3:{n:'연체동물',c:'#d9534f'},4:{n:'극피·해면·기타',c:'#8e44ad'}};
+const KEY_DESC='ojori_desc_v1';
+let SPECIES=[], byCode={}, pts=[], descs={}, markers={};
+let activeG={1:1,2:1,3:1,4:1};
+
+// ---------- 지도 ----------
+const map=L.map('map',{zoomControl:true}).setView([33.4655,126.9195],16);
+// 위성 영상(실제 지형·해안선 확인용) — Esri World Imagery
+L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',{maxZoom:19,attribution:'Esri World Imagery'}).addTo(map);
+
+// ---------- 조사도 오버레이(식산봉 기준 정합) ----------
+// 정합: 사용자(전현석)가 정합도구(align_tool.html)로 위성에 직접 맞춘 값 (0.26m/px, 1298×790m, 정북)
+let geo=[[33.461863,126.912700],[33.468959,126.926676]];
+// 정합 도구(align_tool.html)에서 저장한 값이 있으면 그것을 사용
+try{const g=JSON.parse(localStorage.getItem('ojori_geo_v2')); if(g&&g.length===2)geo=g;}catch(e){}
+const overlay=L.imageOverlay('survey_num.jpg',geo,{opacity:0.62}).addTo(map);
+map.fitBounds(geo);
+
+document.getElementById('ovOpacity').oninput=e=>overlay.setOpacity(e.target.value/100);
+document.getElementById('ovToggle').onclick=function(){
+  const vis=this.classList.toggle('on');this.textContent=vis?'보이기':'숨김';
+  overlay.setOpacity(vis?document.getElementById('ovOpacity').value/100:0);
+};
+
+// ---------- 데이터 로드 ----------
+Promise.all([fetch('species.json',{cache:'no-store'}).then(r=>r.json()),fetch('seed_points.json',{cache:'no-store'}).then(r=>r.json()).catch(()=>[])]).then(([d,seed])=>{
+  SPECIES=d.species; SPECIES.forEach(s=>byCode[s.code]=s);
+  const b=overlay.getBounds(), S=b.getSouth(),N=b.getNorth(),Wl=b.getWest(),E=b.getEast();
+  pts=seed.map((p,i)=>({id:'s'+i,code:p.code,lat:N-p.yf*(N-S),lng:Wl+p.xf*(E-Wl)}));
+  descs=load(KEY_DESC)||{};
+  renderFilter(); renderCatalog(); renderPts(); renderPtCount();
+});
+function load(k){try{return JSON.parse(localStorage.getItem(k))}catch(e){return null}}
+function saveD(){localStorage.setItem(KEY_DESC,JSON.stringify(descs))}
+function esc(s){return (s||'').replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))}
+
+// ---------- 카탈로그 ----------
+function renderFilter(){
+  document.getElementById('gfilter').innerHTML=Object.keys(G).map(g=>{
+    const n=SPECIES.filter(s=>s.group==g).length;
+    return `<label><input type="checkbox" ${activeG[g]?'checked':''} onchange="togG(${g},this.checked)">
+      <span class="dot" style="background:${G[g].c}"></span>${G[g].n} (${n})</label>`;}).join('');
+}
+window.togG=(g,on)=>{activeG[g]=on?1:0;renderCatalog();refreshMarkers();};
+function renderCatalog(){
+  const q=(document.getElementById('search').value||'').toLowerCase().trim();
+  const el=document.getElementById('cat'); let html='';
+  [1,2,3,4].forEach(g=>{
+    if(!activeG[g])return;
+    const arr=SPECIES.filter(s=>s.group==g && (!q||(s.code+' '+s.name).toLowerCase().includes(q)));
+    if(!arr.length)return;
+    html+=`<div class="gsec"><div class="gtitle" style="color:${G[g].c}">${G[g].n} · ${arr.length}</div><div class="grid">`;
+    arr.forEach(s=>{
+      html+=`<div class="sp" onclick="openSp('${s.code}')">
+        <img class="th" loading="lazy" src="${s.photos[0]||''}" onerror="this.style.background='#ddd';this.removeAttribute('src')">
+        <div class="cap"><span class="cd" style="color:${G[g].c}">${s.code}</span>
+        <div class="nm">${esc(s.name)}</div></div></div>`;});
+    html+='</div></div>';
+  });
+  el.innerHTML=html||'<div class="hint" style="padding:20px;text-align:center">검색 결과가 없습니다.</div>';
+}
+document.getElementById('search').addEventListener('input',renderCatalog);
+
+// ---------- 종 상세 ----------
+let curCode=null;
+window.openSp=code=>{
+  const s=byCode[code]; if(!s)return; curCode=code;
+  document.getElementById('mCode').textContent=code;
+  document.getElementById('mCode').style.background=G[s.group].c;
+  document.getElementById('mName').textContent=s.name;
+  document.getElementById('mGal').innerHTML=s.photos.map(p=>`<img loading="lazy" src="${p}" onclick="lightbox('${p}')">`).join('')||'<div class="hint">사진 없음</div>';
+  document.getElementById('mDesc').value=descs[code]||'';
+  document.getElementById('modal').classList.add('on');
+  // 해당 종 마커로 지도 이동
+  const mp=pts.find(p=>p.code===code);
+  if(mp) map.panTo([mp.lat,mp.lng]);
+};
+document.getElementById('mX').onclick=()=>document.getElementById('modal').classList.remove('on');
+document.getElementById('modal').onclick=e=>{if(e.target.id==='modal')e.currentTarget.classList.remove('on')};
+document.getElementById('mSave').onclick=()=>{descs[curCode]=document.getElementById('mDesc').value.trim();saveD();
+  document.getElementById('modal').classList.remove('on');};
+window.lightbox=src=>{document.getElementById('lbImg').src=src;document.getElementById('lb').style.display='flex';};
+document.getElementById('lb').onclick=function(){this.style.display='none';};
+
+// ---------- 마커(표시 전용) ----------
+function markerFor(p){
+  const s=byCode[p.code]||{group:1,name:''};const c=G[s.group].c;
+  const sz=Math.max(20,14+p.code.length*3);
+  const m=L.marker([p.lat,p.lng],{icon:L.divIcon({className:'',iconSize:[sz,sz],iconAnchor:[sz/2,sz/2],
+    html:`<div class="mk" style="width:${sz}px;height:${sz}px;background:${c}">${p.code}</div>`})}).addTo(map);
+  m.on('click',()=>popupFor(p,m));
+  return m;
+}
+function popupFor(p,m){
+  const s=byCode[p.code]||{name:'',photos:[],group:1};
+  const html=`<div class="pop">${s.photos[0]?`<img src="${s.photos[0]}">`:''}
+    <div class="pc" style="color:${G[s.group].c}">${p.code}</div><div class="pn">${esc(s.name)}</div>
+    ${descs[p.code]?`<div style="font-size:12px;color:#5a544c;margin-top:4px">${esc(descs[p.code]).slice(0,120)}</div>`:''}
+    <button onclick="openSp('${p.code}')">상세 · 사진 보기</button></div>`;
+  m.bindPopup(html,{maxWidth:220}).openPopup();
+}
+function renderPts(){Object.values(markers).forEach(m=>map.removeLayer(m));markers={};pts.forEach(p=>{markers[p.id]=markerFor(p);applyVis(p);});}
+function applyVis(p){const s=byCode[p.code];const vis=s&&activeG[s.group];const m=markers[p.id];if(!m)return;
+  if(vis){if(!map.hasLayer(m))m.addTo(map);}else{if(map.hasLayer(m))map.removeLayer(m);}}
+function refreshMarkers(){pts.forEach(applyVis);}
+function renderPtCount(){document.getElementById('ptCount').textContent=`${pts.length}지점 · ${new Set(pts.map(p=>p.code)).size}종`;}
+</script>
+</body>
+</html>
