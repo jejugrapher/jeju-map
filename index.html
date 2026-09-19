@@ -220,6 +220,23 @@
   .card .nm{font-weight:700;font-size:14.5px;display:flex;align-items:center;gap:6px;flex-wrap:wrap;}
   .badge{font-size:10.5px;font-weight:700;color:#fff;padding:2px 8px;border-radius:10px;font-family:sans-serif;}
   .lvb{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:10px;font-family:sans-serif;}
+  /* ===== 영상·3D 모음 (media 모드) ===== */
+  .m-sec{padding:14px 18px 6px;border-bottom:1px solid var(--line);}
+  .m-sec h3{margin:0;font-size:14px;font-weight:700;color:#a5341f;display:flex;align-items:center;gap:7px;}
+  .m-sec p{margin:5px 0 0;font-size:11.5px;line-height:1.55;color:#8a4a3a;}
+  .m-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:12px 14px;}
+  .m-card{border:1px solid #e3cec7;border-radius:10px;overflow:hidden;background:#fff;cursor:pointer;transition:.15s;display:flex;flex-direction:column;}
+  .m-card:hover{border-color:#d9543a;transform:translateY(-2px);box-shadow:0 4px 12px rgba(217,84,58,.18);}
+  .m-thumb{position:relative;width:100%;aspect-ratio:16/9;background:#20232a;display:block;object-fit:cover;}
+  .m-thumb-3d{display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#1f2d2a,#2f4a44);color:#e8b49a;font-size:26px;}
+  .m-count{position:absolute;right:5px;bottom:5px;background:rgba(0,0,0,.72);color:#fff;font-size:10.5px;font-weight:700;padding:2px 6px;border-radius:4px;font-family:sans-serif;}
+  .m-body{padding:8px 10px 10px;}
+  .m-nm{font-size:13px;font-weight:700;color:#3a201a;line-height:1.35;}
+  .m-meta{font-size:11px;color:#8a6a60;margin-top:4px;line-height:1.45;}
+  .m-kind{display:inline-block;font-size:10px;font-weight:700;padding:2px 6px;border-radius:9px;background:#f6e0d9;color:#a5341f;margin-top:5px;font-family:sans-serif;}
+  .m-sub{padding:10px 18px 2px;font-size:12px;font-weight:700;color:#8a4a3a;}
+  @media(max-width:760px){.m-grid{grid-template-columns:1fr 1fr;}}
+  @media(max-width:400px){.m-grid{grid-template-columns:1fr;}}
   .has3d{font-size:10px;font-weight:700;padding:2px 7px;border-radius:10px;background:var(--coral);color:#fff;font-family:sans-serif;}
   .card .meta{font-size:12px;margin-top:5px;line-height:1.5;}
   .detail{padding:2px 0 6px;}
@@ -959,6 +976,13 @@
       <p>제주 전역 317곳 드론 촬영 스팟 (v8 대량 확장). 좌표 기반 자동 규제 판별로 <b>🟢 자유 비행 가능 189곳</b> · 🟡 협의 권장 44 · 🔴 승인 필수 84 표시. 계절 카테고리 (🌸벚꽃·🌻유채·💠수국·🌾억새·🌺매화·동백) · 관제권 (제주공항 9.3km + 정석 5.6km) 원 오버레이 · 드론원스톱 원터치.</p>
       <div class="go">→ 들어가기</div>
     </div>
+    <div class="choice" onclick="enter('media')">
+      <div class="ico">🎬</div>
+      <h2>영상 · 3D 공간</h2>
+      <span class="who" style="background:#f6e0d9;color:#a5341f">360 VR · 드론 항공 · FPV · 가우시안 스플래팅</span>
+      <p>지도에 연결된 <b>영상과 3D 공간 모델만 따로 모아 보는</b> 화면. 직접 촬영한 8K 360 VR 드라이브·드론 항공·FPV 탐사 영상과, 브라우저에서 돌려 보는 3D 가우시안 스플래팅 공간을 한 곳에서 훑어보고, 카드를 누르면 해당 지점 상세로 바로 이동합니다.</p>
+      <div class="go">→ 들어가기</div>
+    </div>
     <div class="choice" onclick="enterTown()">
       <div class="ico">🏘</div>
       <h2>동네지도</h2>
@@ -1041,6 +1065,7 @@
       <button id="swShot" onclick="enter('shot')">명소·자연</button>
       <button id="swFood" onclick="enter('food')">미식·시장</button>
       <button id="swDrone" onclick="enter('drone')">🛸 드론</button>
+      <button id="swMedia" onclick="enter('media')">🎬 영상·3D</button>
       <button id="swTown" onclick="enterTown()">🏘 동네지도</button>
       <div class="searchwrap">
         <span class="searchico">🔍</span>
@@ -2861,6 +2886,7 @@ function tSTYLEClear(){ styleMood=null; styleSeason=null; buildStagbar(); render
 function buildStagbar(){
   const s = document.getElementById('stagbar');
   if(!s) return;
+  if(mode==='media'){ s.innerHTML=''; return; }
   const moodChips = Object.keys(MOOD_LABEL).map(k=>{
     const on = styleMood===k;
     return `<div class="stag ${on?'on':''}" onclick="tSTYLEMood('${k}')">${MOOD_LABEL[k][0]}</div>`;
@@ -2891,7 +2917,8 @@ function enter(m){
   document.getElementById('app').classList.remove('hidden');
   mode=m;selName=null;
   const app=document.getElementById('app');
-  app.className=(m==='all'?'theme-all':(m==='cafe'?'theme-cafe':(m==='well'?'theme-well':(m==='cult'?'theme-cult':(m==='shot'?'theme-shot':(m==='food'?'theme-food':'theme-drone'))))));app.classList.remove('hidden');
+  const THEME={all:'theme-all',cafe:'theme-cafe',well:'theme-well',cult:'theme-cult',shot:'theme-shot',food:'theme-food',media:'theme-shot',drone:'theme-drone'};
+  app.className=THEME[m]||'theme-drone';app.classList.remove('hidden');
   document.getElementById('swAll').classList.toggle('active',m==='all');
   document.getElementById('swCafe').classList.toggle('active',m==='cafe');
   document.getElementById('swWell').classList.toggle('active',m==='well');
@@ -2899,6 +2926,7 @@ function enter(m){
   document.getElementById('swShot').classList.toggle('active',m==='shot');
   document.getElementById('swFood').classList.toggle('active',m==='food');
   document.getElementById('swDrone').classList.toggle('active',m==='drone');
+  document.getElementById('swMedia').classList.toggle('active',m==='media');
   // Show/hide drone alert banner
   const dalert = document.getElementById('droneAlert');
   if (m === 'drone') {
@@ -2936,6 +2964,12 @@ function enter(m){
     : (m==='cult'
     ? '출처: 공간정보·문화·스포츠레저 조사 + Google Places 실측 좌표 · EPSG:4326 · 운영시간·정기휴무·요금은 변동될 수 있어 방문 전 확인 권장. 정보 제공용. · v26 traveler (2026.07.16)'
     : '출처: 제주 공간정보·경관 조사 + Google Places 실측 좌표 · EPSG:4326 · 등급은 자연·지질 형태 임팩트 기준. 드론 비행은 실제 촬영 전 별도 승인 확인 필수. · v26 traveler (2026.07.16)'))));
+  if(m==='media'){
+    document.getElementById('vtitle').textContent = '영상 · 3D 공간 — 지도에 연결된 촬영물 모음';
+    document.getElementById('panelTitle').textContent = '영상 · 3D 공간 모음';
+    document.getElementById('panelSub').textContent = '지도에 연결된 3D 가우시안 스플래팅 공간과 영상을 모아 봅니다. 카드를 누르면 해당 지점의 원래 지도와 상세 정보로 이동합니다.';
+    document.getElementById('vfoot').innerHTML = '영상·3D는 자체 촬영물이며, 각 지점 상세에서 바로 재생·열람할 수 있습니다. 3D 공간 모델은 용량이 커서 버튼을 눌렀을 때만 불러옵니다.';
+  }
   document.getElementById('vfoot').innerHTML += ' · 날씨: <a href="https://open-meteo.com" target="_blank" style="color:inherit">Open-Meteo</a> (CC BY 4.0)';
 }
 
@@ -3060,6 +3094,7 @@ function goHome(){const _ta=document.getElementById('townApp'); if(_ta) _ta.clas
 
 function buildFilters(){
   const f=document.getElementById('filters');f.innerHTML='';
+  if(mode==='media') return;
   if(mode==='all'){
     f.innerHTML='<span class="flabel">종목</span>'+
       Object.keys(SPN).map(s=>`<div class="chip ${allSp[s]?'on':'off'}" onclick="tSP('${s}')"><span class="dot" style="background:${SPC[s]}"></span>${SPN[s]}</div>`).join('')+
@@ -3194,9 +3229,90 @@ window.addEventListener('orientationchange',()=>{setTimeout(()=>{if(map)map.inva
 window.addEventListener('resize',()=>{if(map)map.invalidateSize();});
 function pin(color,ring){return L.divIcon({className:'',html:`<div style="width:22px;height:22px;border-radius:50% 50% 50% 0;transform:rotate(-45deg);background:${color};border:3px solid ${ring};box-shadow:0 2px 5px rgba(26,107,107,.35)"></div>`,iconSize:[22,22],iconAnchor:[11,22]});}
 
+// ============ 영상 · 3D 공간 모음 (media 모드) ============
+// 전 모드의 장소에서 영상(youtube/youtube2/videos)·3D 스플랫(splat/splatUrl)만 추려
+// 같은 장소·같은 씬이 모드별로 중복 등록된 것을 합쳐 카드 목록으로 보여준다.
+function mediaIndex(){
+  const splatByUrl = {}, videoByName = {};
+  allSearchable().forEach(({mode:md, p}) => {
+    const url = p.splat || p.splatUrl;
+    if(url){
+      let e = splatByUrl[url];
+      if(!e){ e = splatByUrl[url] = {url, mode:md, p, names:[], title:p.splatTitle||'', kind:p.splatKind||'3D 공간 (가우시안 스플래팅)', size:p.splatSize||''}; }
+      if(e.names.indexOf(p.name) < 0) e.names.push(p.name);
+      if(!e.title && p.splatTitle) e.title = p.splatTitle;
+      if(!e.size && p.splatSize) e.size = p.splatSize;
+    }
+    const vids = [];
+    const push = (id,t,k,st) => { if(id && !vids.some(v=>v.id===id && (v.s||0)===(st||0))) vids.push({id, t:t||'', k:k||'', s:st||0}); };
+    push(p.youtube, p.youtubeTitle, p.youtubeKind, p.youtubeStart);
+    push(p.youtube2, p.youtube2Title, p.youtube2Kind, p.youtube2Start);
+    (p.videos||[]).forEach(v => push(v.id, v.t, v.k, v.s));
+    if(vids.length){
+      let e = videoByName[p.name];
+      if(!e){ e = videoByName[p.name] = {mode:md, p, vids:[]}; }
+      vids.forEach(v => { if(!e.vids.some(x=>x.id===v.id && x.s===v.s)) e.vids.push(v); });
+    }
+  });
+  const splats = Object.values(splatByUrl);
+  const videos = Object.values(videoByName).sort((a,b)=> b.vids.length - a.vids.length || a.p.name.localeCompare(b.p.name,'ko'));
+  return {splats, videos};
+}
+
+function mediaCard(mode, name, thumbHtml, title, meta, kind){
+  return `<div class="m-card" onclick="jumpToPlace('${mode}','${name.replace(/'/g,"\\'")}')">`
+    + thumbHtml
+    + `<div class="m-body"><div class="m-nm">${title}</div>`
+    + (meta ? `<div class="m-meta">${meta}</div>` : '')
+    + (kind ? `<div class="m-kind">${kind}</div>` : '')
+    + '</div></div>';
+}
+
+function renderMedia(list){
+  const {splats, videos} = mediaIndex();
+  const totalVids = videos.reduce((n,e)=>n+e.vids.length, 0);
+  let html = '';
+  // ── 3D 공간
+  html += `<div class="m-sec"><h3>🧊 3D 공간 — ${splats.length}곳</h3>`
+    + '<p>직접 촬영·재구성한 가우시안 스플래팅 공간입니다. 카드를 누르면 해당 지점 상세로 이동하고, 거기서 3D 보기를 불러올 수 있습니다.</p></div>';
+  html += '<div class="m-grid">' + splats.map(e => {
+    const thumb = '<div class="m-thumb m-thumb-3d">🧊</div>';
+    const meta = (e.title ? e.title + '<br>' : '') + (e.p.region || '');
+    return mediaCard(e.mode, e.p.name, thumb, e.names.join(' · '), meta, e.kind + (e.size ? ' · ' + e.size : ''));
+  }).join('') + '</div>';
+  // ── 영상 (모드별 소그룹)
+  html += `<div class="m-sec" style="border-top:1px solid var(--line)"><h3>🎬 영상 — ${videos.length}곳 · ${totalVids}편</h3>`
+    + '<p>360 VR 드라이브 · 드론 항공 · FPV 탐사 영상이 연결된 지점입니다. 카드를 누르면 해당 지점 상세에서 바로 재생할 수 있습니다.</p></div>';
+  const order = ['drone','shot','cult','all','food','cafe','well'];
+  order.forEach(md => {
+    const grp = videos.filter(e => e.mode === md);
+    if(!grp.length) return;
+    html += `<div class="m-sub"><span class="sr-dot" style="background:${MODE_COLOR[md]}"></span> ${MODE_LABEL[md]} — ${grp.length}곳</div>`;
+    html += '<div class="m-grid">' + grp.map(e => {
+      const v0 = e.vids[0];
+      const thumb = `<div style="position:relative"><img class="m-thumb" loading="lazy" alt="" src="https://i.ytimg.com/vi/${v0.id}/mqdefault.jpg">`
+        + (e.vids.length > 1 ? `<span class="m-count">▶ ${e.vids.length}편</span>` : '<span class="m-count">▶</span>') + '</div>';
+      const meta = (v0.t || '') + (e.p.region ? '<br>' + e.p.region : '');
+      return mediaCard(e.mode, e.p.name, thumb, e.p.name, meta, v0.k || '');
+    }).join('') + '</div>';
+  });
+  list.innerHTML = html;
+  // 지도에는 영상·3D가 있는 지점만 핀으로 표시
+  const pins = {};
+  splats.forEach(e => pins[e.p.name] = {p:e.p, mode:e.mode, label:'🧊 3D 공간'});
+  videos.forEach(e => { if(!pins[e.p.name]) pins[e.p.name] = {p:e.p, mode:e.mode, label:'🎬 영상 ' + e.vids.length + '편'}; });
+  Object.values(pins).forEach(({p, mode:md, label}) => {
+    const m = L.marker([p.lat, p.lng], {icon:pin(MODE_COLOR[md] || '#d9543a', '#fff')}).addTo(map);
+    m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${label} · ${MODE_LABEL[md]}</div>`);
+    m.on('click', () => jumpToPlace(md, p.name));
+    markers[p.name] = m;
+  });
+}
+
 function render(){
   const list=document.getElementById('list');list.innerHTML='';
   Object.values(markers).forEach(m=>map.removeLayer(m));markers={};
+  if(mode==='media'){renderMedia(list);updateMobileFilterBadge();return;}
   let data;
   // Merge new-survey entries into their respective modes
   const ALL_MERGED = ALL.concat(ALL_NEW);
@@ -3240,7 +3356,7 @@ function render(){
     m.bindPopup(`<div class="pop-nm">${p.name}</div><div class="pop-meta">${sub}</div>`);
     m.on('click',()=>select(p.name));markers[p.name]=m;
     const card=document.createElement('div');card.className='card'+(selName===p.name?' sel':'');card.id='c-'+p.name;
-    const has3d=p.splatUrl?'<span class="has3d">3D</span>':'';
+    const has3d=(p.splat||p.splatUrl)?'<span class="has3d">3D</span>':'';
     let head,meta,detail='';
     if(mode==='all'){
       head=`<span class="badge" style="background:${SPC[p.sp]};color:#fff">${SPN[p.sp]}</span> <span class="lvb" style="border:1px solid #b9c6c3">${LVN2[p.lv]}</span>`;
